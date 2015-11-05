@@ -206,11 +206,6 @@ newfaction *read_newfactions(const char *filename)
         if (nf)
             continue;
         nf = calloc(sizeof(newfaction), 1);
-        if (set_email(&nf->email, email) != 0) {
-            log_error("Invalid email address for subscription %s: %s\n", itoa36(subscription), email);
-            continue;
-        }
-        nf->password = _strdup(password);
         nf->race = rc_find(race);
         nf->subscription = subscription;
         if (alliances != NULL) {
@@ -243,6 +238,12 @@ newfaction *read_newfactions(const char *filename)
                 }
             }
         }
+        if (set_email(&nf->email, email) != 0) {
+            log_error("Invalid email address for subscription %s: %s\n", itoa36(subscription), email);
+            free(nf);
+            continue;
+        }
+        nf->password = _strdup(password);
         nf->lang = get_locale(lang);
         nf->bonus = bonus;
         assert(nf->race && nf->email && nf->lang);
