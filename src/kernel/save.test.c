@@ -8,6 +8,8 @@
 #include "unit.h"
 #include "faction.h"
 #include "version.h"
+#include <storage.h>
+#include <memstream.h>
 #include <CuTest.h>
 #include <tests.h>
 
@@ -64,29 +66,28 @@ static void test_readwrite_unit(CuTest * tc)
 }
 
 static void test_readwrite_attrib(CuTest *tc) {
-    gamedata *data;
+    gamedata data;
+    storage store;
     attrib *a = NULL;
-    const char *path = "attrib.dat";
+
     test_cleanup();
-    global.data_version = RELEASE_VERSION; // FIXME: hack!
-    data = gamedata_open(path, "wb", RELEASE_VERSION);
-    CuAssertPtrNotNull(tc, data);
     key_set(&a, 41);
     key_set(&a, 42);
-    write_attribs(data->store, a, NULL);
-    gamedata_close(data);
+    mstream_init(&data.strm);
+    gamedata_init(&data, &store, RELEASE_VERSION);
+    global.data_version = RELEASE_VERSION; // FIXME: hack!
+    write_attribs(data.store, a, NULL);
     a_removeall(&a, NULL);
     CuAssertPtrEquals(tc, 0, a);
 
-    data = gamedata_open(path, "rb", RELEASE_VERSION);
-    CuAssertPtrNotNull(tc, data);
-    read_attribs(data->store, &a, NULL);
-    gamedata_close(data);
+    data.strm.api->rewind(data.strm.handle);
+    read_attribs(data.store, &a, NULL);
+    gamedata_done(&data);
+    mstream_done(&data.strm);
     CuAssertTrue(tc, key_get(a, 41));
     CuAssertTrue(tc, key_get(a, 42));
     a_removeall(&a, NULL);
 
-    CuAssertIntEquals(tc, 0, remove(path));
     test_cleanup();
 }
 
