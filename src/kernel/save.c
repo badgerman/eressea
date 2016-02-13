@@ -441,7 +441,7 @@ static void read_alliances(struct gamedata *data)
             READ_INT(store, &al->flags);
         }
         if (data->version >= ALLIANCELEADER_VERSION) {
-            read_reference(&al->_leader, store, read_faction_reference,
+            read_reference(&al->_leader, data, read_faction_reference,
                 resolve_faction);
             READ_INT(store, &id);
         }
@@ -527,7 +527,7 @@ static void read_owner(struct gamedata *data, region_owner ** powner)
         else {
             owner->last_owner = NULL;
         }
-        read_reference(owner, data->store, &read_faction_reference, &resolve_owner);
+        read_reference(owner, data, &read_faction_reference, &resolve_owner);
         *powner = owner;
     }
     else {
@@ -1520,7 +1520,7 @@ int readgame(const char *filename, bool backup)
             }
         }
         else {
-            fno = read_faction_reference(&store);
+            fno = read_faction_reference(&gdata);
             while (fno.i) {
                 watcher *w = (watcher *)malloc(sizeof(watcher));
                 ur_add(fno, &w->faction, resolve_faction);
@@ -1528,7 +1528,7 @@ int readgame(const char *filename, bool backup)
                 w->mode = (unsigned char)n;
                 w->next = pl->watchers;
                 pl->watchers = w;
-                fno = read_faction_reference(&store);
+                fno = read_faction_reference(&gdata);
             }
         }
         read_attribs(&gdata, &pl->attribs, pl);
