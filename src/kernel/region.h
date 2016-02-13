@@ -18,9 +18,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #ifndef H_KRNL_REGION
 #define H_KRNL_REGION
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <stddef.h>
 #include "types.h"
@@ -66,7 +63,7 @@ extern "C" {
     struct message_list;
     struct rawmaterial;
     struct item;
-
+    struct gamedata;
 #define MORALE_TAX_FACTOR 0.005 /* 0.5% tax per point of morale */
 #define MORALE_MAX 10           /* Maximum morale allowed */
 #define MORALE_DEFAULT 1        /* Morale of peasants when they are conquered for the first time */
@@ -74,6 +71,11 @@ extern "C" {
 #define MORALE_COOLDOWN 2       /* minimum cooldown before a morale change occurs */
 #define MORALE_AVERAGE 6        /* default average time for morale to change */
 #define MORALE_TRANSFER 2       /* points of morale lost when GIVE COMMAND */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
     typedef struct region_owner {
         struct faction *owner;
