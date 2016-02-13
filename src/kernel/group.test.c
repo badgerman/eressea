@@ -5,6 +5,9 @@
 #include "faction.h"
 #include "unit.h"
 #include "region.h"
+#include "save.h"
+#include "version.h"
+#include <util/gamedata.h>
 #include <stream.h>
 #include <filestream.h>
 #include <storage.h>
@@ -19,31 +22,24 @@ static void test_group_readwrite(CuTest * tc)
     faction * f;
     group *g;
     ally *al;
-    storage store;
-    FILE *F;
-    stream strm;
+    gamedata *data;
 
-    F = fopen("test.dat", "wb");
-    fstream_init(&strm, F);
-    binstore_init(&store, &strm);
     test_cleanup();
     test_create_world();
+    data = gamedata_open("test.dat", "wb", RELEASE_VERSION);
     f = test_create_faction(0);
     g = new_group(f, "test", 42);
     al = ally_add(&g->allies, f);
     al->status = HELP_GIVE;
-    write_groups(&store, f);
-    binstore_done(&store);
-    fstream_done(&strm);
+    write_groups(data->store, f);
+    binstore_done(data->store);
+    gamedata_close(data);
 
-    F = fopen("test.dat", "rb");
-    fstream_init(&strm, F);
-    binstore_init(&store, &strm);
     f->groups = 0;
     free_group(g);
-    read_groups(&store, f);
-    binstore_done(&store);
-    fstream_done(&strm);
+    data = gamedata_open("test.dat", "rb", RELEASE_VERSION);
+    read_groups(data, f);
+    gamedata_close(data);
 
     CuAssertPtrNotNull(tc, f->groups);
     CuAssertPtrNotNull(tc, f->groups->allies);

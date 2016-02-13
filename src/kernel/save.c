@@ -59,6 +59,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <util/bsdstring.h>
 #include <util/event.h>
 #include <util/filereader.h>
+#include <util/gamedata.h>
 #include <util/goodies.h>
 #include <util/gamedata.h>
 #include <util/language.h>
@@ -578,12 +579,12 @@ const struct locale *lang)
         WRITE_STR(data->store, obuf);
 }
 
-int read_attribs(storage *store, attrib **alist, void *owner) {
-    if (global.data_version < ATHASH_VERSION) {
-        return a_read_orig(store, alist, owner);
+int read_attribs(gamedata *data, attrib **alist, void *owner) {
+    if (data->version < ATHASH_VERSION) {
+        return a_read_orig(data, alist, owner);
     }
     else {
-        return a_read(store, alist, owner);
+        return a_read(data, alist, owner);
     }
 }
 
@@ -767,7 +768,7 @@ unit *read_unit(struct gamedata *data)
         log_error("Einheit %s hat %u Personen, und %u Trefferpunkte\n", itoa36(u->no), u->number, u->hp);
         u->hp = u->number;
     }
-    read_attribs(data->store, &u->attribs, u);
+    read_attribs(data, &u->attribs, u);
     return u;
 }
 
@@ -1000,7 +1001,7 @@ static region *readregion(struct gamedata *data, int x, int y)
             read_owner(data, &r->land->ownership);
         }
     }
-    read_attribs(data->store, &r->attribs, r);
+    read_attribs(data, &r->attribs, r);
     return r;
 }
 
@@ -1271,7 +1272,7 @@ faction *readfaction(struct gamedata * data)
         }
     }
 
-    read_attribs(data->store, &f->attribs, f);
+    read_attribs(data, &f->attribs, f);
     read_items(data->store, &f->items);
     for (;;) {
         READ_TOK(data->store, name, sizeof(name));
@@ -1314,7 +1315,7 @@ faction *readfaction(struct gamedata * data)
             break;
         }
     }
-    read_groups(data->store, f);
+    read_groups(data, f);
     f->spellbook = 0;
     if (data->version >= REGIONOWNER_VERSION) {
         read_spellbook(FactionSpells() ? &f->spellbook : 0, data->store, get_spell_level_faction, (void *)f);
@@ -1444,7 +1445,7 @@ int readgame(const char *filename, bool backup)
     fstream_init(&strm, F);
     binstore_init(&store, &strm);
     gdata.store = &store;
-    global.data_version = gdata.version; /* HACK: attribute::read does not have access to gamedata, only storage */
+    global.data_version = gdata.version; /* FIXME: hack! attribute::read does not have access to gamedata, only storage */
 
     if (gdata.version >= BUILDNO_VERSION) {
         int build;
@@ -1469,7 +1470,7 @@ int readgame(const char *filename, bool backup)
     else {
         READ_STR(&store, NULL, 0);
     }
-    read_attribs(&store, &global.attribs, NULL);
+    read_attribs(&gdata, &global.attribs, NULL);
     READ_INT(&store, &turn);
     global.data_turn = turn;
     log_debug(" - reading turn %d\n", turn);
@@ -1530,7 +1531,7 @@ int readgame(const char *filename, bool backup)
                 fno = read_faction_reference(&store);
             }
         }
-        read_attribs(&store, &pl->attribs, pl);
+        read_attribs(&gdata, &pl->attribs, pl);
         if (pl->id != 1094969858) { // Regatta
             addlist(&planes, pl);
         }
@@ -1598,7 +1599,7 @@ int readgame(const char *filename, bool backup)
             READ_STR(&store, name, sizeof(name));
             b->type = bt_find(name);
             b->region = r;
-            read_attribs(&store, &b->attribs, b);
+            read_attribs(&gdata, &b->attribs, b);
             if (b->type == bt_lighthouse) {
                 r->flags |= RF_LIGHTHOUSE;
             }
@@ -1645,7 +1646,7 @@ int readgame(const char *filename, bool backup)
             if (sh->type->flags & SFL_NOCOAST) {
                 sh->coast = NODIRECTION;
             }
-            read_attribs(&store, &sh->attribs, sh);
+            read_attribs(&gdata, &sh->attribs, sh);
         }
 
         *shp = 0;
@@ -1673,7 +1674,7 @@ int readgame(const char *filename, bool backup)
             update_interval(u->faction, u->region);
         }
     }
-    read_borders(&store);
+    read_borders(&gdata);
 
     binstore_done(&store);
     fstream_done(&strm);
@@ -1908,10 +1909,10 @@ int writegame(const char *filename)
     return 0;
 }
 
-int a_readint(attrib * a, void *owner, struct storage *store)
+int a_readint(attrib * a, void *owner, struct gamedata *data)
 {
     /*  assert(sizeof(int)==sizeof(a->data)); */
-    READ_INT(store, &a->data.i);
+    READ_INT(data->store, &a->data.i);
     return AT_READ_OK;
 }
 
@@ -1920,12 +1921,12 @@ void a_writeint(const attrib * a, const void *owner, struct storage *store)
     WRITE_INT(store, a->data.i);
 }
 
-int a_readshorts(attrib * a, void *owner, struct storage *store)
+int a_readshorts(attrib * a, void *owner, struct gamedata *data)
 {
     int n;
-    READ_INT(store, &n);
+    READ_INT(data->store, &n);
     a->data.sa[0] = (short)n;
-    READ_INT(store, &n);
+    READ_INT(data->store, &n);
     a->data.sa[1] = (short)n;
     return AT_READ_OK;
 }
@@ -1936,12 +1937,12 @@ void a_writeshorts(const attrib * a, const void *owner, struct storage *store)
     WRITE_INT(store, a->data.sa[1]);
 }
 
-int a_readchars(attrib * a, void *owner, struct storage *store)
+int a_readchars(attrib * a, void *owner, struct gamedata *data)
 {
     int i;
     for (i = 0; i != 4; ++i) {
         int n;
-        READ_INT(store, &n);
+        READ_INT(data->store, &n);
         a->data.ca[i] = (char)n;
     }
     return AT_READ_OK;
@@ -1956,7 +1957,7 @@ void a_writechars(const attrib * a, const void *owner, struct storage *store)
     }
 }
 
-int a_readvoid(attrib * a, void *owner, struct storage *store)
+int a_readvoid(attrib * a, void *owner, struct gamedata *data)
 {
     return AT_READ_OK;
 }
@@ -1965,14 +1966,14 @@ void a_writevoid(const attrib * a, const void *owner, struct storage *store)
 {
 }
 
-int a_readstring(attrib * a, void *owner, struct storage *store)
+int a_readstring(attrib * a, void *owner, struct gamedata *data)
 {
     char buf[DISPLAYSIZE];
     char * result = 0;
     int e;
     size_t len = 0;
     do {
-        e = READ_STR(store, buf, sizeof(buf));
+        e = READ_STR(data->store, buf, sizeof(buf));
         if (result) {
             result = realloc(result, len + DISPLAYSIZE - 1);
             strcpy(result + len, buf);
