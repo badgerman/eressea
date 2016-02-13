@@ -97,7 +97,7 @@ static int createunit_read(trigger * t, gamedata *data)
         read_reference(&td->f, data->store, read_faction_reference, resolve_faction);
     int rc =
         read_reference(&td->r, data->store, read_region_reference,
-        RESOLVE_REGION(global.data_version));
+        RESOLVE_REGION(data->version));
     td->race = (const struct race *)read_race_reference(data->store).v;
 
     if (uc == 0 && rc == 0) {
