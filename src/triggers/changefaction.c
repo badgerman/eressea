@@ -28,6 +28,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* util includes */
 #include <util/attrib.h>
 #include <util/event.h>
+#include <util/gamedata.h>
 #include <util/log.h>
 #include <util/resolve.h>
 #include <util/base36.h>
@@ -82,11 +83,11 @@ static void changefaction_write(const trigger * t, struct storage *store)
     write_faction_reference(td->faction, store);
 }
 
-static int changefaction_read(trigger * t, struct storage *store)
+static int changefaction_read(trigger * t, gamedata *data)
 {
     changefaction_data *td = (changefaction_data *)t->data.v;
-    read_reference(&td->unit, store, read_unit_reference, resolve_unit);
-    read_reference(&td->faction, store, read_faction_reference, resolve_faction);
+    read_reference(&td->unit, data->store, read_unit_reference, resolve_unit);
+    read_reference(&td->faction, data->store, read_faction_reference, resolve_faction);
     return AT_READ_OK;
 }
 
