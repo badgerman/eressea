@@ -1200,17 +1200,24 @@ static void free_wtype(weapon_type *wtype) {
     free(wtype);
 }
 
-int free_rtype_cb(const void * match, const void * key, size_t keylen, void *cbdata) {
-    resource_type *rtype;
-    cb_get_kv(match, &rtype, sizeof(rtype));
+static void free_rtype(resource_type *rtype) {
     free(rtype->_name);
     if (rtype->itype) {
         free_itype(rtype->itype);
+    }
+    if (rtype->atype) {
+        free(rtype->atype);
     }
     if (rtype->wtype) {
         free_wtype(rtype->wtype);
     }
     free(rtype);
+}
+
+int free_rtype_cb(const void * match, const void * key, size_t keylen, void *cbdata) {
+    resource_type *rtype;
+    cb_get_kv(match, &rtype, sizeof(rtype));
+    free_rtype(rtype);
     return 0;
 }
 
