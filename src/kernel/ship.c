@@ -353,9 +353,8 @@ int shipspeed(const ship * sh, const unit * u)
     }
 
     c = get_curse(sh->attribs, ct_find("shipspeedup"));
-    while (c) {
+    if (c) {
         k += curse_geteffect_int(c);
-        c = c->nexthash;
     }
 
     if (sh->damage>0) {
