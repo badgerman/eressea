@@ -47,6 +47,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <storage.h>
 
+#include <critbit.h>
+
 /* libc includes */
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,9 +57,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <assert.h>
 #include <math.h>
 #include <ctype.h>
-
-#define MAXENTITYHASH 7919
-static curse *cursehash[MAXENTITYHASH];
 
 void c_setflag(curse * c, unsigned int flags)
 {
@@ -72,30 +71,35 @@ void c_clearflag(curse * c, unsigned int flags)
     c->flags = (c->flags & ~flags) | (c->type->flags & flags);
 }
 
-void chash(curse * c)
-{
-    int i = c->no % MAXENTITYHASH;
 
-    c->nexthash = cursehash[i];
-    cursehash[i] = c;
-    assert(c->nexthash != c);
+static struct critbit_tree cb_curses;
+static void chash(curse * c)
+{
+    char buffer[sizeof(c->no)+sizeof(c)];
+
+    memcpy(buffer, &c->no, sizeof(c->no));
+    memcpy(buffer+sizeof(c->no), &c, sizeof(curse *));
+    cb_insert(&cb_curses, buffer, sizeof(buffer));
 }
 
 static void cunhash(curse * c)
 {
-    curse **show;
-    int i = c->no % MAXENTITYHASH;
+    char buffer[sizeof(c->no) + sizeof(c)];
+    memcpy(buffer, &c->no, sizeof(c->no));
+    memcpy(buffer + sizeof(c->no), &c, sizeof(curse *));
+    cb_erase(&cb_curses, buffer, sizeof(buffer));
+}
 
-    for (show = &cursehash[i]; *show;
-        show = &(*show)->nexthash) {
-        if ((*show)->no == c->no)
-            break;
+curse *findcurse(int i)
+{
+    void *match;
+    if (cb_find_prefix(&cb_curses, &i, sizeof(i), &match, 1, 0) == 1) {
+        char * data = (char *)match;
+        curse * c = *(curse **)(data + sizeof(i));
+        assert(c->no == i);
+        return c;
     }
-    if (*show) {
-        assert(*show == c);
-        *show = (*show)->nexthash;
-        c->nexthash = 0;
-    }
+    return NULL;
 }
 
 /* ------------------------------------------------------------- */
@@ -377,18 +381,6 @@ curse *get_curse(attrib * ap, const curse_type * ctype)
 }
 
 /* ------------------------------------------------------------- */
-/* findet einen curse global anhand seiner 'curse-Einheitnummer' */
-
-curse *findcurse(int i)
-{
-    curse *old;
-    for (old = cursehash[i % MAXENTITYHASH]; old; old = old->nexthash)
-        if (old->no == i)
-            return old;
-    return NULL;
-}
-
-/* ------------------------------------------------------------- */
 bool remove_curse(attrib ** ap, const curse * c)
 {
     attrib *a = a_select(*ap, c, cmp_curse);
@@ -493,6 +485,9 @@ static void set_cursedmen(curse * c, int cursedmen)
 /* ------------------------------------------------------------- */
 /* Legt eine neue Verzauberung an. Sollte es schon einen Zauber
  * dieses Typs geben, gibt es den bestehenden zurück.
+ *
+ * enno: das stimmt ja wohl nicht. hier wird nirgends nach 
+ *       einem bestehenden curse geschaut.
  */
 static curse *make_curse(unit * mage, attrib ** ap, const curse_type * ct,
     double vigour, int duration, double effect, int men)
