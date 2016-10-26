@@ -21,6 +21,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <kernel/config.h>
 #include "guard.h"
 #include "laws.h"
+#include "monster.h"
 
 #include <kernel/ally.h>
 #include <kernel/save.h>
@@ -43,6 +44,20 @@ attrib_type at_guard = {
     NULL,
     ATF_UNIQUE
 };
+
+guard_t can_start_guarding(const unit * u)
+{
+    if (u->status >= ST_FLEE || fval(u, UFL_FLEEING))
+        return E_GUARD_FLEEING;
+    /* Monster der Monsterpartei dürfen immer bewachen */
+    if (is_monsters(u->faction) || fval(u_race(u), RCF_UNARMEDGUARD))
+        return E_GUARD_OK;
+    if (!armedmen(u, true))
+        return E_GUARD_UNARMED;
+    if (IsImmune(u->faction))
+        return E_GUARD_NEWBIE;
+    return E_GUARD_OK;
+}
 
 void update_guards(void)
 {
