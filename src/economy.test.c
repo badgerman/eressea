@@ -2,6 +2,7 @@
 #include <kernel/config.h>
 #include "economy.h"
 
+#include <util/attrib.h>
 #include <util/message.h>
 #include <kernel/building.h>
 #include <kernel/item.h>
@@ -341,6 +342,66 @@ static void test_income(CuTest *tc)
     test_cleanup();
 }
 
+static int limit_logs(const struct region * r, const struct resource_type * rtype)
+{
+    return 10;
+}
+
+static void setup_produce(CuTest *tc) {
+    unit *u;
+    item_type * itype;
+    struct locale *lang;
+    resource_limit *rdata;
+    attrib *a;
+ 
+    lang = test_create_locale();
+    locale_setstring(lang, "log", "Holz");
+    itype = test_create_itemtype("log");
+    itype->rtype->flags |= RTF_LIMITED;
+    a = a_add(&itype->rtype->attribs, a_new(&at_resourcelimit));
+    rdata = (resource_limit *)a->data.v;
+    rdata->guard |= GUARD_TREES;
+    rdata->limit = limit_logs;
+    itype->construction = calloc(1, sizeof(construction));
+    itype->construction->skill = SK_LUMBERJACK;
+    itype->construction->minskill = 1;
+    CuAssertPtrNotNull(tc, itype);
+    CuAssertPtrNotNull(tc, finditemtype("Holz", lang));
+    u = test_create_unit(test_create_faction(0), test_create_region(0, 0, 0));
+    set_level(u, SK_LUMBERJACK, 1);
+    u->faction->locale = lang;
+    CuAssertPtrNotNull(tc, u);
+}
+
+static void test_produce(CuTest *tc) {
+    unit *u;
+    item_type * itype;
+    faction *f;
+
+    test_setup();
+    setup_produce(tc);
+    itype = rt_get_or_create("log")->itype;
+    u = regions->units;
+    f = u->faction;
+
+    // happy case: 1 person w. skill 1 produces 1 log
+    u->thisorder = create_order(K_MAKE, f->locale, "Holz");
+    CuAssertPtrNotNull(tc, u->thisorder);
+    CuAssertIntEquals(tc, 0, make_cmd(u, u->thisorder));
+    split_allocations(u->region);
+    CuAssertIntEquals(tc, 1, i_get(u->items, itype));
+    CuAssertPtrNotNull(tc, test_find_messagetype(f->msgs, "produce"));
+    test_clear_messagelist(&f->msgs);
+
+    // limit_logs() is 10, do not produce more:
+    scale_number(u, 20);
+    CuAssertIntEquals(tc, 0, make_cmd(u, u->thisorder));
+    split_allocations(u->region);
+    CuAssertIntEquals(tc, 11, i_get(u->items, itype));
+    CuAssertPtrNotNull(tc, test_find_messagetype(f->msgs, "produce"));
+    test_cleanup();
+}
+
 CuSuite *get_economy_suite(void)
 {
     CuSuite *suite = CuSuiteNew();
@@ -355,5 +416,6 @@ CuSuite *get_economy_suite(void)
     SUITE_ADD_TEST(suite, test_tax_cmd);
     SUITE_ADD_TEST(suite, test_maintain_buildings);
     SUITE_ADD_TEST(suite, test_recruit);
+    SUITE_ADD_TEST(suite, test_produce);
     return suite;
 }

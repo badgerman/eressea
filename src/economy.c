@@ -936,7 +936,7 @@ static void allocate_resource(unit * u, const resource_type * rtype, int want)
     }
 
     if (rdata->guard != 0) {
-        unit *u2;
+        unit *u2; // = is_guarded(r, u, GUARD_PRODUCE);
         for (u2 = r->units; u2; u2 = u2->next) {
             if (is_guard(u2, rdata->guard) != 0 && can_guard(u2, u)) {
                 ADDMSG(&u->faction->msgs,
