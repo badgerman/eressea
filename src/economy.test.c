@@ -1,6 +1,8 @@
 #include <platform.h>
 #include <kernel/config.h>
 #include "economy.h"
+#include "guard.h"
+#include "monster.h"
 
 #include <util/attrib.h>
 #include <util/message.h>
@@ -373,6 +375,64 @@ static void setup_produce(CuTest *tc) {
     CuAssertPtrNotNull(tc, u);
 }
 
+static void test_ent_guards_trees(CuTest *tc) {
+    unit *u, *ug;
+    item_type * itype;
+    faction *f;
+    race * rc;
+
+    test_setup();
+    setup_produce(tc);
+    itype = rt_get_or_create("log")->itype;
+    u = regions->units;
+    f = u->faction;
+
+    // ents guard against tree production
+    rc = test_create_race("ent");
+    CuAssertPtrEquals(tc, rc, (void *)get_race(RC_TREEMAN));
+    ug = test_create_unit(get_monsters(), u->region); // monsters can always guard unarmed
+    u_setrace(ug, rc);
+    guard(ug, GUARD_ALL);
+
+    u->thisorder = create_order(K_MAKE, f->locale, "Holz");
+    CuAssertPtrNotNull(tc, u->thisorder);
+    CuAssertIntEquals(tc, 0, make_cmd(u, u->thisorder));
+    split_allocations(u->region);
+    CuAssertIntEquals(tc, 1, i_get(u->items, itype));
+    CuAssertPtrNotNull(tc, test_find_messagetype(f->msgs, "produce"));
+    test_clear_messagelist(&f->msgs);
+    test_cleanup();
+}
+
+static void test_elf_guards_trees(CuTest *tc) {
+    unit *u, *ug;
+    item_type * itype;
+    faction *f;
+    race * rc;
+
+    test_setup();
+    setup_produce(tc);
+    itype = rt_get_or_create("log")->itype;
+    u = regions->units;
+    f = u->faction;
+
+    // ents guard against tree production
+    rc = test_create_race("elf");
+    CuAssertPtrEquals(tc, rc, (void *)get_race(RC_ELF));
+    rc->flags |= RCF_UNARMEDGUARD; // hack, so I don't need to arm the unit
+    ug = test_create_unit(test_create_faction(rc), u->region);
+    guard(ug, GUARD_ALL);
+
+    u->thisorder = create_order(K_MAKE, f->locale, "Holz");
+    CuAssertPtrNotNull(tc, u->thisorder);
+    CuAssertIntEquals(tc, 0, make_cmd(u, u->thisorder));
+    split_allocations(u->region);
+    CuAssertIntEquals(tc, 1, i_get(u->items, itype));
+    CuAssertPtrNotNull(tc, test_find_messagetype(f->msgs, "produce"));
+    test_clear_messagelist(&f->msgs);
+    test_cleanup();
+}
+
 static void test_produce(CuTest *tc) {
     unit *u;
     item_type * itype;
@@ -417,5 +477,7 @@ CuSuite *get_economy_suite(void)
     SUITE_ADD_TEST(suite, test_maintain_buildings);
     SUITE_ADD_TEST(suite, test_recruit);
     SUITE_ADD_TEST(suite, test_produce);
+    SUITE_ADD_TEST(suite, test_ent_guards_trees);
+    SUITE_ADD_TEST(suite, test_elf_guards_trees);
     return suite;
 }
