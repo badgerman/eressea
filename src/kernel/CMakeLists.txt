@@ -30,7 +30,6 @@ spell.test.c
 # terrain.test.c
 unit.test.c
 jsonconf.test.c
-# xmlreader.test.c
 )
 
 SET(_FILES
@@ -67,6 +66,10 @@ jsonconf.c
 if (LIBXML2_FOUND)
 SET(_FILES ${_FILES} xmlreader.c)
 endif(LIBXML2_FOUND)
+
+if (EXPAT_FOUND)
+SET(_FILES ${_FILES} xmlconf.c)
+endif(EXPAT_FOUND)
 
 SET(VERSION_SRC ${PROJECT_NAME}/version.c PARENT_SCOPE)
 
