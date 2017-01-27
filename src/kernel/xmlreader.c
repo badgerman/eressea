@@ -47,12 +47,10 @@ without prior permission by the authors of Eressea.
 #include <util/nrmessage.h>
 #include <util/xml.h>
 
-#ifdef USE_LIBXML2
 /* libxml includes */
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/encoding.h>
-#endif
 
 /* libc includes */
 #include <assert.h>
@@ -60,7 +58,6 @@ without prior permission by the authors of Eressea.
 #include <limits.h>
 #include <string.h>
 
-#ifdef USE_LIBXML2
 static void xml_readtext(xmlNodePtr node, struct locale **lang, xmlChar ** text)
 {
     xmlChar *propValue = xmlGetProp(node, BAD_CAST "locale");
@@ -2082,4 +2079,3 @@ void register_xmlreader(void)
     xml_register_callback(parse_races);   /* requires spells */
     xml_register_callback(parse_calendar);
 }
-#endif

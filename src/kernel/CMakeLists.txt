@@ -61,9 +61,12 @@ spellbook.c
 spell.c
 terrain.c
 unit.c
-xmlreader.c
 jsonconf.c
 )
+
+if (LIBXML2_FOUND)
+SET(_FILES ${_FILES} xmlreader.c)
+endif(LIBXML2_FOUND)
 
 SET(VERSION_SRC ${PROJECT_NAME}/version.c PARENT_SCOPE)
 
