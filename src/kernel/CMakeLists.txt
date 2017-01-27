@@ -68,6 +68,7 @@ SET(_FILES ${_FILES} xmlreader.c)
 endif(LIBXML2_FOUND)
 
 if (EXPAT_FOUND)
+SET(_TEST_FILES ${_TEST_FILES} xmlconf.test.c)
 SET(_FILES ${_FILES} xmlconf.c)
 endif(EXPAT_FOUND)
 
