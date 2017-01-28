@@ -1,6 +1,7 @@
 #include <platform.h>
 #include "xmlconf.h"
 
+#include <kernel/race.h>
 #include <expat.h>
 
 #include <assert.h>
@@ -10,19 +11,96 @@
 #define MAXSTACK 16
 typedef struct ParseInfo {
     int sp;
+    union {
+        struct {
+            race *rc;
+            int attacks;
+        } race;
+    } parent;
     XML_Char *stack[MAXSTACK];
 } ParseInfo;
+
+int get_attr_index(const XML_Char **atts, const XML_Char *key) {
+    int i;
+    for (i = 0; atts[i]; i += 2) {
+        if (strcmp(atts[i], key) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+const XML_Char *get_attr_value(const XML_Char **atts, const XML_Char *key) {
+    int i = get_attr_index(atts, key);
+    return (i >= 0) ? atts[i+1] : NULL;
+}
+
+static void parse_attack(ParseInfo *pi, const XML_Char **atts) {
+    race *rc = pi->parent.race.rc;
+    int i;
+    for (i = 0; atts[i]; i += 2) {
+        int a = pi->parent.race.attacks;
+        const XML_Char *key = atts[i];
+        const XML_Char *value = atts[i + 1];
+        if (strcmp(key, "type") == 0) {
+            rc->attack[a].type = atoi(value);
+        }
+        else if (strcmp(key, "level") == 0) {
+            rc->attack[a].level = atoi(value);
+        }
+        //else if (strcmp(key, "spell") == 0) {
+        //    rc->attack[a].data.sp = find_spell(value);
+        //}
+        else if (strcmp(key, "damage") == 0) {
+            rc->attack[a].data.dice = strdup(value);
+        }
+    }
+    ++pi->parent.race.attacks;
+}
+
+static void parse_race(ParseInfo *pi, const XML_Char **atts) {
+    const XML_Char *name = get_attr_value(atts, "name");
+    if (name) {
+        int i;
+        race *rc;
+        rc = rc_get_or_create(name);
+        for (i = 0; atts[i]; i += 2) {
+            if (strcmp(atts[i], "weight") == 0) {
+                rc->weight = atoi(atts[i + 1]);
+            }
+        }
+        pi->parent.race.rc = rc;
+        pi->parent.race.attacks = 0;
+    }
+}
 
 static void handle_start(void *userData, const XML_Char *name, const XML_Char **atts) {
     ParseInfo *pi = (ParseInfo *)userData;
     assert(pi && pi->sp<MAXSTACK);
+    if (pi->sp == 2) {
+        if (strcmp(name, "race") == 0) {
+            parse_race(pi, atts);
+        }
+    }
+    else if (pi->sp == 3) {
+        if (strcmp(name, "attack") == 0) {
+            parse_attack(pi, atts);
+        }
+    }
     pi->stack[pi->sp++] = strdup(name);
 }
 
 static void handle_end(void *userData, const XML_Char *name) {
     ParseInfo *pi = (ParseInfo *)userData;
     assert(pi && pi->sp>0);
+
     free(pi->stack[--pi->sp]);
+    if (pi->sp == 2) {
+        if (strcmp(name, "race") == 0) {
+            pi->parent.race.rc->attack[pi->parent.race.attacks].type = AT_NONE;
+            pi->parent.race.rc = NULL;
+        }
+    }
 }
 
 static void handle_text(void *userData, const XML_Char *s, int len){
