@@ -5,21 +5,24 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
+#define MAXSTACK 16
 typedef struct ParseInfo {
-    int level;
+    int sp;
+    XML_Char *stack[MAXSTACK];
 } ParseInfo;
 
 static void handle_start(void *userData, const XML_Char *name, const XML_Char **atts) {
     ParseInfo *pi = (ParseInfo *)userData;
-    assert(pi);
-    pi->level++;
+    assert(pi && pi->sp<MAXSTACK);
+    pi->stack[pi->sp++] = strdup(name);
 }
 
 static void handle_end(void *userData, const XML_Char *name) {
     ParseInfo *pi = (ParseInfo *)userData;
     assert(pi);
-    pi->level--;
+    free(pi->stack[--pi->sp]);
 }
 
 static void handle_text(void *userData, const XML_Char *s, int len){
