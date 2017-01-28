@@ -21,7 +21,7 @@ static void handle_start(void *userData, const XML_Char *name, const XML_Char **
 
 static void handle_end(void *userData, const XML_Char *name) {
     ParseInfo *pi = (ParseInfo *)userData;
-    assert(pi);
+    assert(pi && pi->sp>0);
     free(pi->stack[--pi->sp]);
 }
 
