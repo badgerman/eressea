@@ -89,14 +89,37 @@ static void parse_attack(ParseInfo *pi, const XML_Char **atts) {
 }
 
 static void parse_race(ParseInfo *pi, const XML_Char **atts) {
-    const XML_Char *name = get_attr_value(atts, "name");
+    int n = get_attr_index(atts, "name");
+    const XML_Char *name = atts[n+1];
     if (name) {
         int i;
         race *rc;
         rc = rc_get_or_create(name);
         for (i = 0; atts[i]; i += 2) {
-            if (strcmp(atts[i], "weight") == 0) {
-                rc->weight = atoi(atts[i + 1]);
+            if (i != n) {
+                const XML_Char *key = atts[i];
+                const XML_Char *value = atts[i + 1];
+                if (strcmp(key, "weight") == 0) {
+                    rc->weight = atoi(value);
+                }
+                else if (strcmp(key, "magres") == 0) {
+                    rc->magres = (float)atof(value);
+                }
+                else if (strcmp(key, "healing") == 0) {
+                    rc->healing = (float)atof(value);
+                }
+                else if (strcmp(key, "maxaura") == 0) {
+                    rc->maxaura = (float)atof(value);
+                }
+                else if (strcmp(key, "regaura") == 0) {
+                    rc->regaura = (float)atof(value);
+                }
+                else if (strcmp(key, "speed") == 0) {
+                    rc->speed = (float)atof(value);
+                }
+                else {
+                    log_error("invalid attribute %s=%s for race %s.", key, value, name);
+                }
             }
         }
         pi->parent.race.rc = rc;
