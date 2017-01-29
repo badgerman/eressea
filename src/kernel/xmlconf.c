@@ -88,6 +88,33 @@ static void parse_attack(ParseInfo *pi, const XML_Char **atts) {
     ++pi->parent.race.attacks;
 }
 
+static bool parse_int(int * val, const XML_Char** atts, const XML_Char* name, int i) {
+    if (strcmp(atts[i], name) == 0) {
+        assert(val);
+        *val = atoi(atts[i + 1]);
+        return true;
+    }
+    return false;
+}
+
+static bool parse_float(float * val, const XML_Char** atts, const XML_Char* name, int i) {
+    if (strcmp(atts[i], name) == 0) {
+        assert(val);
+        *val = (float)atof(atts[i + 1]);
+        return true;
+    }
+    return false;
+}
+
+static bool parse_double(double * val, const XML_Char** atts, const XML_Char* name, int i) {
+    if (strcmp(atts[i], name) == 0) {
+        assert(val);
+        *val = atof(atts[i + 1]);
+        return true;
+    }
+    return false;
+}
+
 static void parse_race(ParseInfo *pi, const XML_Char **atts) {
     int n = get_attr_index(atts, "name");
     const XML_Char *name = atts[n+1];
@@ -97,27 +124,18 @@ static void parse_race(ParseInfo *pi, const XML_Char **atts) {
         rc = rc_get_or_create(name);
         for (i = 0; atts[i]; i += 2) {
             if (i != n) {
-                const XML_Char *key = atts[i];
-                const XML_Char *value = atts[i + 1];
-                if (strcmp(key, "weight") == 0) {
-                    rc->weight = atoi(value);
-                }
-                else if (strcmp(key, "magres") == 0) {
-                    rc->magres = (float)atof(value);
-                }
-                else if (strcmp(key, "healing") == 0) {
-                    rc->healing = (float)atof(value);
-                }
-                else if (strcmp(key, "maxaura") == 0) {
-                    rc->maxaura = (float)atof(value);
-                }
-                else if (strcmp(key, "regaura") == 0) {
-                    rc->regaura = (float)atof(value);
-                }
-                else if (strcmp(key, "speed") == 0) {
-                    rc->speed = (float)atof(value);
-                }
-                else {
+                if (
+                    !parse_int(&rc->recruitcost, atts, "recruitcost", i) &&
+                    !parse_int(&rc->maintenance, atts, "maintenance", i) &&
+                    !parse_int(&rc->weight, atts, "weight", i) &&
+                    !parse_float(&rc->magres, atts, "magres", i) &&
+                    !parse_float(&rc->healing, atts, "healing", i) &&
+                    !parse_float(&rc->speed, atts, "speed", i) &&
+                    !parse_double(&rc->maxaura, atts, "maxaura", i) &&
+                    !parse_double(&rc->regaura, atts, "regaura", i)
+                ) {
+                    const XML_Char *key = atts[i];
+                    const XML_Char *value = atts[i + 1];
                     log_error("invalid attribute %s=%s for race %s.", key, value, name);
                 }
             }
@@ -201,6 +219,11 @@ int xmlconf_parse(const char *text, size_t len)
 
     err = XML_Parse(p, text, len, XML_TRUE);
 
+    if (err != XML_STATUS_OK) {
+        enum XML_Error ec;
+        ec = XML_GetErrorCode(p);
+        log_error(XML_ErrorString(ec));
+    }
     XML_ParserFree(p);
     return err != XML_STATUS_OK;
 }

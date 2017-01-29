@@ -10,7 +10,8 @@
 static void test_xmlconf(CuTest *tc) {
     const char *xml = "<eressea>"
         "<races>"
-        "<race name=\"human\" magres=\"1.5\" healing=\"2.5\" maxaura=\"3.5\" regaura=\"4.5\" speed=\"5.5\" weight=\"1000\">"
+        "<race name=\"human\" magres=\"1.5\" healing=\"2.5\" maxaura=\"3.5\" regaura=\"4.5\" speed=\"5.5\" "
+            "recruitcost=\"100\" maintenance=\"10\" weight=\"1000\">"
         "<attack type=\"1\" damage=\"1d5\"/>"
         "</race>"
         "</races>"
@@ -20,6 +21,8 @@ static void test_xmlconf(CuTest *tc) {
     CuAssertIntEquals(tc, 0, xmlconf_parse(xml, strlen(xml)));
     CuAssertPtrNotNull(tc, rc = rc_find("human"));
     CuAssertIntEquals(tc, 1000, rc->weight);
+    CuAssertIntEquals(tc, 100, rc->recruitcost);
+    CuAssertIntEquals(tc, 10, rc->maintenance);
     CuAssertDblEquals(tc, 1.5, rc->magres, 0.1);
     CuAssertDblEquals(tc, 2.5, rc->healing, 0.1);
     CuAssertDblEquals(tc, 3.5, rc->maxaura, 0.1);
