@@ -186,7 +186,13 @@ void free_races(void) {
         race * rc = races->next;
         
         for (i = 0; races->attack[i].type!=AT_NONE; ++i) {
-            spellref_free(races->attack[i].data.sp);
+            int type = races->attack[i].type;
+            if (type == AT_SPELL) {
+                spellref_free(races->attack[i].data.sp);
+            }
+            else if (type != AT_DAZZLE) {
+                free(races->attack[i].data.dice);
+            }
         }
         spellref_free(races->precombatspell);
         free_params(&races->parameters);

@@ -2,6 +2,8 @@
 #include "xmlconf.h"
 
 #include <kernel/race.h>
+#include <kernel/spell.h>
+#include <util/log.h>
 #include <expat.h>
 
 #include <assert.h>
@@ -37,22 +39,45 @@ const XML_Char *get_attr_value(const XML_Char **atts, const XML_Char *key) {
 
 static void parse_attack(ParseInfo *pi, const XML_Char **atts) {
     race *rc = pi->parent.race.rc;
-    int i;
+    int type = AT_NONE, i;
+    i = get_attr_index(atts, "type");
+    if (i >= 0) type = atoi(atts[i + 1]);
+    assert(type > AT_NONE && type <= AT_STRUCTURAL);
     for (i = 0; atts[i]; i += 2) {
         int a = pi->parent.race.attacks;
         const XML_Char *key = atts[i];
         const XML_Char *value = atts[i + 1];
-        if (strcmp(key, "type") == 0) {
-            rc->attack[a].type = atoi(value);
-        }
-        else if (strcmp(key, "level") == 0) {
-            rc->attack[a].level = atoi(value);
-        }
-        //else if (strcmp(key, "spell") == 0) {
-        //    rc->attack[a].data.sp = find_spell(value);
-        //}
-        else if (strcmp(key, "damage") == 0) {
-            rc->attack[a].data.dice = strdup(value);
+        switch (type) {
+        case AT_STANDARD:
+        case AT_NATURAL:
+        case AT_STRUCTURAL:
+        case AT_DRAIN_ST:
+        case AT_DRAIN_EXP:
+            if (strcmp(key, "damage") == 0) {
+                rc->attack[a].data.dice = strdup(value);
+            }
+            else {
+                log_error("invalid attribute %s=%s for attack type %d.", key, value, type);
+            }
+            break;
+        case AT_DAZZLE:
+            log_error("invalid attribute %s=%s for attack type %d.", key, value, type);
+            break;
+        case AT_SPELL:
+            if (strcmp(key, "spell") == 0) {
+                rc->attack[a].data.sp = spellref_create(value);
+            }
+            else if (strcmp(key, "level") == 0) {
+                rc->attack[a].level = atoi(value);
+            }
+            else {
+                log_error("invalid attribute %s=%s for attack type %d.", key, value, type);
+            }
+            break;
+        case AT_COMBATSPELL:
+        default:
+            log_error("invalid attack type %d.", type);
+            break;
         }
     }
     ++pi->parent.race.attacks;
