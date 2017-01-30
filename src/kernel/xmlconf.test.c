@@ -14,6 +14,7 @@ static void test_xmlconf(CuTest *tc) {
             "recruitcost=\"100\" maintenance=\"10\" weight=\"1000\">"
         "<attack type=\"1\" damage=\"1d5\"/>"
         "</race>"
+        "<xi:include href=\"config://default/goblin.xml\"/>"
         "</races>"
         "</eressea>";
     const race *rc;

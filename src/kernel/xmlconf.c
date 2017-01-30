@@ -37,6 +37,33 @@ const XML_Char *get_attr_value(const XML_Char **atts, const XML_Char *key) {
     return (i >= 0) ? atts[i+1] : NULL;
 }
 
+static bool parse_int(int * val, const XML_Char** atts, const XML_Char* name, int i) {
+    if (strcmp(atts[i], name) == 0) {
+        assert(val);
+        *val = atoi(atts[i + 1]);
+        return true;
+    }
+    return false;
+}
+
+static bool parse_float(float * val, const XML_Char** atts, const XML_Char* name, int i) {
+    if (strcmp(atts[i], name) == 0) {
+        assert(val);
+        *val = (float)atof(atts[i + 1]);
+        return true;
+    }
+    return false;
+}
+
+static bool parse_double(double * val, const XML_Char** atts, const XML_Char* name, int i) {
+    if (strcmp(atts[i], name) == 0) {
+        assert(val);
+        *val = atof(atts[i + 1]);
+        return true;
+    }
+    return false;
+}
+
 static void parse_attack(ParseInfo *pi, const XML_Char **atts) {
     race *rc = pi->parent.race.rc;
     int a = pi->parent.race.attacks;
@@ -88,33 +115,6 @@ static void parse_attack(ParseInfo *pi, const XML_Char **atts) {
     ++pi->parent.race.attacks;
 }
 
-static bool parse_int(int * val, const XML_Char** atts, const XML_Char* name, int i) {
-    if (strcmp(atts[i], name) == 0) {
-        assert(val);
-        *val = atoi(atts[i + 1]);
-        return true;
-    }
-    return false;
-}
-
-static bool parse_float(float * val, const XML_Char** atts, const XML_Char* name, int i) {
-    if (strcmp(atts[i], name) == 0) {
-        assert(val);
-        *val = (float)atof(atts[i + 1]);
-        return true;
-    }
-    return false;
-}
-
-static bool parse_double(double * val, const XML_Char** atts, const XML_Char* name, int i) {
-    if (strcmp(atts[i], name) == 0) {
-        assert(val);
-        *val = atof(atts[i + 1]);
-        return true;
-    }
-    return false;
-}
-
 static void parse_race(ParseInfo *pi, const XML_Char **atts) {
     int n = get_attr_index(atts, "name");
     const XML_Char *name = atts[n+1];
@@ -145,10 +145,20 @@ static void parse_race(ParseInfo *pi, const XML_Char **atts) {
     }
 }
 
+static void handle_include(ParseInfo *pi, const XML_Char **atts) {
+    const XML_Char *href = get_attr_value(atts, "href");
+    if (href) {
+        (void)href;
+    }
+}
+
 static void handle_start(void *userData, const XML_Char *name, const XML_Char **atts) {
     ParseInfo *pi = (ParseInfo *)userData;
     assert(pi && pi->sp<MAXSTACK);
-    if (pi->sp == 2) {
+    if (strcmp(name, "xi:include") == 0) {
+        handle_include(pi, atts);
+    }
+    else if (pi->sp == 2) {
         if (strcmp(name, "race") == 0) {
             parse_race(pi, atts);
         }
@@ -163,7 +173,7 @@ static void handle_start(void *userData, const XML_Char *name, const XML_Char **
 
 static void handle_end(void *userData, const XML_Char *name) {
     ParseInfo *pi = (ParseInfo *)userData;
-    assert(pi && pi->sp>0);
+    assert(pi && pi->sp > 0);
 
     free(pi->stack[--pi->sp]);
     if (pi->sp == 2) {
