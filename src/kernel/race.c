@@ -593,4 +593,13 @@ void write_race(gamedata *data, const race *rc) {
     for (i = 0; i != MAXSKILLS; ++i) {
         WRITE_INT(data->store, rc->bonus[i]);
     }
+    if (rc->study_speed) {
+        for (i = 0; i != MAXSKILLS; ++i) {
+            if (rc->study_speed[i] != 0) {
+                WRITE_INT(data->store, i);
+                WRITE_INT(data->store, rc->study_speed[i]);
+            }
+        }
+    }
+    WRITE_INT(data->store, NOSKILL);
 }
