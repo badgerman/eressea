@@ -106,10 +106,12 @@ extern "C" {
         int type;
         union {
             char *dice;
-            struct spellref *sp;
+            struct {
+                struct spellref *ref;
+                int level;
+            } spell;
         } data;
         int flags;
-        int level;
     } att;
 
     typedef const char *(*race_desc_func)(const struct race *rc, const struct locale *lang);

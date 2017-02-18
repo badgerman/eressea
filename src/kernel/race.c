@@ -40,6 +40,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <util/attrib.h>
 #include <util/bsdstring.h>
 #include <util/functions.h>
+#include <util/gamedata.h>
 #include <util/umlaut.h>
 #include <util/language.h>
 #include <util/log.h>
@@ -271,7 +272,7 @@ void free_races(void) {
         for (i = 0; races->attack[i].type!=AT_NONE; ++i) {
             att *at = races->attack + i;
             if (at->type == AT_SPELL) {
-                spellref_free(at->data.sp);
+                spellref_free(at->data.spell.ref);
             }
             else {
                 free(at->data.dice);
@@ -548,4 +549,48 @@ void register_race_description_function(race_desc_func func, const char *name) {
 
 void register_race_name_function(race_name_func func, const char *name) {
     register_function((pf_generic)func, name);
+}
+
+void write_race(gamedata *data, const race *rc) {
+    int i;
+
+    WRITE_TOK(data->store, rc->_name);
+    WRITE_INT(data->store, rc->flags);
+    WRITE_INT(data->store, rc->battle_flags);
+    WRITE_INT(data->store, rc->ec_flags);
+    WRITE_INT(data->store, rc->magres);
+    WRITE_INT(data->store, rc->healing);
+    WRITE_INT(data->store, rc->maxaura);
+    WRITE_INT(data->store, rc->recruitcost);
+    WRITE_INT(data->store, rc->maintenance);
+    WRITE_INT(data->store, rc->splitsize);
+    WRITE_INT(data->store, rc->weight);
+    WRITE_INT(data->store, rc->capacity);
+    WRITE_INT(data->store, rc->income);
+    WRITE_INT(data->store, rc->hitpoints);
+    WRITE_INT(data->store, rc->armor);
+    WRITE_INT(data->store, rc->at_default);
+    WRITE_INT(data->store, rc->df_default);
+    WRITE_INT(data->store, rc->at_bonus);
+    WRITE_INT(data->store, rc->df_bonus);
+    WRITE_FLT(data->store, (float)rc->regaura);
+    WRITE_FLT(data->store, (float)rc->recruit_multi);
+    WRITE_FLT(data->store, rc->speed);
+    WRITE_FLT(data->store, rc->aggression);
+    for (i = 0; i != RACE_ATTACKS; ++i) {
+        const att *a = rc->attack + i;
+        WRITE_INT(data->store, a->type);
+        if (a->type == AT_NONE) break;
+        if (a->type == AT_SPELL) {
+            WRITE_INT(data->store, a->data.spell.level);
+            WRITE_TOK(data->store, a->data.spell.ref->name);
+        }
+        else {
+            WRITE_TOK(data->store, a->data.dice);
+        }
+        WRITE_INT(data->store, a->flags);
+    }
+    for (i = 0; i != MAXSKILLS; ++i) {
+        WRITE_INT(data->store, rc->bonus[i]);
+    }
 }

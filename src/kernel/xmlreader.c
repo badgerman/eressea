@@ -1869,11 +1869,12 @@ static int parse_races(xmlDocPtr doc)
                 xmlFree(propValue);
             }
             else {
-                attack->data.sp = xml_spellref(node, "spell");
-                if (attack->data.sp) {
-                    attack->level = xml_ivalue(node, "level", 0);
-                    if (attack->level <= 0) {
-                        log_error("magical attack '%s' for race '%s' needs a level: %d\n", attack->data.sp->name, rc->_name, attack->level);
+                attack->data.spell.ref = xml_spellref(node, "spell");
+                if (attack->data.spell.ref) {
+                    attack->data.spell.level = xml_ivalue(node, "level", 0);
+                    if (attack->data.spell.level <= 0) {
+                        log_error("magical attack '%s' for race '%s' needs a level: %d\n",
+                            attack->data.spell.ref->name, rc->_name, attack->data.spell.level);
                     }
                 }
             }
