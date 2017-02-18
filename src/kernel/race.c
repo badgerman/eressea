@@ -576,7 +576,6 @@ void write_race(gamedata *data, const race *rc) {
     WRITE_FLT(data->store, (float)rc->regaura);
     WRITE_FLT(data->store, (float)rc->recruit_multi);
     WRITE_FLT(data->store, rc->speed);
-    WRITE_FLT(data->store, rc->aggression);
     for (i = 0; i != RACE_ATTACKS; ++i) {
         const att *a = rc->attack + i;
         WRITE_INT(data->store, a->type);
