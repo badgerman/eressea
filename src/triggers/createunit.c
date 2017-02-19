@@ -105,7 +105,7 @@ static int createunit_read(trigger * t, gamedata *data)
 
     read_reference(&td->r, data, read_region_reference,
         RESOLVE_REGION(data->version));
-    td->race = (const struct race *)read_race_reference(data->store).v;
+    td->race = read_race_reference(data->store);
     if (!td->race) {
         result = AT_READ_FAIL;
     }

@@ -940,8 +940,8 @@ int tolua_read_xml(lua_State * L)
 int tolua_read_rules(lua_State * L)
 {
     const char *filename = tolua_tostring(L, 1, "rules.dat");
-    read_rules(filename);
-    return 0;
+    lua_pushinteger(L, read_rules(filename));
+    return 1;
 }
 
 typedef struct event_args {

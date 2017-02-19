@@ -95,31 +95,44 @@ enum {
     RCO_TRADEHERB
 };
 
-static void rc_setoption(race *rc, int k, const char *value) {
+static variant * rc_makeoption(race *rc, int k) {
     unsigned char key = (unsigned char)k;
     int i;
     variant *v = NULL;
+
     if (!rc->options) {
         rc->options = malloc(sizeof(rcoption));
         rc->options->key[0] = key;
         rc->options->key[1] = RCO_NONE;
         v = rc->options->value;
-    } else {
-        for (i=0;!v && i < MAXOPTIONS && rc->options->key[i]!=RCO_NONE;++i) {
-            if (rc->options->key[i]==key) {
-                v = rc->options->value+i;
+    }
+    else {
+        for (i = 0; !v && i < MAXOPTIONS && rc->options->key[i] != RCO_NONE; ++i) {
+            if (rc->options->key[i] == key) {
+                v = rc->options->value + i;
             }
         }
         if (!v) {
             assert(i<MAXOPTIONS || !"MAXOPTIONS too small for race");
-            v = rc->options->value+i;
+            v = rc->options->value + i;
             rc->options->key[i] = key;
-            if (i+1<MAXOPTIONS) {
-                rc->options->key[i+1]=RCO_NONE;
+            if (i + 1<MAXOPTIONS) {
+                rc->options->key[i + 1] = RCO_NONE;
             }
         }
     }
     assert(v);
+    return v;
+}
+
+static void rc_setoption_int(race *rc, int key, int value) {
+    variant *v = rc_makeoption(rc, key);
+    v->i = value;
+}
+
+static void rc_setoption(race *rc, int key, const char *value) {
+    variant *v = rc_makeoption(rc, key);
+
     if (key == RCO_SCARE) {
         v->i = atoi(value);
     }
@@ -526,21 +539,16 @@ void write_race_reference(const race * rc, struct storage *store)
     WRITE_TOK(store, rc ? rc->_name : "none");
 }
 
-variant read_race_reference(struct storage *store)
+race *read_race_reference(struct storage *store)
 {
-    variant result;
     char zName[20];
     READ_TOK(store, zName, sizeof(zName));
 
-    if (strcmp(zName, "none") == 0) {
-        result.v = NULL;
-        return result;
+    if (strcmp(zName, "none") != 0) {
+        race *rc = rc_get_or_create(zName);
+        return rc;
     }
-    else {
-        result.v = rc_find_i(zName);
-    }
-    assert(result.v != NULL);
-    return result;
+    return NULL;
 }
 
 void register_race_description_function(race_desc_func func, const char *name) {
@@ -556,6 +564,7 @@ void write_race(gamedata *data, const race *rc)
     int i;
 
     WRITE_TOK(data->store, rc->_name);
+    WRITE_TOK(data->store, rc->def_damage);
     WRITE_INT(data->store, rc->flags);
     WRITE_INT(data->store, rc->battle_flags);
     WRITE_INT(data->store, rc->ec_flags);
@@ -642,10 +651,13 @@ struct race * read_race(struct gamedata *data)
 {
     race * rc;
     float flt;
+    int i;
     char zName[64];
 
     READ_TOK(data->store, zName, sizeof(zName));
     rc = rc_get_or_create(zName);
+    READ_TOK(data->store, zName, sizeof(zName));
+    rc->def_damage = strdup(zName);
     READ_INT(data->store, &rc->flags);
     READ_INT(data->store, &rc->battle_flags);
     READ_INT(data->store, &rc->ec_flags);
@@ -670,5 +682,70 @@ struct race * read_race(struct gamedata *data)
     rc->recruit_multi = flt;
     READ_FLT(data->store, &flt);
     rc->speed = flt;
+
+    for (i = 0; i != RACE_ATTACKS; ++i) {
+        att *a = rc->attack + i;
+        READ_INT(data->store, &a->type);
+        if (a->type == AT_NONE) break;
+        if (a->type == AT_SPELL) {
+            READ_INT(data->store, &a->data.spell.level);
+            READ_TOK(data->store, zName, sizeof(zName));
+            a->data.spell.ref = spellref_create(NULL, zName);
+        }
+        else {
+            READ_TOK(data->store, zName, sizeof(zName));
+            a->data.dice = strdup(zName);
+        }
+        READ_INT(data->store, &a->flags);
+    }
+
+    for (i = 0; i != MAXSKILLS; ++i) {
+        int b;
+        READ_INT(data->store, &b);
+        rc->bonus[i] = (char)b;
+    }
+
+    READ_INT(data->store, &i);
+    if (i!=NOSKILL) {
+        rc->study_speed = malloc(MAXSKILLS);
+        do {
+            int m;
+            READ_INT(data->store, &m);
+            rc->study_speed[i] = (char)m;
+            READ_INT(data->store, &i);
+        } while (i != NOSKILL);
+    }
+
+    READ_INT(data->store, &i);
+    if (i != RCO_NONE) {
+        do {
+            int m;
+            variant *v;
+
+            switch (i) {
+            case RCO_SCARE:
+            case RCO_STAMINA:
+            case RCO_TRADELUX:
+            case RCO_TRADEHERB:
+                READ_INT(data->store, &m);
+                rc_setoption_int(rc, i, m);
+                break;
+            case RCO_OTHER:
+                v = rc_makeoption(rc, i);
+                v->v = read_race_reference(data->store);
+                break;
+            case RCO_HUNGER:
+                READ_TOK(data->store, zName, sizeof(zName));
+                rc_setoption(rc, i, zName);
+                break;
+            }
+            READ_INT(data->store, &i);
+        } while (i != RCO_NONE);
+    }
+
+    for (i = 0; i != MAXMAGIETYP; ++i) {
+        rc->familiars[i] = read_race_reference(data->store);
+    }
+
     return rc;
 }
