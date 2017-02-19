@@ -35,6 +35,7 @@ without prior permission by the authors of Eressea.
 #include <kernel/curse.h>
 #include <kernel/equipment.h>
 #include <kernel/unit.h>
+#include <kernel/rules.h>
 #include <kernel/terrain.h>
 #include <kernel/messages.h>
 #include <kernel/region.h>
@@ -936,6 +937,13 @@ int tolua_read_xml(lua_State * L)
     return 1;
 }
 
+int tolua_read_rules(lua_State * L)
+{
+    const char *filename = tolua_tostring(L, 1, "rules.dat");
+    read_rules(filename);
+    return 0;
+}
+
 typedef struct event_args {
     int hfunction;
     int hargs;
@@ -1100,6 +1108,7 @@ int tolua_bindings_open(lua_State * L, const dictionary *inifile)
         tolua_function(L, TOLUA_CAST "rng_int", tolua_rng_int);
         tolua_function(L, TOLUA_CAST "spells", tolua_get_spells);
         tolua_function(L, TOLUA_CAST "read_xml", tolua_read_xml);
+        tolua_function(L, TOLUA_CAST "read_rules", tolua_read_rules);
     } tolua_endmodule(L);
     return 1;
 }
