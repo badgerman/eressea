@@ -576,6 +576,7 @@ void write_race(gamedata *data, const race *rc) {
     WRITE_FLT(data->store, (float)rc->regaura);
     WRITE_FLT(data->store, (float)rc->recruit_multi);
     WRITE_FLT(data->store, rc->speed);
+
     for (i = 0; i != RACE_ATTACKS; ++i) {
         const att *a = rc->attack + i;
         WRITE_INT(data->store, a->type);
@@ -589,9 +590,11 @@ void write_race(gamedata *data, const race *rc) {
         }
         WRITE_INT(data->store, a->flags);
     }
+
     for (i = 0; i != MAXSKILLS; ++i) {
         WRITE_INT(data->store, rc->bonus[i]);
     }
+
     if (rc->study_speed) {
         for (i = 0; i != MAXSKILLS; ++i) {
             if (rc->study_speed[i] != 0) {
@@ -601,4 +604,35 @@ void write_race(gamedata *data, const race *rc) {
         }
     }
     WRITE_INT(data->store, NOSKILL);
+
+    if (rc->options) {
+        for (i = 0; i != MAXOPTIONS; ++i) {
+            int key = rc->options->key[i];
+            if (key == RCO_NONE) {
+                break;
+            }
+            WRITE_INT(data->store, key);
+            switch (key) {
+            case RCO_OTHER:
+                write_race_reference((const race *)rc->options->value[i].v, data->store);
+                break;
+            case RCO_HUNGER:
+                WRITE_TOK(data->store, (const char *)rc->options->value[i].v);
+                break;
+            case RCO_SCARE:
+            case RCO_STAMINA:
+            case RCO_TRADELUX:
+            case RCO_TRADEHERB:
+                WRITE_INT(data->store, rc->options->value[i].i);
+                break;
+            default:
+                log_error("race.option %d not implemented", key);
+            }
+        }
+    }
+    WRITE_INT(data->store, RCO_NONE);
+
+    for (i = 0; i != MAXMAGIETYP; ++i) {
+        write_race_reference(rc->familiars[i], data->store);
+    }
 }
