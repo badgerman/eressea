@@ -48,6 +48,7 @@ extern "C" {
     struct spellref;
     struct locale;
     struct rcoption;
+    struct gamedata;
 
     extern int num_races;
 
@@ -271,6 +272,7 @@ extern "C" {
     void register_race_name_function(race_name_func, const char *);
     void register_race_description_function(race_desc_func, const char *);
 
+    void write_race(struct gamedata *data, const struct race *rc);
 #ifdef __cplusplus
 }
 #endif

@@ -551,7 +551,8 @@ void register_race_name_function(race_name_func func, const char *name) {
     register_function((pf_generic)func, name);
 }
 
-void write_race(gamedata *data, const race *rc) {
+void write_race(gamedata *data, const race *rc)
+{
     int i;
 
     WRITE_TOK(data->store, rc->_name);
