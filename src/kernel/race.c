@@ -637,3 +637,38 @@ void write_race(gamedata *data, const race *rc)
         write_race_reference(rc->familiars[i], data->store);
     }
 }
+
+struct race * read_race(struct gamedata *data)
+{
+    race * rc;
+    float flt;
+    char zName[64];
+
+    READ_TOK(data->store, zName, sizeof(zName));
+    rc = rc_get_or_create(zName);
+    READ_INT(data->store, &rc->flags);
+    READ_INT(data->store, &rc->battle_flags);
+    READ_INT(data->store, &rc->ec_flags);
+    READ_INT(data->store, &rc->magres);
+    READ_INT(data->store, &rc->healing);
+    READ_INT(data->store, &rc->maxaura);
+    READ_INT(data->store, &rc->recruitcost);
+    READ_INT(data->store, &rc->maintenance);
+    READ_INT(data->store, &rc->splitsize);
+    READ_INT(data->store, &rc->weight);
+    READ_INT(data->store, &rc->capacity);
+    READ_INT(data->store, &rc->income);
+    READ_INT(data->store, &rc->hitpoints);
+    READ_INT(data->store, &rc->armor);
+    READ_INT(data->store, &rc->at_default);
+    READ_INT(data->store, &rc->df_default);
+    READ_INT(data->store, &rc->at_bonus);
+    READ_INT(data->store, &rc->df_bonus);
+    READ_FLT(data->store, &flt);
+    rc->regaura = flt;
+    READ_FLT(data->store, &flt);
+    rc->recruit_multi = flt;
+    READ_FLT(data->store, &flt);
+    rc->speed = flt;
+    return rc;
+}

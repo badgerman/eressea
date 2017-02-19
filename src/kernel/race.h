@@ -273,6 +273,7 @@ extern "C" {
     void register_race_description_function(race_desc_func, const char *);
 
     void write_race(struct gamedata *data, const struct race *rc);
+    struct race * read_race(struct gamedata *data);
 #ifdef __cplusplus
 }
 #endif
