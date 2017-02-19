@@ -10,16 +10,6 @@
 
 #include <storage.h>
 
-#define RULES_RACES 1
-#define RULES_VERSION RULES_RACES
-
-enum {
-    TYPE_NONE,
-    TYPE_RACE,
-    TYPE_SHIP,
-    TYPE_BUILDING,
-};
-
 int main(int argc, char **argv) {
     const char * xmlfile, *catalog;
 

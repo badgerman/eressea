@@ -32,5 +32,16 @@ void write_rules(const char *filename) {
 
 void read_rules(const char *filename)
 {
+    gamedata *data;
+    int type;
+
+    data = gamedata_open(filename, "rb", RULES_VERSION);
+    do {
+        READ_INT(data->store, &type);
+        if (type == TYPE_RACE) {
+            read_race(data);
+        }
+    } while (type != TYPE_NONE);
+    gamedata_close(data);
 }
 
