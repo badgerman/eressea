@@ -115,7 +115,6 @@ extern "C" {
         int flags;
     } att;
 
-    typedef const char *(*race_desc_func)(const struct race *rc, const struct locale *lang);
     typedef void (*race_name_func)(struct unit *);
 
     typedef struct race {
@@ -148,11 +147,7 @@ extern "C" {
         signed char bonus[MAXSKILLS];
 
         race_name_func generate_name;
-        race_desc_func describe;
         void(*age) (struct unit * u);
-        bool(*move_allowed) (const struct region *, const struct region *);
-        struct item *(*itemdrop) (const struct race *, int size);
-        void(*init_familiar) (struct unit *);
 
         struct rcoption *options; /* rarely used properties */
 
@@ -233,6 +228,7 @@ extern "C" {
 #define RCF_IRONGOLEM      (1<<28)      /* race gets irongolem properties */
 #define RCF_ATTACK_MOVED   (1<<29)      /* may attack if it has moved */
 #define RCF_MIGRANTS       (1<<30)      /* may have migrant units (human bonus) */
+#define RCF_FAMILIAR       (1<<31)      /* may be a familiar */
 
     /* Economic flags */
 #define ECF_KEEP_ITEM       (1<<1)   /* gibt Gegenst�nde weg */
@@ -270,7 +266,6 @@ extern "C" {
 
     const char *raceprefix(const struct unit *u);
     void register_race_name_function(race_name_func, const char *);
-    void register_race_description_function(race_desc_func, const char *);
 
     void write_race(struct gamedata *data, const struct race *rc);
     struct race * read_race(struct gamedata *data);

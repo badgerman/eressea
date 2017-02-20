@@ -240,7 +240,7 @@ race_list *get_familiarraces(void)
     if (!init) {
         race *rc = races;
         for (; rc != NULL; rc = rc->next) {
-            if (rc->init_familiar != NULL) {
+            if (rc->flags & RCF_FAMILIAR) {
                 racelist_insert(&familiarraces, rc);
             }
         }
@@ -549,10 +549,6 @@ race *read_race_reference(struct storage *store)
         return rc;
     }
     return NULL;
-}
-
-void register_race_description_function(race_desc_func func, const char *name) {
-    register_function((pf_generic)func, name);
 }
 
 void register_race_name_function(race_name_func func, const char *name) {
