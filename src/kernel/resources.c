@@ -69,6 +69,7 @@ const resource_type * rtype)
     rm->divisor = divisor;
     rm->flags = 0;
     rm->type = rmt_get(rtype);
+    assert(rm->type);
     update_resource(rm, 1.0);
     rm->type->terraform(rm, r);
 }
