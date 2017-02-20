@@ -115,7 +115,7 @@ extern "C" {
         int flags;
     } att;
 
-    typedef void (*race_name_func)(struct unit *);
+    typedef void (*race_func) (struct unit *);
 
     typedef struct race {
         char *_name;
@@ -146,8 +146,8 @@ extern "C" {
         struct att attack[RACE_ATTACKS];
         signed char bonus[MAXSKILLS];
 
-        race_name_func generate_name;
-        void(*age) (struct unit * u);
+        race_func name_unit;
+        race_func age_unit;
 
         struct rcoption *options; /* rarely used properties */
 
@@ -265,7 +265,7 @@ extern "C" {
     struct race *read_race_reference(struct storage *store);
 
     const char *raceprefix(const struct unit *u);
-    void register_race_name_function(race_name_func, const char *);
+    void register_race_function(race_func, const char *);
 
     void write_race(struct gamedata *data, const struct race *rc);
     struct race * read_race(struct gamedata *data);
