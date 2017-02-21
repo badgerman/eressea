@@ -1309,7 +1309,8 @@ resource_type * read_resource(gamedata *data)
 
 static int write_resource_cb(const void *match, const void *key, size_t keylen, void *cbdata)
 {
-    const resource_type *rtype = (const resource_type *)match;
+    resource_type * rtype;
+    cb_get_kv(match, &rtype, sizeof(rtype));
     gamedata *data = (gamedata *)cbdata;
 
     UNUSED_ARG(key);
