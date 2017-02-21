@@ -330,6 +330,11 @@ extern "C" {
     void register_item_useonother(int(*foo) (struct unit *, int,
         const struct item_type *, int, struct order *), const char *name);
 
+    void write_resource(struct gamedata *data, const struct resource_type *rtype);
+    struct resource_type * read_resource(struct gamedata *data);
+    void write_resources(struct gamedata *data);
+    void read_resources(struct gamedata *data);
+
     void free_resources(void);
 
 #ifdef __cplusplus

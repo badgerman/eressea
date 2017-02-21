@@ -44,6 +44,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <critbit.h>
 #include <util/event.h>
 #include <util/functions.h>
+#include <util/gamedata.h>
 #include <util/goodies.h>
 #include <util/log.h>
 #include <util/language.h>
@@ -1287,6 +1288,48 @@ void free_resources(void)
         cb_clear(inames + i);
         cb_clear(rnames + i);
     }
+}
+
+void write_resource(gamedata *data, const resource_type *rtype)
+{
+    WRITE_TOK(data->store, rtype->_name);
+}
+
+resource_type * read_resource(gamedata *data)
+{
+    resource_type *rtype = NULL;
+    char zName[64];
+    if (strcmp(zName, "none") == 0) {
+        return NULL;
+    }
+    READ_TOK(data->store, zName, sizeof(zName));
+    rtype = rt_get_or_create(zName);
+    return rtype;
+}
+
+static int write_resource_cb(const void *match, const void *key, size_t keylen, void *cbdata)
+{
+    const resource_type *rtype = (const resource_type *)match;
+    gamedata *data = (gamedata *)cbdata;
+
+    UNUSED_ARG(key);
+    UNUSED_ARG(keylen);
+    write_resource(data, rtype);
+    return 0;
+}
+
+void write_resources(gamedata *data)
+{
+    cb_foreach(&cb_resources, "", 0, write_resource_cb, data);
+    WRITE_TOK(data->store, "none");
+}
+
+void read_resources(gamedata *data)
+{
+    resource_type *rtype;
+    do {
+        rtype = read_resource(data);
+    } while (rtype);
 }
 
 void register_resources(void)

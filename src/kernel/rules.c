@@ -1,6 +1,7 @@
 #include <platform.h>
 
 #include <kernel/race.h>
+#include <kernel/item.h>
 #include <kernel/xmlreader.h>
 
 #include <util/gamedata.h>
@@ -31,6 +32,8 @@ int write_rules(const char *filename) {
         write_race(data, rc);
     }
     WRITE_INT(data->store, TYPE_NONE);
+
+    write_resources(data);
     gamedata_close(data);
     return 0;
 }
@@ -53,6 +56,8 @@ int read_rules(const char *filename)
             read_race(data);
         }
     } while (type != TYPE_NONE);
+
+    read_resources(data);
     gamedata_close(data);
     return 0;
 }

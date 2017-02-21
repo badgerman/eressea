@@ -2,6 +2,6 @@
 for rules in e2 e3 ; do
 cd conf/$rules
 ../../Debug/eressea/convert rules.xml catalog.xml
-git add rules.dat
+#git add rules.dat
 cd ../../
 done
