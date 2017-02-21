@@ -1299,10 +1299,10 @@ resource_type * read_resource(gamedata *data)
 {
     resource_type *rtype = NULL;
     char zName[64];
+    READ_TOK(data->store, zName, sizeof(zName));
     if (strcmp(zName, "none") == 0) {
         return NULL;
     }
-    READ_TOK(data->store, zName, sizeof(zName));
     rtype = rt_get_or_create(zName);
     return rtype;
 }

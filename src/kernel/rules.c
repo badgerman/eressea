@@ -10,7 +10,8 @@
 
 #define RULES_RACES 1
 #define RULES_RC_DEF_DAMAGE 2
-#define RULES_RC_FAMILIARS 3
+#define RULES_RC_BROKEN 3
+#define RULES_RC_FAMILIARS 4
 #define RULES_VERSION RULES_RC_FAMILIARS
 
 enum {
@@ -51,12 +52,13 @@ int read_rules(const char *filename)
     if (data->version != RULES_VERSION) {
         return -2;
     }
-    do {
-        READ_INT(data->store, &type);
+    READ_INT(data->store, &type);
+    while (type != TYPE_NONE) {
         if (type == TYPE_RACE) {
             read_race(data);
         }
-    } while (type != TYPE_NONE);
+        READ_INT(data->store, &type);
+    }
 
     read_resources(data);
     gamedata_close(data);

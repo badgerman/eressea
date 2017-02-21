@@ -659,9 +659,8 @@ void write_race(gamedata *data, const race *rc)
             WRITE_INT(data->store, i);
             write_race_reference(frc, data->store);
         }
-        WRITE_INT(data->store, MAXMAGIETYP);
     }
-    
+    WRITE_INT(data->store, -1);
 }
 
 struct race * read_race(struct gamedata *data)
@@ -761,7 +760,7 @@ struct race * read_race(struct gamedata *data)
     }
 
     READ_INT(data->store, &i);
-    while (i!=MAXMAGIETYP) {
+    while (i>=0) {
         rc->familiars[i] = read_race_reference(data->store);
         READ_INT(data->store, &i);
     }
