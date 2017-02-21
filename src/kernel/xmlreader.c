@@ -773,12 +773,14 @@ static item_type *xml_readitem(xmlXPathContextPtr xpath, resource_type * rtype)
     itype = rtype->itype ? rtype->itype : it_get_or_create(rtype);
     itype->weight = xml_ivalue(node, "weight", 0);
     itype->capacity = xml_ivalue(node, "capacity", 0);
-    itype->flags |= flags;
 
     /* reading item/construction */
     xpath->node = node;
     result = xmlXPathEvalExpression(BAD_CAST "construction", xpath);
-    xml_readconstruction(xpath, result->nodesetval, &itype->construction);
+    if (result->nodesetval->nodeNr!=0) {
+        flags |= ITF_CONSTRUCTION;
+        xml_readconstruction(xpath, result->nodesetval, &itype->construction);
+    }
     xmlXPathFreeObject(result);
 
     /* reading item/weapon */
@@ -860,9 +862,12 @@ static item_type *xml_readitem(xmlXPathContextPtr xpath, resource_type * rtype)
         }
         xmlFree(propValue);
     }
+    xmlXPathFreeObject(result);
+
     itype->score = xml_ivalue(node, "score", 0);
     if (!itype->score) itype->score = default_score(itype);
-    xmlXPathFreeObject(result);
+
+    itype->flags |= flags;
 
     return itype;
 }
@@ -957,6 +962,7 @@ static int parse_resources(xmlDocPtr doc)
 
         name = xmlGetProp(node, BAD_CAST "material");
         if (name) {
+            rtype->flags |= RTF_MATERIAL;
             rmt_create(rtype, (const char *)name);
             xmlFree(name);
         }

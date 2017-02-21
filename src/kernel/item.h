@@ -56,6 +56,7 @@ extern "C" {
 #define RTF_LIMITED  (1<<1)     /* a resource that's freely available, but in
                                      * limited supply */
 #define RTF_POOLED   (1<<2)     /* resource is available in pool */
+#define RTF_MATERIAL (1<<3)     /* resource is a raw material */
 
     /* flags for resource_type::name() */
 #define NMF_PLURAL     0x01
@@ -71,7 +72,7 @@ extern "C" {
     typedef struct resource_type {
         /* --- constants --- */
         char *_name;             /* wie es hei�t */
-        unsigned int flags;
+        int flags;
         /* --- functions --- */
         rtype_uchange uchange;
         rtype_uget uget;
@@ -121,6 +122,7 @@ extern "C" {
 #define ITF_BIG              0x0008     /* big item, e.g. does not fit in a bag of holding */
 #define ITF_ANIMAL           0x0010     /* an animal */
 #define ITF_VEHICLE          0x0020     /* a vehicle, drawn by two animals */
+#define ITF_CONSTRUCTION     0x0040     /* can be built by players */
 
     /* error codes for item_type::use */
 #define ECUSTOM   -1
@@ -131,7 +133,7 @@ extern "C" {
     typedef struct item_type {
         resource_type *rtype;
         /* --- constants --- */
-        unsigned int flags;
+        int flags;
         int weight;
         int capacity;
         struct construction *construction;

@@ -30,6 +30,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "pool.h"
 #include "race.h"
 #include "region.h"
+#include "resources.h"
 #include "skill.h"
 #include "terrain.h"
 #include "unit.h"
@@ -1290,31 +1291,73 @@ void free_resources(void)
     }
 }
 
-void write_resource(gamedata *data, const resource_type *rtype)
-{
-    WRITE_TOK(data->store, rtype->_name);
-}
-
 resource_type * read_resource(gamedata *data)
 {
     resource_type *rtype = NULL;
     char zName[64];
+
     READ_TOK(data->store, zName, sizeof(zName));
     if (strcmp(zName, "none") == 0) {
         return NULL;
     }
     rtype = rt_get_or_create(zName);
+    READ_INT(data->store, &rtype->flags);
+    if (rtype->flags & RTF_MATERIAL) {
+        READ_TOK(data->store, zName, sizeof(zName));
+        rmt_create(rtype, zName);
+    }
+    if (rtype->flags & RTF_ITEM) {
+        item_type *itype = it_get_or_create(rtype);
+        READ_INT(data->store, &itype->flags);
+        READ_INT(data->store, &itype->weight);
+        READ_INT(data->store, &itype->capacity);
+        READ_INT(data->store, &itype->score);
+        READ_TOK(data->store, zName, sizeof(zName));
+        if (zName[0]) {
+            itype->_appearance[0] = strdup(zName);
+        }
+        READ_TOK(data->store, zName, sizeof(zName));
+        if (zName[1]) {
+            itype->_appearance[1] = strdup(zName);
+        }
+        if (itype->flags & ITF_CONSTRUCTION) {
+            itype->construction = read_construction(data);
+        }
+    }
     return rtype;
+}
+
+void write_resource(gamedata *data, const resource_type *rtype)
+{
+    WRITE_TOK(data->store, rtype->_name);
+    WRITE_INT(data->store, rtype->flags);
+    if (rtype->flags & RTF_MATERIAL) {
+        const struct rawmaterial_type * rmt = rmt_get(rtype);
+        assert(rmt);
+        WRITE_TOK(data->store, rmt->name);
+    }
+    if (rtype->flags & RTF_ITEM) {
+        const item_type *itype = rtype->itype;
+        WRITE_INT(data->store, itype->flags);
+        WRITE_INT(data->store, itype->weight);
+        WRITE_INT(data->store, itype->capacity);
+        WRITE_INT(data->store, itype->score);
+        WRITE_TOK(data->store, itype->_appearance[0]);
+        WRITE_TOK(data->store, itype->_appearance[1]);
+        if (itype->flags & ITF_CONSTRUCTION) {
+            write_construction(data, itype->construction);
+        }
+    }
 }
 
 static int write_resource_cb(const void *match, const void *key, size_t keylen, void *cbdata)
 {
-    resource_type * rtype;
-    cb_get_kv(match, &rtype, sizeof(rtype));
     gamedata *data = (gamedata *)cbdata;
+    resource_type * rtype;
 
     UNUSED_ARG(key);
     UNUSED_ARG(keylen);
+    cb_get_kv(match, &rtype, sizeof(rtype));
     write_resource(data, rtype);
     return 0;
 }

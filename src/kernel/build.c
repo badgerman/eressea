@@ -52,12 +52,18 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <util/attrib.h>
 #include <util/base36.h>
 #include <util/event.h>
+#include <util/gamedata.h>
 #include <util/goodies.h>
 #include <util/language.h>
 #include <util/log.h>
 #include <util/parser.h>
 #include <util/resolve.h>
 #include <util/xml.h>
+
+/* attributes inclues */
+#include <attributes/matmod.h>
+
+#include <storage.h>
 
 /* from libc */
 #include <assert.h>
@@ -66,9 +72,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* attributes inclues */
-#include <attributes/matmod.h>
 
 struct building *getbuilding(const struct region *r)
 {
@@ -1017,4 +1020,26 @@ void free_construction(struct construction *cons)
         free(cons);
         cons = next;
     }
+}
+
+construction *read_construction(gamedata *data) 
+{
+    construction *cons = calloc(1, sizeof(construction));
+    int i;
+
+    READ_INT(data->store, &i);
+    cons->skill = (skill_t)i;
+    READ_INT(data->store, &cons->minskill);
+    READ_INT(data->store, &cons->maxsize);
+    READ_INT(data->store, &cons->reqsize);
+    return cons;
+}
+
+void write_construction(gamedata *data, construction *cons)
+{
+    assert(cons);
+    WRITE_INT(data->store, cons->skill);
+    WRITE_INT(data->store, cons->minskill);
+    WRITE_INT(data->store, cons->maxsize);
+    WRITE_INT(data->store, cons->reqsize);
 }

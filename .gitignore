@@ -39,3 +39,8 @@ tmp/
 tests/config.lua
 tests/reports/
 tests/data/185.dat
+
+# old submodules, deprecated
+/quicklist/
+/cutest/
+/critbit/

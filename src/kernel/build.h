@@ -33,6 +33,7 @@ extern "C" {
      */
 
     struct xml_tag;
+    struct gamedata;
 
     typedef struct requirement {
         const struct resource_type *rtype;
@@ -64,6 +65,9 @@ extern "C" {
         /* stores skill modifiers and other attributes */
 
     } construction;
+
+    struct construction *read_construction(struct gamedata *data);
+    void write_construction(struct gamedata *data, struct construction *cons);
 
     void free_construction(struct construction *cons);
     extern int destroy_cmd(struct unit *u, struct order *ord);
