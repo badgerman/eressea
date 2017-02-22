@@ -40,15 +40,19 @@ extern "C" {
         int number;
     } requirement;
 
+    typedef struct building_stage {
+        int defense_bonus;          /* protection bonus (defense) during combat */
+        int close_combat_bonus;     /* close combat attack bonus*/
+        int ranged_bonus;           /* ranged attack bonus */
+    } building_stage;
+
     typedef struct construction {
         skill_t skill;              /* skill req'd per point of size */
         int minskill;               /* skill req'd per point of size */
 
         int maxsize;                /* maximum size of this type */
         int reqsize;                /* size of object using up 1 set of requirement. */
-        int defense_bonus;          /* protection bonus (defense) during combat */
-        int close_combat_bonus;     /* close combat attack bonus*/
-        int ranged_bonus;           /* ranged attack bonus */
+        building_stage stage;
         requirement *materials;     /* material req'd to build one object */
         const struct building_type *btype;
         /* building type required to make this thing */

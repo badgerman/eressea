@@ -189,7 +189,7 @@ static void test_building_defence_bonus(CuTest * tc)
     r = test_create_region(0, 0, 0);
     btype = test_create_buildingtype("castle");
     btype->protection = (int(*)(const struct building *, const struct unit *, building_bonus))get_function("building_protection");
-    btype->construction->defense_bonus = 3;
+    btype->construction->stage.defense_bonus = 3;
     bld = test_create_building(r, btype);
     bld->size = 1;
 

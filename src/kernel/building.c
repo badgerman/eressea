@@ -351,23 +351,24 @@ int building_protection(const building * b, const unit * u, building_bonus bonus
     int i = 0;
     int bsize = buildingeffsize(b, false);
     const construction *cons = b->type->construction;
+    const building_stage *stage;
     if (!cons) {
         return 0;
     }
 
-    for (i = 0; i < bsize; i++)
-    {
+    for (i = 0; i != bsize; i++) {
         cons = cons->improvement;
     }
+    stage = &cons->stage;
 
     switch (bonus)
     {
     case DEFENSE_BONUS:
-        return cons->defense_bonus;
+        return stage->defense_bonus;
     case CLOSE_COMBAT_ATTACK_BONUS:
-        return cons->close_combat_bonus;
+        return stage->close_combat_bonus;
     case RANGED_ATTACK_BONUS:
-        return cons->ranged_bonus;
+        return stage->ranged_bonus;
     default:
         return 0;
     }
