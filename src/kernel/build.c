@@ -1024,22 +1024,39 @@ void free_construction(struct construction *cons)
 
 construction *read_construction(gamedata *data) 
 {
-    construction *cons = calloc(1, sizeof(construction));
-    int i;
+    construction *top = NULL, **iter = &top;
+    int n;
 
-    READ_INT(data->store, &i);
-    cons->skill = (skill_t)i;
-    READ_INT(data->store, &cons->minskill);
-    READ_INT(data->store, &cons->maxsize);
-    READ_INT(data->store, &cons->reqsize);
-    return cons;
+    READ_INT(data->store, &n);
+    while (n-- > 0) {
+        construction *cons = calloc(1, sizeof(construction));
+        int i;
+        
+        READ_INT(data->store, &i);
+        cons->skill = (skill_t)i;
+        READ_INT(data->store, &cons->minskill);
+        READ_INT(data->store, &cons->maxsize);
+        READ_INT(data->store, &cons->reqsize);
+        *iter = cons;
+        iter = &cons->improvement;
+    }
+    return top;
 }
 
 void write_construction(gamedata *data, construction *cons)
 {
+    construction *iter = cons;
+    int i;
     assert(cons);
-    WRITE_INT(data->store, cons->skill);
-    WRITE_INT(data->store, cons->minskill);
-    WRITE_INT(data->store, cons->maxsize);
-    WRITE_INT(data->store, cons->reqsize);
+    for (i=0;iter;++i) {
+        iter = cons->improvement;
+    }
+    WRITE_INT(data->store, i);
+    while (cons) {
+        WRITE_INT(data->store, cons->skill);
+        WRITE_INT(data->store, cons->minskill);
+        WRITE_INT(data->store, cons->maxsize);
+        WRITE_INT(data->store, cons->reqsize);
+        cons = cons->improvement;
+    }
 }
