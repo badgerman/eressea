@@ -1161,22 +1161,6 @@ const item_type *finditemtype(const char *name, const struct locale *lang)
     return 0;
 }
 
-static void init_resourcelimit(attrib * a)
-{
-    a->data.v = calloc(sizeof(resource_limit), 1);
-}
-
-static void finalize_resourcelimit(attrib * a)
-{
-    free(a->data.v);
-}
-
-attrib_type at_resourcelimit = {
-    "resourcelimit",
-    init_resourcelimit,
-    finalize_resourcelimit,
-};
-
 item *item_spoil(const struct race *rc, int size)
 {
     item *itm = NULL;
@@ -1260,6 +1244,9 @@ void free_rtype(resource_type *rtype) {
     if (rtype->itype) {
         free_itype(rtype->itype);
     }
+    if (rtype->raw) {
+        free(rtype->raw);
+    }
     free(rtype->_name);
     free(rtype);
 }
@@ -1303,8 +1290,7 @@ resource_type * read_resource(gamedata *data)
     rtype = rt_get_or_create(zName);
     READ_INT(data->store, &rtype->flags);
     if (rtype->flags & RTF_MATERIAL) {
-        READ_TOK(data->store, zName, sizeof(zName));
-        rmt_create(rtype, zName);
+        rmt_create(rtype);
     }
     if (rtype->flags & RTF_ITEM) {
         item_type *itype = it_get_or_create(rtype);
@@ -1334,7 +1320,6 @@ void write_resource(gamedata *data, const resource_type *rtype)
     if (rtype->flags & RTF_MATERIAL) {
         const struct rawmaterial_type * rmt = rmt_get(rtype);
         assert(rmt);
-        WRITE_TOK(data->store, rmt->name);
     }
     if (rtype->flags & RTF_ITEM) {
         const item_type *itype = rtype->itype;

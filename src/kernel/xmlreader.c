@@ -954,13 +954,6 @@ static int parse_resources(xmlDocPtr doc)
         rtype->flags |= flags;
         xmlFree(name);
 
-        name = xmlGetProp(node, BAD_CAST "material");
-        if (name) {
-            rtype->flags |= RTF_MATERIAL;
-            rmt_create(rtype, (const char *)name);
-            xmlFree(name);
-        }
-
         /* reading eressea/resources/resource/function */
         xpath->node = node;
         result = xmlXPathEvalExpression(BAD_CAST "function", xpath);
@@ -993,18 +986,20 @@ static int parse_resources(xmlDocPtr doc)
             }
         xmlXPathFreeObject(result);
 
+        name = xmlGetProp(node, BAD_CAST "material");
+        if (name) {
+            rmt_create(rtype);
+            xmlFree(name);
+        }
+
         /* reading eressea/resources/resource/resourcelimit */
         xpath->node = node;
         result = xmlXPathEvalExpression(BAD_CAST "resourcelimit", xpath);
         assert(result->nodesetval->nodeNr <= 1);
         if (result->nodesetval->nodeNr != 0) {
-            resource_limit *rdata;
-            attrib *a = a_find(rtype->attribs, &at_resourcelimit);
+            resource_limit *rdata = rtype->limit = calloc(1, sizeof(resource_limit));
             xmlNodePtr limit = result->nodesetval->nodeTab[0];
 
-            if (a == NULL)
-                a = a_add(&rtype->attribs, a_new(&at_resourcelimit));
-            rdata = (resource_limit *)a->data.v;
             rtype->flags |= RTF_LIMITED;
             xpath->node = limit;
             xmlXPathFreeObject(result);
@@ -1071,7 +1066,7 @@ static int parse_resources(xmlDocPtr doc)
 
             /* reading eressea/resources/resource/resourcelimit/function */
             result = xmlXPathEvalExpression(BAD_CAST "function", xpath);
-            if (result->nodesetval != NULL)
+            if (result->nodesetval != NULL) {
                 for (k = 0; k != result->nodesetval->nodeNr; ++k) {
                     xmlNodePtr node = result->nodesetval->nodeTab[k];
                     pf_generic fun;
@@ -1099,9 +1094,9 @@ static int parse_resources(xmlDocPtr doc)
                     }
                     xmlFree(propValue);
                 }
+            }
         }
         xmlXPathFreeObject(result);
-
         /* reading eressea/resources/resource/resourcelimit/function */
         xpath->node = node;
         result = xmlXPathEvalExpression(BAD_CAST "resourcelimit/function", xpath);
@@ -1129,7 +1124,6 @@ static int parse_resources(xmlDocPtr doc)
 
     /* make sure old items (used in requirements) are available */
     init_resources();
-    init_itemtypes();
 
     return 0;
 }
