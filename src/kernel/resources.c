@@ -202,7 +202,7 @@ struct rawmaterial_type *rmt_get(const struct resource_type *rtype)
 struct rawmaterial_type *rmt_create(struct resource_type *rtype)
 {
     rawmaterial_type *rmtype;
-
+    rtype->flags |= RTF_MATERIAL;
     assert(!rtype->raw);
     rmtype = rtype->raw = malloc(sizeof(rawmaterial_type));
     rmtype->rtype = rtype;

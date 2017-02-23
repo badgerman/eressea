@@ -184,7 +184,10 @@ static void rt_register(resource_type * rtype)
 }
 
 resource_type *rt_get_or_create(const char *name) {
-    resource_type *rtype = rt_find(name);
+    resource_type *rtype;
+    
+    assert(name && name[0]);
+    rtype = rt_find(name);
     if (!rtype) {
         rtype = calloc(1, sizeof(resource_type));
         if (!rtype) {
