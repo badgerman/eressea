@@ -1,4 +1,13 @@
 <?xml version="1.0"?>
 <eressea xmlns:xi="http://www.w3.org/2001/XInclude">
   <xi:include href="config://game/races.xml"/>
+  <xi:include href="config://core/common/items.xml"/>
+  <xi:include href="config://core/common/herbs.xml" />
+  <xi:include href="config://core/spoils.xml"/>
+  <xi:include href="config://default/adamantium.xml" />
+  <xi:include href="config://game/items.xml" />
+  <xi:include href="config://game/luxuries.xml" />
+  <xi:include href="config://game/weapons.xml" />
+  <xi:include href="config://game/armor.xml" />
+  <xi:include href="config://game/resources.xml" />
 </eressea>
