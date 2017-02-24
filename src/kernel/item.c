@@ -1285,7 +1285,8 @@ resource_type * read_resource(gamedata *data)
 {
     resource_type *rtype = NULL;
     char zName[64];
-
+    int i;
+    
     READ_TOK(data->store, zName, sizeof(zName));
     if (strcmp(zName, "none") == 0) {
         return NULL;
@@ -1318,6 +1319,10 @@ resource_type * read_resource(gamedata *data)
             itype->construction = read_construction(data);
         }
     }
+    READ_INT(data->store, &i);
+    if (i!=0) {
+        rtype->ltype = new_luxurytype(rtype->itype, i);
+    }
     return rtype;
 }
 
@@ -1339,6 +1344,12 @@ void write_resource(gamedata *data, const resource_type *rtype)
         if (itype->flags & ITF_CONSTRUCTION) {
             write_construction(data, itype->construction);
         }
+    }
+    if (rtype->ltype) {
+        WRITE_INT(data->store, rtype->ltype->price);
+    }
+    else {
+        WRITE_INT(data->store, 0);
     }
 }
 
