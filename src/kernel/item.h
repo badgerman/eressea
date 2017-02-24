@@ -183,7 +183,7 @@ extern "C" {
         const item_type *itype;
         unsigned int flags;
         double penalty;
-        double magres;
+        variant magres;
         int prot;
         float projectile;           /* chance, dass ein projektil abprallt */
     } armor_type;
@@ -207,7 +207,7 @@ extern "C" {
         int minskill;
         int offmod;
         int defmod;
-        double magres;
+        variant magres;
         int reload;                 /* time to reload this weapon */
         weapon_mod *modifiers;
         /* --- functions --- */
@@ -246,15 +246,13 @@ extern "C" {
     /* creation */
     resource_type *rt_get_or_create(const char *name);
     item_type *it_get_or_create(resource_type *rtype);
-    item_type *new_itemtype(resource_type * rtype, int iflags, int weight,
-        int capacity);
     luxury_type *new_luxurytype(item_type * itype, int price);
     weapon_type *new_weapontype(item_type * itype);
     weapon_type *new_weapontype_depr(item_type * itype, int wflags,
-        double magres, const char *damage[], int offmod, int defmod, int reload,
+        variant magres, const char *damage[], int offmod, int defmod, int reload,
         skill_t sk, int minskill);
     armor_type *new_armortype(item_type * itype, double penalty,
-        double magres, int prot, unsigned int flags);
+        variant magres, int prot, unsigned int flags);
     potion_type *new_potiontype(item_type * itype, int level);
 
     typedef enum {

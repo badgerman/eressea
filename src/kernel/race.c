@@ -345,6 +345,7 @@ race *rc_create(const char *zName)
 
     assert(zName);
     rc = (race *)calloc(sizeof(race), 1);
+    rc->magres.sa[1] = 1;
     rc->hitpoints = 1;
     rc->weight = PERSON_WEIGHT;
     rc->capacity = 540;
@@ -397,8 +398,8 @@ bool r_insectstalled(const region * r)
     return fval(r->terrain, ARCTIC_REGION);
 }
 
-double rc_magres(const race *rc) {
-    return rc->magres / 100.0;
+variant rc_magres(const race *rc) {
+    return rc->magres;
 }
 
 double rc_maxaura(const race *rc) {
@@ -579,7 +580,8 @@ void write_race(gamedata *data, const race *rc)
     WRITE_INT(data->store, rc->flags);
     WRITE_INT(data->store, rc->battle_flags);
     WRITE_INT(data->store, rc->ec_flags);
-    WRITE_INT(data->store, rc->magres);
+    WRITE_INT(data->store, rc->magres.sa[0]);
+    WRITE_INT(data->store, rc->magres.sa[1]);
     WRITE_INT(data->store, rc->healing);
     WRITE_INT(data->store, rc->maxaura);
     WRITE_INT(data->store, rc->recruitcost);
@@ -667,7 +669,7 @@ struct race * read_race(struct gamedata *data)
 {
     race * rc;
     float flt;
-    int i;
+    int i, den, num;
     char zName[64];
 
     READ_TOK(data->store, zName, sizeof(zName));
@@ -677,7 +679,9 @@ struct race * read_race(struct gamedata *data)
     READ_INT(data->store, &rc->flags);
     READ_INT(data->store, &rc->battle_flags);
     READ_INT(data->store, &rc->ec_flags);
-    READ_INT(data->store, &rc->magres);
+    READ_INT(data->store, &den);
+    READ_INT(data->store, &num);
+    rc->magres = frac_make(den, num);
     READ_INT(data->store, &rc->healing);
     READ_INT(data->store, &rc->maxaura);
     READ_INT(data->store, &rc->recruitcost);

@@ -119,7 +119,7 @@ extern "C" {
 
     typedef struct race {
         char *_name;
-        int magres;
+        variant magres;
         int healing;
         int maxaura;            /* Faktor auf Maximale Aura */
         double regaura;            /* Faktor auf Regeneration */
@@ -185,7 +185,7 @@ extern "C" {
 
     int rc_luxury_trade(const struct race *rc);
     int rc_herb_trade(const struct race *rc);
-    double rc_magres(const struct race *rc);
+    variant rc_magres(const struct race *rc);
     double rc_maxaura(const struct race *rc);
     int rc_armor_bonus(const struct race *rc);
     int rc_scare(const struct race *rc);

@@ -289,7 +289,7 @@ weapon_type *new_weapontype(item_type * itype)
 }
 
 weapon_type *new_weapontype_depr(item_type * itype,
-    int wflags, double magres, const char *damage[], int offmod, int defmod,
+    int wflags, variant magres, const char *damage[], int offmod, int defmod,
     int reload, skill_t sk, int minskill)
 {
     weapon_type *wtype = new_weapontype(itype);
@@ -312,7 +312,7 @@ weapon_type *new_weapontype_depr(item_type * itype,
     return wtype;
 }
 
-armor_type *new_armortype(item_type * itype, double penalty, double magres,
+armor_type *new_armortype(item_type * itype, double penalty, variant magres,
     int prot, unsigned int flags)
 {
     armor_type *atype;
@@ -1307,8 +1307,7 @@ resource_type * read_resource(gamedata *data)
         READ_INT(data->store, &rtype->limit->value);
     }
     if (rtype->flags & RTF_ITEM) {
-        int i;
-        float f;
+        int i, den, num;
         item_type *itype = it_get_or_create(rtype);
         READ_INT(data->store, &itype->flags);
         READ_INT(data->store, &itype->weight);
@@ -1336,8 +1335,9 @@ resource_type * read_resource(gamedata *data)
             READ_INT(data->store, &wtype->offmod);
             READ_INT(data->store, &wtype->defmod);
             READ_INT(data->store, &wtype->reload);
-            READ_FLT(data->store, &f);
-            wtype->magres = f;
+            READ_INT(data->store, &den);
+            READ_INT(data->store, &num);
+            wtype->magres = frac_make(den, num);
             READ_TOK(data->store, zName, sizeof(zName));
             if (zName[0]) {
                 wtype->damage[0] = strdup(zName);
@@ -1381,7 +1381,8 @@ void write_resource(gamedata *data, const resource_type *rtype)
             WRITE_INT(data->store, rtype->wtype->offmod);
             WRITE_INT(data->store, rtype->wtype->defmod);
             WRITE_INT(data->store, rtype->wtype->reload);
-            WRITE_FLT(data->store, (float)rtype->wtype->magres);
+            WRITE_INT(data->store, rtype->wtype->magres.sa[0]);
+            WRITE_INT(data->store, rtype->wtype->magres.sa[1]);
             WRITE_TOK(data->store, rtype->wtype->damage[0]);
             WRITE_TOK(data->store, rtype->wtype->damage[1]);
         }
