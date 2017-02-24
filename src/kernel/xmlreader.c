@@ -635,7 +635,7 @@ static weapon_type *xml_readweapon(xmlXPathContextPtr xpath, item_type * itype)
     xmlFree(propValue);
 
     wtype =
-        new_weapontype(itype, flags, magres, NULL, offmod, defmod, reload, sk,
+        new_weapontype_depr(itype, flags, magres, NULL, offmod, defmod, reload, sk,
         minskill);
 
     /* reading weapon/damage */

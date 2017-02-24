@@ -202,7 +202,7 @@ extern "C" {
     typedef struct weapon_type {
         const item_type *itype;
         char *damage[2];
-        unsigned int flags;
+        int flags;
         skill_t skill;
         int minskill;
         int offmod;
@@ -249,7 +249,8 @@ extern "C" {
     item_type *new_itemtype(resource_type * rtype, int iflags, int weight,
         int capacity);
     luxury_type *new_luxurytype(item_type * itype, int price);
-    weapon_type *new_weapontype(item_type * itype, int wflags,
+    weapon_type *new_weapontype(item_type * itype);
+    weapon_type *new_weapontype_depr(item_type * itype, int wflags,
         double magres, const char *damage[], int offmod, int defmod, int reload,
         skill_t sk, int minskill);
     armor_type *new_armortype(item_type * itype, double penalty,

@@ -279,23 +279,29 @@ luxury_type *new_luxurytype(item_type * itype, int price)
     return ltype;
 }
 
-weapon_type *new_weapontype(item_type * itype,
+weapon_type *new_weapontype(item_type * itype)
+{
+    weapon_type *wtype;
+    assert(itype && (!itype->rtype || !resource2weapon(itype->rtype)));
+    wtype = calloc(sizeof(weapon_type), 1);
+    wtype->itype = itype;
+    return wtype;
+}
+
+weapon_type *new_weapontype_depr(item_type * itype,
     int wflags, double magres, const char *damage[], int offmod, int defmod,
     int reload, skill_t sk, int minskill)
 {
-    weapon_type *wtype;
+    weapon_type *wtype = new_weapontype(itype);
 
     assert(minskill > 0);
-    assert(itype && (!itype->rtype || !resource2weapon(itype->rtype)));
 
-    wtype = calloc(sizeof(weapon_type), 1);
     if (damage) {
         wtype->damage[0] = strdup(damage[0]);
         wtype->damage[1] = strdup(damage[1]);
     }
+    wtype->flags = wflags;
     wtype->defmod = defmod;
-    wtype->flags |= wflags;
-    wtype->itype = itype;
     wtype->magres = magres;
     wtype->minskill = minskill;
     wtype->offmod = offmod;
@@ -1285,7 +1291,6 @@ resource_type * read_resource(gamedata *data)
 {
     resource_type *rtype = NULL;
     char zName[64];
-    int i;
     
     READ_TOK(data->store, zName, sizeof(zName));
     if (strcmp(zName, "none") == 0) {
@@ -1302,6 +1307,8 @@ resource_type * read_resource(gamedata *data)
         READ_INT(data->store, &rtype->limit->value);
     }
     if (rtype->flags & RTF_ITEM) {
+        int i;
+        float f;
         item_type *itype = it_get_or_create(rtype);
         READ_INT(data->store, &itype->flags);
         READ_INT(data->store, &itype->weight);
@@ -1312,16 +1319,38 @@ resource_type * read_resource(gamedata *data)
             itype->_appearance[0] = strdup(zName);
         }
         READ_TOK(data->store, zName, sizeof(zName));
-        if (zName[1]) {
+        if (zName[0]) {
             itype->_appearance[1] = strdup(zName);
         }
         if (itype->flags & ITF_CONSTRUCTION) {
             itype->construction = read_construction(data);
         }
-    }
-    READ_INT(data->store, &i);
-    if (i!=0) {
-        rtype->ltype = new_luxurytype(rtype->itype, i);
+        READ_INT(data->store, &i);
+        if (i != 0) {
+            weapon_type *wtype = rtype->wtype = new_weapontype(itype);
+            wtype->minskill = i;
+            READ_INT(data->store, &wtype->flags);
+            READ_INT(data->store, &i);
+            assert(i >= 0 && i < MAXSKILLS);
+            wtype->skill = (skill_t)i;
+            READ_INT(data->store, &wtype->offmod);
+            READ_INT(data->store, &wtype->defmod);
+            READ_INT(data->store, &wtype->reload);
+            READ_FLT(data->store, &f);
+            wtype->magres = f;
+            READ_TOK(data->store, zName, sizeof(zName));
+            if (zName[0]) {
+                wtype->damage[0] = strdup(zName);
+            }
+            READ_TOK(data->store, zName, sizeof(zName));
+            if (zName[0]) {
+                wtype->damage[1] = strdup(zName);
+            }
+        }
+        READ_INT(data->store, &i);
+        if (i != 0) {
+            rtype->ltype = new_luxurytype(itype, i);
+        }
     }
     return rtype;
 }
@@ -1344,12 +1373,27 @@ void write_resource(gamedata *data, const resource_type *rtype)
         if (itype->flags & ITF_CONSTRUCTION) {
             write_construction(data, itype->construction);
         }
-    }
-    if (rtype->ltype) {
-        WRITE_INT(data->store, rtype->ltype->price);
-    }
-    else {
-        WRITE_INT(data->store, 0);
+        if (rtype->wtype) {
+            assert(rtype->wtype->minskill!=0);
+            WRITE_INT(data->store, rtype->wtype->minskill);
+            WRITE_INT(data->store, rtype->wtype->flags);
+            WRITE_INT(data->store, rtype->wtype->skill);
+            WRITE_INT(data->store, rtype->wtype->offmod);
+            WRITE_INT(data->store, rtype->wtype->defmod);
+            WRITE_INT(data->store, rtype->wtype->reload);
+            WRITE_FLT(data->store, (float)rtype->wtype->magres);
+            WRITE_TOK(data->store, rtype->wtype->damage[0]);
+            WRITE_TOK(data->store, rtype->wtype->damage[1]);
+        }
+        else {
+            WRITE_INT(data->store, 0);
+        }
+        if (rtype->ltype) {
+            WRITE_INT(data->store, rtype->ltype->price);
+        }
+        else {
+            WRITE_INT(data->store, 0);
+        }
     }
 }
 
