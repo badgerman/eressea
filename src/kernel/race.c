@@ -380,7 +380,7 @@ race *rc_get_or_create(const char *zName)
 {
     race *rc;
 
-    assert(zName);
+    assert(zName && zName[0]);
     rc = rc_find_i(zName);
     return rc ? rc : rc_create(zName);
 }

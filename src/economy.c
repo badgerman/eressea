@@ -896,7 +896,7 @@ struct message * get_modifiers(unit *u, const resource_mod *mod, variant *savep,
                     save_n *= mod->value.sa[0];
                     save_d *= mod->value.sa[1];
                 }
-                if (mod->flags & RMF_SKILL) {
+                else if (mod->flags & RMF_SKILL) {
                     skill += mod->value.i;
                 }
             }

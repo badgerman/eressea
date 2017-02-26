@@ -47,7 +47,7 @@ extern "C" {
         variant value;
         const struct building_type *btype;
         const struct race *race;
-        unsigned int flags;
+        int flags;
     } resource_mod;
 
     typedef struct rawmaterial_type {

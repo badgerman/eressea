@@ -24,6 +24,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "alchemy.h"
 #include "build.h"
+#include "building.h"
 #include "curse.h"
 #include "faction.h"
 #include "messages.h"
@@ -1284,6 +1285,20 @@ void free_resources(void)
     }
 }
 
+void write_fraction(storage *store, variant v) {
+    WRITE_INT(store, v.sa[0]);
+    WRITE_INT(store, v.sa[1]);
+}
+
+void read_fraction(storage *store, variant *v) {
+    int den, num;
+
+    assert(v);
+    READ_INT(store, &den);
+    READ_INT(store, &num);
+    *v = frac_make(den, num);
+}
+
 resource_type * read_resource(gamedata *data)
 {
     resource_type *rtype = NULL;
@@ -1299,7 +1314,7 @@ resource_type * read_resource(gamedata *data)
         rmt_create(rtype);
     }
     if (rtype->flags & RTF_ITEM) {
-        int i, den, num;
+        int i, n;
         item_type *itype = it_get_or_create(rtype);
         READ_INT(data->store, &itype->flags);
         READ_INT(data->store, &itype->weight);
@@ -1313,9 +1328,31 @@ resource_type * read_resource(gamedata *data)
         if (zName[0]) {
             itype->_appearance[1] = strdup(zName);
         }
+
         if (itype->flags & ITF_CONSTRUCTION) {
             itype->construction = read_construction(data);
         }
+
+        READ_INT(data->store, &n);
+        if (n>0) {
+            resource_mod * mod = rtype->modifiers = calloc(n+1, sizeof(resource_mod));
+            while (n--) {
+                READ_INT(data->store, &mod->flags);
+                READ_TOK(data->store, zName, sizeof(zName));
+                if (zName[0]) {
+                    mod->btype = bt_get_or_create(zName);
+                }
+                mod->race = read_race_reference(data->store);
+                if (mod->flags&RMF_SAVEMATERIAL) {
+                    read_fraction(data->store, &mod->value);
+                }
+                else {
+                    READ_INT(data->store, &mod->value.i);
+                }
+                ++mod;
+            }
+        }
+
         READ_INT(data->store, &i);
         if (i != 0) {
             weapon_type *wtype = rtype->wtype = new_weapontype(itype);
@@ -1327,9 +1364,7 @@ resource_type * read_resource(gamedata *data)
             READ_INT(data->store, &wtype->offmod);
             READ_INT(data->store, &wtype->defmod);
             READ_INT(data->store, &wtype->reload);
-            READ_INT(data->store, &den);
-            READ_INT(data->store, &num);
-            wtype->magres = frac_make(den, num);
+            read_fraction(data->store, &wtype->magres);
             READ_TOK(data->store, zName, sizeof(zName));
             if (zName[0]) {
                 wtype->damage[0] = strdup(zName);
@@ -1359,9 +1394,34 @@ void write_resource(gamedata *data, const resource_type *rtype)
         WRITE_INT(data->store, itype->score);
         WRITE_TOK(data->store, itype->_appearance[0]);
         WRITE_TOK(data->store, itype->_appearance[1]);
+
         if (itype->flags & ITF_CONSTRUCTION) {
             write_construction(data, itype->construction);
         }
+
+        if (rtype->modifiers) {
+            const resource_mod * mod;
+            int n = 0;
+            for (mod = rtype->modifiers; mod->flags; ++mod) {
+                ++n;
+            }
+            WRITE_INT(data->store, n);
+            for (mod = rtype->modifiers; mod->flags; ++mod) {
+                WRITE_INT(data->store, mod->flags);
+                WRITE_TOK(data->store, mod->btype ? mod->btype->_name : NULL);
+                write_race_reference(mod->race, data->store);
+                if (mod->flags&RMF_SAVEMATERIAL) {
+                    write_fraction(data->store, mod->value);
+                }
+                else {
+                    WRITE_INT(data->store, mod->value.i);
+                }
+            }
+        }
+        else {
+            WRITE_INT(data->store, 0);
+        }
+
         if (rtype->wtype) {
             assert(rtype->wtype->minskill!=0);
             WRITE_INT(data->store, rtype->wtype->minskill);
@@ -1378,6 +1438,7 @@ void write_resource(gamedata *data, const resource_type *rtype)
         else {
             WRITE_INT(data->store, 0);
         }
+
         if (rtype->ltype) {
             WRITE_INT(data->store, rtype->ltype->price);
         }
