@@ -1298,10 +1298,6 @@ resource_type * read_resource(gamedata *data)
     if (rtype->flags & RTF_MATERIAL) {
         rmt_create(rtype);
     }
-    if (rtype->flags & RTF_LIMITED) {
-        rtype->limit = calloc(1, sizeof(resource_limit));
-        /* TODO: read/write limits */
-    }
     if (rtype->flags & RTF_ITEM) {
         int i, den, num;
         item_type *itype = it_get_or_create(rtype);
@@ -1355,8 +1351,6 @@ void write_resource(gamedata *data, const resource_type *rtype)
 {
     WRITE_TOK(data->store, rtype->_name);
     WRITE_INT(data->store, rtype->flags);
-    if (rtype->flags & RTF_LIMITED) {
-    }
     if (rtype->flags & RTF_ITEM) {
         const item_type *itype = rtype->itype;
         WRITE_INT(data->store, itype->flags);
