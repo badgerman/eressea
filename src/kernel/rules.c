@@ -68,4 +68,3 @@ int read_rules(const char *filename)
     gamedata_close(data);
     return 0;
 }
-
