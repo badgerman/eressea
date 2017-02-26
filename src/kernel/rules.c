@@ -1,4 +1,5 @@
 #include <platform.h>
+#include "rules.h"
 
 #include <kernel/race.h>
 #include <kernel/item.h>
@@ -67,4 +68,3 @@ int read_rules(const char *filename)
     gamedata_close(data);
     return 0;
 }
-
