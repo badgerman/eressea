@@ -1142,6 +1142,12 @@ resource_type * read_resource(gamedata *data)
                 wtype->damage[1] = strdup(zName);
             }
         }
+
+        READ_INT(data->store, &i);
+        if (i != 0) {
+            rtype->ptype = new_potiontype(itype, i);
+        }
+
         READ_INT(data->store, &i);
         if (i != 0) {
             rtype->ltype = new_luxurytype(itype, i);
@@ -1207,6 +1213,12 @@ void write_resource(gamedata *data, const resource_type *rtype)
             WRITE_INT(data->store, 0);
         }
 
+        if (rtype->ptype) {
+            WRITE_INT(data->store, rtype->ptype->level);
+        }
+        else {
+            WRITE_INT(data->store, 0);
+        }
         if (rtype->ltype) {
             WRITE_INT(data->store, rtype->ltype->price);
         }
