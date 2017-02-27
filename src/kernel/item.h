@@ -109,6 +109,7 @@ extern "C" {
 #define ITF_ANIMAL           0x0010     /* an animal */
 #define ITF_VEHICLE          0x0020     /* a vehicle, drawn by two animals */
 #define ITF_CONSTRUCTION     0x0040     /* can be built by players */
+#define ITF_CANUSE           0x0080     /* can be used with use_item_fun callout */
 
     /* error codes for item_type::use */
 #define ECUSTOM   -1
@@ -127,10 +128,6 @@ extern "C" {
         /* --- functions --- */
         bool(*canuse) (const struct unit * user,
             const struct item_type * itype);
-        int(*use) (struct unit * user, const struct item_type * itype, int amount,
-        struct order * ord);
-        int(*useonother) (struct unit * user, int targetno,
-            const struct item_type * itype, int amount, struct order * ord);
         int(*give) (struct unit * src, struct unit * dest,
             const struct item_type * itm, int number, struct order * ord);
         int score;
@@ -313,8 +310,6 @@ extern "C" {
     void register_item_give(int(*foo) (struct unit *, struct unit *,
         const struct item_type *, int, struct order *), const char *name);
     void register_item_use(int(*foo) (struct unit *,
-        const struct item_type *, int, struct order *), const char *name);
-    void register_item_useonother(int(*foo) (struct unit *, int,
         const struct item_type *, int, struct order *), const char *name);
 
     void write_resource(struct gamedata *data, const struct resource_type *rtype);

@@ -3242,11 +3242,6 @@ void update_long_order(unit * u)
 static int use_item(unit * u, const item_type * itype, int amount, struct order *ord)
 {
     int i;
-    int target = -1;
-
-    if (itype->useonother) {
-        target = read_unitid(u->faction, u->region);
-    }
 
     i = get_pooled(u, itype->rtype, GET_DEFAULT, amount);
     if (amount > i) {
@@ -3257,19 +3252,14 @@ static int use_item(unit * u, const item_type * itype, int amount, struct order 
         return ENOITEM;
     }
 
-    if (target == -1) {
-        if (itype->use) {
-            int result = itype->use(u, itype, amount, ord);
-            if (result > 0) {
-                use_pooled(u, itype->rtype, GET_DEFAULT, result);
-            }
-            return result;
+    if (itype->flags & ITF_CANUSE) {
+        int result = item_use_fun(u, itype, amount, ord);
+        if (result > 0) {
+            use_pooled(u, itype->rtype, GET_DEFAULT, result);
         }
-        return EUNUSABLE;
+        return result;
     }
-    else {
-        return itype->useonother(u, target, itype, amount, ord);
-    }
+    return EUNUSABLE;
 }
 
 void monthly_healing(void)
@@ -4196,16 +4186,54 @@ void init_processor(void)
     }
 }
 
-void processorders(void)
+static void reset_game(void)
+{
+    region *r;
+    faction *f;
+    for (r = regions; r; r = r->next) {
+        unit *u;
+        building *b;
+        r->flags &= RF_SAVEMASK;
+        for (u = r->units; u; u = u->next) {
+            u->flags &= UFL_SAVEMASK;
+        }
+        for (b = r->buildings; b; b = b->next) {
+            b->flags &= BLD_SAVEMASK;
+        }
+        if (r->land && r->land->ownership && r->land->ownership->owner) {
+            faction *owner = r->land->ownership->owner;
+            if (owner == get_monsters()) {
+                /* some compat-fix, i believe. */
+                owner = update_owners(r);
+            }
+            if (owner) {
+                fset(r, RF_GUARDED);
+            }
+        }
+    }
+    for (f = factions; f; f = f->next) {
+        f->flags &= FFL_SAVEMASK;
+    }
+}
+
+void turn_begin(void)
+{
+    ++turn;
+    reset_game();
+}
+
+void turn_process(void)
 {
     init_processor();
     process();
-    /*************************************************/
 
     if (config_get_int("modules.markets", 0)) {
         do_markets();
     }
+}
 
+void turn_end(void)
+{
     log_info(" - Attribute altern");
     ageing();
     remove_empty_units();
@@ -4218,6 +4246,13 @@ void processorders(void)
     /* immer ausführen, wenn neue Sprüche dazugekommen sind, oder sich
      * Beschreibungen geändert haben */
     update_spells();
+}
+
+void processorders(void)
+{
+    turn_begin();
+    turn_process();
+    turn_end();
 }
 
 void update_subscriptions(void)

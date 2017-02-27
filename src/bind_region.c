@@ -19,6 +19,7 @@ without prior permission by the authors of Eressea.
 #include "chaos.h"
 
 #include <kernel/config.h>
+#include <kernel/curse.h>
 #include <kernel/region.h>
 #include <kernel/resources.h>
 #include <kernel/unit.h>
@@ -29,6 +30,7 @@ without prior permission by the authors of Eressea.
 #include <kernel/ship.h>
 #include <kernel/plane.h>
 #include <kernel/terrain.h>
+#include <kernel/messages.h>
 #include <modules/autoseed.h>
 #include <attributes/key.h>
 #include <attributes/racename.h>
@@ -45,6 +47,23 @@ without prior permission by the authors of Eressea.
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+
+static int tolua_region_count_msg_type(lua_State *L) {
+    region *self = (region *)tolua_tousertype(L, 1, 0);
+    const char *str = tolua_tostring(L, 2, 0);
+    int n = 0;
+    if (self->msgs) {
+        mlist * ml = self->msgs->begin;
+        while (ml) {
+            if (strcmp(str, ml->msg->type->name) == 0) {
+                ++n;
+            }
+            ml = ml->next;
+        }
+    }
+    lua_pushinteger(L, n);
+    return 1;
+}
 
 int tolua_regionlist_next(lua_State * L)
 {
@@ -652,6 +671,27 @@ static int tolua_distance(lua_State * L)
     return 1;
 }
 
+static int tolua_region_get_curse(lua_State *L) {
+    region *self = (region *)tolua_tousertype(L, 1, 0);
+    const char *name = tolua_tostring(L, 2, 0);
+    if (self->attribs) {
+        curse * c = get_curse(self->attribs, ct_find(name));
+        if (c) {
+            lua_pushnumber(L, curse_geteffect(c));
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int tolua_region_has_attrib(lua_State *L) {
+    region *self = (region *)tolua_tousertype(L, 1, 0);
+    const char *name = tolua_tostring(L, 2, 0);
+    attrib * a = a_find(self->attribs, at_find(name));
+    lua_pushboolean(L, a != NULL);
+    return 1;
+}
+
 void tolua_region_open(lua_State * L)
 {
     /* register user types */
@@ -671,6 +711,10 @@ void tolua_region_open(lua_State * L)
             tolua_function(L, TOLUA_CAST "destroy", tolua_region_destroy);
             tolua_function(L, TOLUA_CAST "__tostring", tolua_region_tostring);
 
+            tolua_function(L, TOLUA_CAST "count_msg_type", tolua_region_count_msg_type);
+
+            tolua_function(L, TOLUA_CAST "get_curse", &tolua_region_get_curse);
+            tolua_function(L, TOLUA_CAST "has_attrib", &tolua_region_has_attrib);
             /* flags */
             tolua_variable(L, TOLUA_CAST "blocked", tolua_region_get_blocked, tolua_region_set_blocked);
 

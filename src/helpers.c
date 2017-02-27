@@ -13,6 +13,7 @@ without prior permission by the authors of Eressea.
 #include <platform.h>
 #include "helpers.h"
 #include "vortex.h"
+#include "alchemy.h"
 
 #include <util/attrib.h>
 #include <util/base36.h>
@@ -490,16 +491,21 @@ static int lua_equipmentcallback(const struct equipment *eq, unit * u)
 }
 
 /** callback for an item-use function written in lua. */
-int
-lua_useitem(struct unit *u, const struct item_type *itype, int amount,
-struct order *ord)
+static int
+use_item_lua(unit *u, const item_type *itype, int amount, struct order *ord)
 {
     lua_State *L = (lua_State *)global.vm_state;
     int result = 0;
     char fname[64];
+    int (*callout)(unit *, const item_type *, int, struct order *);
 
     strlcpy(fname, "use_", sizeof(fname));
     strlcat(fname, itype->rtype->_name, sizeof(fname));
+
+    callout = (int(*)(unit *, const item_type *, int, struct order *))get_function(fname);
+    if (callout) {
+        return callout(u, itype, amount, ord);
+    }
 
     lua_getglobal(L, fname);
     if (lua_isfunction(L, -1)) {
@@ -516,11 +522,15 @@ struct order *ord)
             result = (int)lua_tonumber(L, -1);
             lua_pop(L, 1);
         }
+        return result;
     }
-    else {
-        log_error("use(%s) calling '%s': not a function.\n", unitname(u), fname);
-        lua_pop(L, 1);
+    if (itype->rtype->ptype) {
+        return use_potion(u, itype, amount, ord);
+    } else {
+        log_error("no such callout: %s", fname);
     }
+    log_error("use(%s) calling '%s': not a function.\n", unitname(u), fname);
+    lua_pop(L, 1);
 
     return result;
 }
@@ -551,7 +561,6 @@ void register_tolua_helpers(void)
     register_function((pf_generic)lua_callspell, TOLUA_CAST "lua_castspell");
     register_function((pf_generic)lua_initfamiliar,
         TOLUA_CAST "lua_initfamiliar");
-    register_item_use(&lua_useitem, TOLUA_CAST "lua_useitem");
     register_function((pf_generic)lua_getresource,
         TOLUA_CAST "lua_getresource");
     register_function((pf_generic)lua_canuse_item,
@@ -565,6 +574,7 @@ void register_tolua_helpers(void)
     register_function((pf_generic)lua_maintenance,
         TOLUA_CAST "lua_maintenance");
 
+    item_use_fun = use_item_lua;
     res_produce_fun = produce_resource_lua;
     res_limit_fun = limit_resource_lua;
     register_item_give(lua_giveitem, TOLUA_CAST "lua_giveitem");

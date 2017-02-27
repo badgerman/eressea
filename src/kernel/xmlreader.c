@@ -767,6 +767,8 @@ static item_type *xml_readitem(xmlXPathContextPtr xpath, resource_type * rtype)
 
     if (xml_bvalue(node, "cursed", false))
         flags |= ITF_CURSED;
+    if (xml_bvalue(node, "use", false))
+        flags |= ITF_CANUSE;
     if (xml_bvalue(node, "notlost", false))
         flags |= ITF_NOTLOST;
     if (xml_bvalue(node, "herb", false))
@@ -805,6 +807,10 @@ static item_type *xml_readitem(xmlXPathContextPtr xpath, resource_type * rtype)
     result = xmlXPathEvalExpression(BAD_CAST "potion", xpath);
     assert(result->nodesetval->nodeNr <= 1);
     if (result->nodesetval->nodeNr != 0) {
+        if ((itype->flags & ITF_CANUSE) == 0) {
+            log_error("potion %s has no use attribute", rtype->_name);
+            itype->flags |= ITF_CANUSE;
+        }
         xpath->node = result->nodesetval->nodeTab[0];
         rtype->ptype = xml_readpotion(xpath, itype);
     }
@@ -850,19 +856,9 @@ static item_type *xml_readitem(xmlXPathContextPtr xpath, resource_type * rtype)
                 (int(*)(struct unit *, struct unit *, const struct item_type *, int,
             struct order *))fun;
         }
-        else if (strcmp((const char *)propValue, "use") == 0) {
-            itype->use =
-                (int(*)(struct unit *, const struct item_type *, int,
-            struct order *))fun;
-        }
         else if (strcmp((const char *)propValue, "canuse") == 0) {
             itype->canuse =
                 (bool(*)(const struct unit *, const struct item_type *))fun;
-        }
-        else if (strcmp((const char *)propValue, "useonother") == 0) {
-            itype->useonother =
-                (int(*)(struct unit *, int, const struct item_type *, int,
-            struct order *))fun;
         }
         else {
             log_error("unknown function type '%s' for item '%s'\n", (const char *)propValue, rtype->_name);
