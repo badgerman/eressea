@@ -1024,6 +1024,7 @@ void free_construction(struct construction *cons)
 
 construction *read_construction(gamedata *data) 
 {
+    char zName[64];
     construction *top = NULL, **iter = &top;
     int n;
 
@@ -1037,6 +1038,16 @@ construction *read_construction(gamedata *data)
         READ_INT(data->store, &cons->minskill);
         READ_INT(data->store, &cons->maxsize);
         READ_INT(data->store, &cons->reqsize);
+        READ_INT(data->store, &i);
+        if (i > 0) {
+            requirement *req = cons->materials = calloc(i+1, sizeof(requirement));
+            while (i--) {
+                READ_INT(data->store, &req->number);
+                READ_TOK(data->store, zName, sizeof(zName));
+                req->rtype = rt_get_or_create(zName);
+                ++req;
+            }
+        }
         *iter = cons;
         iter = &cons->improvement;
     }
@@ -1057,6 +1068,19 @@ void write_construction(gamedata *data, construction *cons)
         WRITE_INT(data->store, cons->minskill);
         WRITE_INT(data->store, cons->maxsize);
         WRITE_INT(data->store, cons->reqsize);
+        if (cons->materials) {
+            const requirement *req;
+            int n = 0;
+            for (req = cons->materials; req->number; ++req) ++n;
+            WRITE_INT(data->store, n);
+            for (req = cons->materials; req->number; ++req) {
+                WRITE_INT(data->store, req->number);
+                WRITE_TOK(data->store, req->rtype->_name);
+            }
+        }
+        else {
+            WRITE_INT(data->store, 0);
+        }
         cons = cons->improvement;
     }
 }
