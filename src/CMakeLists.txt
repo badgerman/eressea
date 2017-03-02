@@ -281,13 +281,8 @@ target_link_libraries(convert ${LIBXML2_LIBRARIES})
 target_link_libraries(test_eressea ${LIBXML2_LIBRARIES})
 add_definitions(-DUSE_LIBXML2)
 
-add_executable(convert convert.c)
 target_link_libraries(convert
-  game
   ${LIBXML2_LIBRARIES}
-  ${STORAGE_LIBRARIES}
-  ${CLIBS_LIBRARIES}
-  ${INIPARSER_LIBRARIES}
 )
 endif (LIBXML2_FOUND)
 
