@@ -576,10 +576,17 @@ static weapon *select_weapon(const troop t, bool attacking,
 
 static bool i_canuse(const unit * u, const item_type * itype)
 {
+    bool result = true;
     if (itype->canuse) {
-        return itype->canuse(u, itype);
+        result = itype->canuse(u, itype);
     }
-    return true;
+    if (result!=rc_can_use(u_race(u), itype)) {
+        log_error("conversion error: %s should be %s to use %s",
+            u->_race->_name,
+            result ? "allowed" : "forbidden",
+            itype->rtype->_name);
+    }
+    return result;
 }
 
 static int

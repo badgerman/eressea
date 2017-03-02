@@ -123,6 +123,8 @@ extern "C" {
         int flags;
         int weight;
         int capacity;
+        int mask_allow;
+        int mask_deny;
         struct construction *construction;
         char *_appearance[2];       /* wie es f�r andere aussieht */
         /* --- functions --- */

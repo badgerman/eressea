@@ -55,6 +55,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* libc includes */
 #include <assert.h>
 #include <ctype.h>
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -335,6 +336,17 @@ bool rc_changed(int *cache) {
         return true;
     }
     return false;
+}
+
+bool rc_can_use(const struct race *rc, const struct item_type *itype)
+{
+    if (itype->mask_allow) {
+        return (rc->mask_item==0 || (itype->mask_allow & rc->mask_item) != 0);
+    }
+    if (itype->mask_deny) {
+        return (itype->mask_deny & rc->mask_item) == 0;
+    }
+    return true;
 }
 
 race *rc_create(const char *zName)
