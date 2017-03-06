@@ -8,9 +8,21 @@ function setup()
     eressea.settings.set("NewbieImmunity", "0")
 end
 
+function test_give_horses()
+    local r = region.create(0, 0, "plain")
+    local f = faction.create("noreply@eressea.de", "human", "de")
+    local u = unit.create(f, r, 1)
+
+    r:set_resource("horse", 0)
+    u:add_item("charger", 20)
+    u:add_order("GIB 0 10 Streitross")
+    process_orders()
+    assert_equal(10, r:get_resource("horse"))
+    assert_equal(10, u:get_item("charger"))
+end
+
 function test_goblins()
     local r = region.create(0, 0, "plain")
-    assert(r)
     local f1 = faction.create("goblin@eressea.de", "goblin", "de")
     local f2 = faction.create("dwarf@eressea.de", "dwarf", "de")
     local f3 = faction.create("elf@eressea.de", "elf", "de")
@@ -22,8 +34,8 @@ function test_goblins()
 
     local restricted = {
     "towershield", "rep_crossbow", "plate", "lance",
-    "mllornlance", "greatbow", "greataxe", "axe", "scale",
-    "plate", "rustyhalberd", "halberd", "greatsword"
+    "mallornlance", "greatbow", "greataxe", "axe", "scale",
+    "plate", "halberd", "greatsword", "rustyhalberd"
     }
     for k, v in ipairs(restricted) do
         ud:add_item(v, 1)
@@ -37,4 +49,28 @@ function test_goblins()
     ud:add_order("ATTACKIERE " .. itoa36(u2.id))
     ud:add_order("ATTACKIERE " .. itoa36(u3.id))
     process_orders()
+end
+
+function test_make_horse()
+    eressea.settings.set("rules.horses.growth", "0")
+    local r = region.create(0, 0, "plain")
+    local f = faction.create("horses@eressea.de", "human", "de")
+    local u = unit.create(f, r, 1)
+    u:set_skill("training", 4)
+    r:set_resource("horse", 100)
+    u:add_order("MACHE 1 PFERD")
+    process_orders()
+    assert_equal(1, u:get_item("horse"))
+    assert_equal(99, r:get_resource("horse"))
+
+    u:clear_orders()
+    u:add_order("MACHE 1 STREITROSS")
+    u:add_item("money", 200)
+    u:add_item("iron", 1)
+    process_orders()
+    assert_equal(1, u:get_item("charger"))
+    assert_equal(0, u:get_item("horse"))
+    assert_equal(0, u:get_item("iron"))
+    assert_equal(0, u:get_item("money"))
+    assert_equal(99, r:get_resource("horse"))
 end
