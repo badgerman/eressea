@@ -9,6 +9,7 @@ if config.rules then
     confdir = confdir .. rules
     catalog = confdir .. 'catalog.xml'
     if read_rules(confdir .. 'rules.dat') ~= 0 then
+        print('could not read rules.dat, using rules.xml instead')
         assert(0 == read_xml(confdir .. 'rules.xml', catalog),
             "could not load XML data, did you compile with LIBXML2 ?")
     end
