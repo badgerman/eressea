@@ -876,13 +876,7 @@ static item_type *xml_readitem(xmlXPathContextPtr xpath, resource_type * rtype)
             continue;
         }
         assert(propValue != NULL);
-        if (strcmp((const char *)propValue, "canuse") == 0) {
-            itype->canuse =
-                (bool(*)(const struct unit *, const struct item_type *))fun;
-        }
-        else {
-            log_error("unknown function type '%s' for item '%s'\n", (const char *)propValue, rtype->_name);
-        }
+        log_error("unknown function type '%s' for item '%s'\n", (const char *)propValue, rtype->_name);
         xmlFree(propValue);
     }
     xmlXPathFreeObject(result);
@@ -983,9 +977,6 @@ static int parse_resources(xmlDocPtr doc)
                 assert(propValue != NULL);
                 if (strcmp((const char *)propValue, "change") == 0) {
                     rtype->uchange = (rtype_uchange)fun;
-                }
-                else if (strcmp((const char *)propValue, "get") == 0) {
-                    rtype->uget = (rtype_uget)fun;
                 }
                 else if (strcmp((const char *)propValue, "name") == 0) {
                     rtype->name = (rtype_name)fun;

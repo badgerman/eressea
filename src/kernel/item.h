@@ -69,8 +69,6 @@ extern "C" {
 
     typedef int(*rtype_uchange) (struct unit * user,
         const struct resource_type * rtype, int delta);
-    typedef int(*rtype_uget) (const struct unit * user,
-        const struct resource_type * rtype);
     typedef char *(*rtype_name) (const struct resource_type * rtype, int flags);
     typedef struct resource_type {
         /* --- constants --- */
@@ -78,7 +76,6 @@ extern "C" {
         int flags;
         /* --- functions --- */
         rtype_uchange uchange;
-        rtype_uget uget;
         rtype_name name;
         struct rawmaterial_type *raw;
         struct resource_mod *modifiers;
@@ -127,9 +124,6 @@ extern "C" {
         int mask_deny;
         struct construction *construction;
         char *_appearance[2];       /* wie es f�r andere aussieht */
-        /* --- functions --- */
-        bool(*canuse) (const struct unit * user,
-            const struct item_type * itype);
         int score;
     } item_type;
 
