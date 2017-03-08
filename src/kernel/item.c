@@ -317,7 +317,6 @@ armor_type *new_armortype(item_type * itype, int flags) {
     return atype;
 }
 
-
 armor_type *new_armortype_depr(item_type * itype, double penalty, variant magres,
     int prot, int flags)
 {
@@ -1022,7 +1021,7 @@ void free_resources(void)
     }
 }
 
-void write_fraction(storage *store, variant v) {
+void write_fraction(storage *store, const variant v) {
     WRITE_INT(store, v.sa[0]);
     WRITE_INT(store, v.sa[1]);
 }
@@ -1120,12 +1119,24 @@ resource_type * read_resource(gamedata *data)
         }
 
         READ_INT(data->store, &i);
-        if (i != 0) {
+        if (i >= 0) {
+            float flt;
+            rtype->atype = new_armortype(rtype->itype, i);
+            rtype->atype->flags = i;
+            READ_INT(data->store, &rtype->atype->prot);
+            READ_FLT(data->store, &rtype->atype->projectile);
+            READ_FLT(data->store, &flt);
+            rtype->atype->penalty = flt;
+            read_fraction(data->store, &rtype->atype->magres);
+        }
+
+        READ_INT(data->store, &i);
+        if (i >= 0) {
             rtype->ptype = new_potiontype(itype, i);
         }
 
         READ_INT(data->store, &i);
-        if (i != 0) {
+        if (i >= 0) {
             rtype->ltype = new_luxurytype(itype, i);
         }
     }
@@ -1185,11 +1196,10 @@ void write_resource(gamedata *data, const resource_type *rtype)
         if (rtype->atype) {
             WRITE_INT(data->store, rtype->atype->flags);
             WRITE_INT(data->store, rtype->atype->prot);
-            write_fraction(data->store, rtype->atype->magres);
             WRITE_FLT(data->store, rtype->atype->projectile);
-            WRITE_FLT(data->store, (float)rtype->atype->penalty);
-        }
-        else {
+            WRITE_FLT(data->store, rtype->atype->penalty);
+            write_fraction(data->store, rtype->atype->magres);
+        } else {
             WRITE_INT(data->store, -1);
         }
 
@@ -1197,13 +1207,13 @@ void write_resource(gamedata *data, const resource_type *rtype)
             WRITE_INT(data->store, rtype->ptype->level);
         }
         else {
-            WRITE_INT(data->store, 0);
+            WRITE_INT(data->store, -1);
         }
         if (rtype->ltype) {
             WRITE_INT(data->store, rtype->ltype->price);
         }
         else {
-            WRITE_INT(data->store, 0);
+            WRITE_INT(data->store, -1);
         }
     }
 }
