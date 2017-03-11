@@ -7,6 +7,7 @@
 #include "travelthru.h"
 #include "keyword.h"
 
+#include <kernel/ally.h>
 #include <kernel/config.h>
 #include <kernel/building.h>
 #include <kernel/faction.h>
@@ -20,9 +21,13 @@
 #include <kernel/spellbook.h>
 #include <kernel/terrain.h>
 
+#include <util/attrib.h>
 #include <util/language.h>
 #include <util/lists.h>
 #include <util/message.h>
+
+#include <attributes/key.h>
+#include <attributes/otherfaction.h>
 
 #include <selist.h>
 #include <stream.h>
@@ -40,18 +45,11 @@ static void test_reorder_units(CuTest * tc)
     ship * s;
     unit *u0, *u1, *u2, *u3, *u4;
     struct faction * f;
-    const building_type *btype;
-    const ship_type *stype;
 
-    test_cleanup();
-    test_create_world();
-
-    btype = bt_find("castle");
-    stype = st_find("boat");
-
-    r = findregion(-1, 0);
-    b = test_create_building(r, btype);
-    s = test_create_ship(r, stype);
+    test_setup();
+    r = test_create_region(0, 0, NULL);
+    b = test_create_building(r, NULL);
+    s = test_create_ship(r, NULL);
     f = test_create_faction(0);
 
     u0 = test_create_unit(f, r);
@@ -153,14 +151,97 @@ static void test_sparagraph(CuTest *tc) {
     freestrlist(sp);
 }
 
-static void test_write_unit(CuTest *tc) {
+static void test_bufunit_fstealth(CuTest *tc) {
+    faction *f1, *f2;
+    region *r;
+    unit *u;
+    ally *al;
+    char buf[256];
+    struct locale *lang;
+
+    test_setup();
+    lang = get_or_create_locale("de");
+    locale_setstring(lang, "status_aggressive", "aggressive");
+    locale_setstring(lang, "anonymous", "anonymous");
+    f1 = test_create_faction(0);
+    f1->locale = lang;
+    f2 = test_create_faction(0);
+    f2->locale = lang;
+    r = test_create_region(0, 0, 0);
+    u = test_create_unit(f1, r);
+    faction_setname(f1, "UFO");
+    renumber_faction(f1, 1);
+    faction_setname(f2, "TWW");
+    renumber_faction(f2, 2);
+    unit_setname(u, "Hodor");
+    unit_setid(u, 1);
+    key_set(&u->attribs, 42, 42);
+
+    /* report to ourselves */
+    bufunit(f1, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), 1 human, aggressive.", buf);
+
+    /* ... also when we are anonymous */
+    u->flags |= UFL_ANON_FACTION;
+    bufunit(f1, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), anonymous, 1 human, aggressive.", buf);
+    u->flags &= ~UFL_ANON_FACTION;
+
+    /* we see that our unit is cloaked */
+    set_factionstealth(u, f2);
+    CuAssertPtrNotNull(tc, u->attribs);
+    bufunit(f1, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), TWW (2), 1 human, aggressive.", buf);
+
+    /* ... also when we are anonymous */
+    u->flags |= UFL_ANON_FACTION;
+    bufunit(f1, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), anonymous, 1 human, aggressive.", buf);
+    u->flags &= ~UFL_ANON_FACTION;
+
+    /* we can see that someone is presenting as us */
+    bufunit(f2, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), TWW (2), 1 human.", buf);
+
+    /* ... but not if they are anonymous */
+    u->flags |= UFL_ANON_FACTION;
+    bufunit(f2, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), anonymous, 1 human.", buf);
+    u->flags &= ~UFL_ANON_FACTION;
+
+    /* we see the same thing as them when we are an ally */
+    al = ally_add(&f1->allies, f2);
+    al->status = HELP_FSTEALTH;
+    bufunit(f2, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), TWW (2) (UFO (1)), 1 human.", buf);
+
+    /* ... also when they are anonymous */
+    u->flags |= UFL_ANON_FACTION;
+    bufunit(f2, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), anonymous, 1 human.", buf);
+    u->flags &= ~UFL_ANON_FACTION;
+
+    /* fstealth has no influence when we are allies, same results again */
+    set_factionstealth(u, NULL);
+    bufunit(f2, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), UFO (1), 1 human.", buf);
+
+    u->flags |= UFL_ANON_FACTION;
+    bufunit(f2, u, 0, seen_unit, buf, sizeof(buf));
+    CuAssertStrEquals(tc, "Hodor (1), anonymous, 1 human.", buf);
+    u->flags &= ~UFL_ANON_FACTION;
+
+    test_cleanup();
+}
+
+static void test_bufunit(CuTest *tc) {
     unit *u;
     faction *f;
     race *rc;
     struct locale *lang;
-    char buffer[1024];
+    char buffer[256];
 
-    test_cleanup();
+    test_setup();
     rc = rc_get_or_create("human");
     rc->bonus[SK_ALCHEMY] = 1;
     lang = get_or_create_locale("de");
@@ -191,6 +272,7 @@ static void test_write_unit(CuTest *tc) {
     f->locale = get_or_create_locale("de");
     bufunit(f, u, 0, 0, buffer, sizeof(buffer));
     CuAssertStrEquals(tc, "Hodor (1), UFO (1), 1 human.", buffer);
+
     test_cleanup();
 }
 
@@ -580,7 +662,8 @@ CuSuite *get_reports_suite(void)
     SUITE_ADD_TEST(suite, test_seen_faction);
     SUITE_ADD_TEST(suite, test_regionid);
     SUITE_ADD_TEST(suite, test_sparagraph);
-    SUITE_ADD_TEST(suite, test_write_unit);
+    SUITE_ADD_TEST(suite, test_bufunit);
+    SUITE_ADD_TEST(suite, test_bufunit_fstealth);
     SUITE_ADD_TEST(suite, test_arg_resources);
     return suite;
 }
