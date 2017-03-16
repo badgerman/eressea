@@ -93,9 +93,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <errno.h>
 #include <sys/stat.h>
 
-struct settings global = {
-    "Eressea",                    /* gamename */
-};
+struct settings global;
 
 bool lomem = false;
 int turn = -1;
@@ -733,7 +731,7 @@ bool config_changed(int *cache_key) {
 }
 
 #define MAXKEYS 16
-void config_set_from(const dictionary *d)
+void config_set_from(const dictionary *d, const char *valid_keys[])
 {
     int s, nsec = iniparser_getnsec(d);
     for (s=0;s!=nsec;++s) {
@@ -742,6 +740,7 @@ void config_set_from(const dictionary *d)
         int k, nkeys = iniparser_getsecnkeys(d, sec);
         const char *keys[MAXKEYS];
         size_t slen = strlen(sec);
+
         assert(nkeys <= MAXKEYS);
         assert(slen<sizeof(key));
         memcpy(key, sec, slen);
@@ -756,6 +755,16 @@ void config_set_from(const dictionary *d)
             val = iniparser_getstring(d, keys[k], NULL);
             if (!orig) {
                 if (val) {
+                    if (valid_keys) {
+                        int i;
+                        for (i = 0; valid_keys[i]; ++i) {
+                            size_t vlen = strlen(valid_keys[i]);
+                            if (strncmp(key, valid_keys[i], vlen) == 0) break;
+                        }
+                        if (!valid_keys[i]) {
+                            log_error("unknown key in ini-section %s: %s = %s", sec, key+slen+1, val);
+                        }
+                    }
                     config_set(key, val);
                 }
             } else {
@@ -787,7 +796,6 @@ bool config_token(const char *key, const char *tok) {
 }
 
 void free_config(void) {
-    global.functions.wage = NULL;
     free_params(&configuration);
     ++config_cache_key;
 }
@@ -830,7 +838,7 @@ void free_gamedata(void)
 const char * game_name(void)
 {
     const char * param = config_get("game.name");
-    return param ? param : global.gamename;
+    return param ? param : "Eressea";
 }
 
 const char * game_mailcmd(void)
