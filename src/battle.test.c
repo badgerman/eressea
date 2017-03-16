@@ -257,9 +257,9 @@ static void test_calculate_armor(CuTest * tc)
     r = test_create_region(0, 0, 0);
     ibelt = it_get_or_create(rt_get_or_create("trollbelt"));
     ishield = it_get_or_create(rt_get_or_create("shield"));
-    ashield = new_armortype(ishield, 0.0, v50p, 1, ATF_SHIELD);
+    ashield = new_armortype_depr(ishield, 0.0, v50p, 1, ATF_SHIELD);
     ichain = it_get_or_create(rt_get_or_create("chainmail"));
-    achain = new_armortype(ichain, 0.0, v50p, 3, ATF_NONE);
+    achain = new_armortype_depr(ichain, 0.0, v50p, 3, ATF_NONE);
     wtype = new_weapontype_depr(it_get_or_create(rt_get_or_create("sword")), 0, v50p, 0, 0, 0, 0, SK_MELEE, 1);
     rc = test_create_race("human");
     du = test_create_unit(test_create_faction(rc), r);
@@ -327,9 +327,9 @@ static void test_magic_resistance(CuTest *tc)
     test_setup();
     r = test_create_region(0, 0, 0);
     ishield = it_get_or_create(rt_get_or_create("shield"));
-    ashield = new_armortype(ishield, 0.0, v50p, 1, ATF_SHIELD);
+    ashield = new_armortype_depr(ishield, 0.0, v50p, 1, ATF_SHIELD);
     ichain = it_get_or_create(rt_get_or_create("chainmail"));
-    achain = new_armortype(ichain, 0.0, v50p, 3, ATF_NONE);
+    achain = new_armortype_depr(ichain, 0.0, v50p, 3, ATF_NONE);
     rc = test_create_race("human");
     du = test_create_unit(test_create_faction(rc), r);
     dt.index = 0;
@@ -398,9 +398,9 @@ static void test_projectile_armor(CuTest * tc)
     test_setup();
     r = test_create_region(0, 0, 0);
     ishield = it_get_or_create(rt_get_or_create("shield"));
-    ashield = new_armortype(ishield, 0.0, v50p, 1, ATF_SHIELD);
+    ashield = new_armortype_depr(ishield, 0.0, v50p, 1, ATF_SHIELD);
     ichain = it_get_or_create(rt_get_or_create("chainmail"));
-    achain = new_armortype(ichain, 0.0, v50p, 3, ATF_NONE);
+    achain = new_armortype_depr(ichain, 0.0, v50p, 3, ATF_NONE);
     wtype = new_weapontype_depr(it_get_or_create(rt_get_or_create("sword")), 0, v50p, 0, 0, 0, 0, SK_MELEE, 1);
     rc = test_create_race("human");
     rc->battle_flags |= BF_EQUIPMENT;

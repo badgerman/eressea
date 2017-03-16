@@ -172,7 +172,7 @@ extern "C" {
 
     typedef struct armor_type {
         const item_type *itype;
-        unsigned int flags;
+        int flags;
         double penalty;
         variant magres;
         int prot;
@@ -238,12 +238,13 @@ extern "C" {
     resource_type *rt_get_or_create(const char *name);
     item_type *it_get_or_create(resource_type *rtype);
     luxury_type *new_luxurytype(item_type * itype, int price);
-    weapon_type *new_weapontype(item_type * itype);
+    weapon_type *new_weapontype(item_type * itype, int flags);
     weapon_type *new_weapontype_depr(item_type * itype, int wflags,
         variant magres, const char *damage[], int offmod, int defmod, int reload,
         skill_t sk, int minskill);
-    armor_type *new_armortype(item_type * itype, double penalty,
-        variant magres, int prot, unsigned int flags);
+    armor_type *new_armortype(item_type * itype, int flags);
+    armor_type *new_armortype_depr(item_type * itype, double penalty,
+        variant magres, int prot, int flags);
     potion_type *new_potiontype(item_type * itype, int level);
 
 

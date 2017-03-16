@@ -602,7 +602,7 @@ static armor_type *xml_readarmor(xmlXPathContextPtr xpath, item_type * itype)
     if (xml_bvalue(node, "shield", false))
         flags |= ATF_SHIELD;
 
-    atype = new_armortype(itype, penalty, magres, ac, flags);
+    atype = new_armortype_depr(itype, penalty, magres, ac, flags);
     atype->projectile = (float)xml_fvalue(node, "projectile", 0.0);
     return atype;
 }

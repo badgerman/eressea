@@ -779,7 +779,7 @@ bool missile)
 
 static const armor_type *select_armor(troop t, bool shield)
 {
-    unsigned int type = shield ? ATF_SHIELD : 0;
+    int type = shield ? ATF_SHIELD : 0;
     unit *u = t.fighter->unit;
     const armor *a = t.fighter->armors;
     int geschuetzt = 0;

@@ -275,12 +275,13 @@ luxury_type *new_luxurytype(item_type * itype, int price)
     return ltype;
 }
 
-weapon_type *new_weapontype(item_type * itype)
+weapon_type *new_weapontype(item_type * itype, int flags)
 {
     weapon_type *wtype;
     assert(itype && (!itype->rtype || !resource2weapon(itype->rtype)));
     wtype = calloc(sizeof(weapon_type), 1);
     wtype->itype = itype;
+    wtype->flags = flags;
     return wtype;
 }
 
@@ -288,7 +289,7 @@ weapon_type *new_weapontype_depr(item_type * itype,
     int wflags, variant magres, const char *damage[], int offmod, int defmod,
     int reload, skill_t sk, int minskill)
 {
-    weapon_type *wtype = new_weapontype(itype);
+    weapon_type *wtype = new_weapontype(itype, wflags);
 
     assert(minskill > 0);
 
@@ -296,7 +297,6 @@ weapon_type *new_weapontype_depr(item_type * itype,
         wtype->damage[0] = strdup(damage[0]);
         wtype->damage[1] = strdup(damage[1]);
     }
-    wtype->flags = wflags;
     wtype->defmod = defmod;
     wtype->magres = magres;
     wtype->minskill = minskill;
@@ -308,23 +308,29 @@ weapon_type *new_weapontype_depr(item_type * itype,
     return wtype;
 }
 
-armor_type *new_armortype(item_type * itype, double penalty, variant magres,
-    int prot, unsigned int flags)
+armor_type *new_armortype(item_type * itype, int flags) {
+    armor_type *atype;
+
+    atype = calloc(sizeof(armor_type), 1);
+    atype->itype = itype;
+    atype->flags = flags;
+    return atype;
+}
+
+
+armor_type *new_armortype_depr(item_type * itype, double penalty, variant magres,
+    int prot, int flags)
 {
     armor_type *atype;
 
     assert(itype->rtype->atype == NULL);
-
-    atype = calloc(sizeof(armor_type), 1);
-
-    atype->itype = itype;
+    atype = new_armortype(itype, flags);
     atype->penalty = penalty;
     atype->magres = magres;
     atype->prot = prot;
     atype->flags = flags;
-    itype->rtype->atype = atype;
-
-    return atype;
+    
+    return itype->rtype->atype = atype;
 }
 
 static void pt_register(potion_type * ptype)
@@ -1085,10 +1091,9 @@ resource_type * read_resource(gamedata *data)
         }
 
         READ_INT(data->store, &i);
-        if (i != 0) {
-            weapon_type *wtype = rtype->wtype = new_weapontype(itype);
-            wtype->minskill = i;
-            READ_INT(data->store, &wtype->flags);
+        if (i >= 0) {
+            weapon_type *wtype = rtype->wtype = new_weapontype(itype, i);
+            READ_INT(data->store, &wtype->minskill);
             READ_INT(data->store, &i);
             assert(i >= 0 && i < MAXSKILLS);
             wtype->skill = (skill_t)i;
@@ -1104,6 +1109,17 @@ resource_type * read_resource(gamedata *data)
             if (zName[0]) {
                 wtype->damage[1] = strdup(zName);
             }
+        }
+
+        READ_INT(data->store, &i);
+        if (i >= 0) {
+            float flt;
+            armor_type *atype = rtype->atype = new_armortype(itype, i);
+            READ_INT(data->store, &atype->prot);
+            read_fraction(data->store, &rtype->atype->magres);
+            READ_FLT(data->store, &rtype->atype->projectile);
+            READ_FLT(data->store, &flt);
+            rtype->atype->penalty = flt;
         }
 
         READ_INT(data->store, &i);
@@ -1160,9 +1176,9 @@ void write_resource(gamedata *data, const resource_type *rtype)
         }
 
         if (rtype->wtype) {
-            assert(rtype->wtype->minskill!=0);
-            WRITE_INT(data->store, rtype->wtype->minskill);
+            assert(rtype->wtype->flags>=0);
             WRITE_INT(data->store, rtype->wtype->flags);
+            WRITE_INT(data->store, rtype->wtype->minskill);
             WRITE_INT(data->store, rtype->wtype->skill);
             WRITE_INT(data->store, rtype->wtype->offmod);
             WRITE_INT(data->store, rtype->wtype->defmod);
@@ -1173,7 +1189,18 @@ void write_resource(gamedata *data, const resource_type *rtype)
             WRITE_TOK(data->store, rtype->wtype->damage[1]);
         }
         else {
-            WRITE_INT(data->store, 0);
+            WRITE_INT(data->store, -1);
+        }
+
+        if (rtype->atype) {
+            WRITE_INT(data->store, rtype->atype->flags);
+            WRITE_INT(data->store, rtype->atype->prot);
+            write_fraction(data->store, rtype->atype->magres);
+            WRITE_FLT(data->store, rtype->atype->projectile);
+            WRITE_FLT(data->store, (float)rtype->atype->penalty);
+        }
+        else {
+            WRITE_INT(data->store, -1);
         }
 
         if (rtype->ptype) {
