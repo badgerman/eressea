@@ -1081,6 +1081,8 @@ void write_construction(gamedata *data, construction *cons)
         else {
             WRITE_INT(data->store, 0);
         }
+        assert(!cons->attribs);
+        assert(!cons->btype);
         cons = cons->improvement;
     }
 }
