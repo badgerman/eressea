@@ -386,7 +386,7 @@ function test_birthdaycake()
 end
 
 function test_p2()
-    local f = faction.create("noreply@eressea.de", "human", "de")
+    local f = faction.create('human')
     local r = region.create(0, 0, "plain")
     local u = unit.create(f, r, 1)
     r:set_resource("sapling", 0)
@@ -403,7 +403,7 @@ end
 
 function test_p2_move()
     -- http://bugs.eressea.de/view.php?id=1855
-    local f = faction.create("noreply@eressea.de", "human", "de")
+    local f = faction.create('human')
     local r = region.create(0, 0, "plain")
     region.create(1, 0, "plain")
     local u = unit.create(f, r, 1)

@@ -1082,9 +1082,7 @@ resource_type * read_resource(gamedata *data)
                     mod->btype = bt_get_or_create(zName);
                 }
                 mod->race = read_race_reference(data->store);
-                if (mod->type == RMT_PROD_SAVE || mod->type == RMT_PROD_SKILL) {
-                    read_fraction(data->store, &mod->value);
-                }
+                read_fraction(data->store, &mod->value);
                 ++mod;
             }
         }
@@ -1150,7 +1148,6 @@ void write_resource(gamedata *data, const resource_type *rtype)
         if (itype->flags & ITF_CONSTRUCTION) {
             write_construction(data, itype->construction);
         }
-#ifdef TODO
         if (rtype->modifiers) {
             const resource_mod * mod;
             int n = 0;
@@ -1158,22 +1155,16 @@ void write_resource(gamedata *data, const resource_type *rtype)
                 ++n;
             }
             WRITE_INT(data->store, n);
-            for (mod = rtype->modifiers; mod->flags; ++mod) {
-                WRITE_INT(data->store, mod->flags);
+            for (mod = rtype->modifiers; mod->type!=RMT_END; ++mod) {
+                WRITE_INT(data->store, mod->type);
                 WRITE_TOK(data->store, mod->btype ? mod->btype->_name : NULL);
                 write_race_reference(mod->race, data->store);
-                if (mod->flags&RMF_SAVEMATERIAL) {
-                    write_fraction(data->store, mod->value);
-                }
-                else {
-                    WRITE_INT(data->store, mod->value.i);
-                }
+                write_fraction(data->store, mod->value);
             }
         }
         else {
             WRITE_INT(data->store, 0);
         }
-#endif
         if (rtype->wtype) {
             assert(rtype->wtype->flags>=0);
             WRITE_INT(data->store, rtype->wtype->flags);
