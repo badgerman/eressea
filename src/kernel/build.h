@@ -32,9 +32,7 @@ extern "C" {
      * wichtig
      */
 
-    struct xml_tag;
     struct gamedata;
-
     typedef struct requirement {
         const struct resource_type *rtype;
         int number;
@@ -58,17 +56,14 @@ extern "C" {
          * last level of a building points to NULL, as do objects of
          * an unlimited size.
          */
-        struct attrib *attribs;
-        /* stores skill modifiers and other attributes */
-
     } construction;
 
     struct construction *read_construction(struct gamedata *data);
     void write_construction(struct gamedata *data, struct construction *cons);
 
     void free_construction(struct construction *cons);
-    extern int destroy_cmd(struct unit *u, struct order *ord);
-    extern int leave_cmd(struct unit *u, struct order *ord);
+    int destroy_cmd(struct unit *u, struct order *ord);
+    int leave_cmd(struct unit *u, struct order *ord);
 
     void build_road(struct unit *u, int size, direction_t d);
     void create_ship(struct unit *u, const struct ship_type *newtype,
@@ -78,16 +73,15 @@ extern "C" {
     struct building *getbuilding(const struct region *r);
     struct ship *getship(const struct region *r);
 
-    void reportevent(struct region *r, char *s);
-
     void shash(struct ship *sh);
     void sunhash(struct ship *sh);
-    extern int roqf_factor(void);
+    int roqf_factor(void);
 
-    int build(struct unit *u, const construction * ctype, int completed, int want);
-    extern int maxbuild(const struct unit *u, const construction * cons);
-    extern struct message *msg_materials_required(struct unit *u,
-    struct order *ord, const struct construction *ctype, int multi);
+    int build(struct unit *u, const construction * ctype, int completed, int want, int skill_mod);
+    int maxbuild(const struct unit *u, const construction * cons);
+    struct message *msg_materials_required(struct unit *u, struct order *ord,
+        const struct construction *ctype, int multi);
+
     /** error messages that build may return: */
 #define ELOWSKILL -1
 #define ENEEDSKILL -2

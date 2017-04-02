@@ -80,7 +80,6 @@ extern "C" {
         struct rawmaterial_type *raw;
         struct resource_mod *modifiers;
         /* --- pointers --- */
-        struct attrib *attribs;
         struct item_type *itype;
         struct potion_type *ptype;
         struct luxury_type *ltype;
@@ -91,11 +90,6 @@ extern "C" {
     const char *resourcename(const resource_type * rtype, int flags);
     const resource_type *findresourcetype(const char *name,
         const struct locale *lang);
-
-    /* resource-limits for regions */
-#define RMF_SKILL         0x01  /* int, bonus on resource production skill */
-#define RMF_SAVEMATERIAL  0x02  /* fraction (sa[0]/sa[1]), multiplier on resource usage */
-#define RMF_REQUIREDBUILDING 0x04       /* building, required to build */
 
     /* bitfield values for item_type::flags */
 #define ITF_NONE             0x0000

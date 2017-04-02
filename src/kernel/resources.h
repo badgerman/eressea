@@ -24,30 +24,30 @@ extern "C" {
     };
 
     typedef struct rawmaterial {
-        const struct rawmaterial_type *type;
-#ifdef LOMEM
-        int amount:16;
-        int level:8;
-        int flags:8;
-        int base:8;
-        int divisor:8;
-        int startlevel:8;
-#else
+        const struct resource_type *rtype;
         int amount;
         int level;
         int flags;
         int base;
         int divisor;
         int startlevel;
-#endif
         struct rawmaterial *next;
     } rawmaterial;
 
+    /* resource-limits for regions */
+    typedef enum resource_modifier_type {
+        RMT_END, /* array terminator */
+        RMT_PROD_SKILL, /* bonus on resource production skill */
+        RMT_PROD_SAVE,   /* fractional multiplier when produced */
+        RMT_PROD_REQUIRE, /* building or race is required to produce this item */
+        RMT_USE_SAVE,  /* fractional multiplier when used to manufacture something */
+    } resource_modifier_type;
+
     typedef struct resource_mod {
+        resource_modifier_type type;
         variant value;
         const struct building_type *btype;
         const struct race *race;
-        int flags;
     } resource_mod;
 
     typedef struct rawmaterial_type {
@@ -65,11 +65,10 @@ extern "C" {
     void terraform_resources(struct region *r);
     struct rawmaterial *rm_get(struct region *,
         const struct resource_type *);
-    struct rawmaterial_type *rmt_find(const char *str);
     struct rawmaterial_type *rmt_get(const struct resource_type *);
 
-    void add_resource(struct region *r, int level, int base, int divisor,
-        const struct resource_type *rtype);
+    struct rawmaterial *add_resource(struct region *r, int level, 
+        int base, int divisor, const struct resource_type *rtype);
     struct rawmaterial_type *rmt_create(struct resource_type *rtype);
 
     extern int(*res_limit_fun)(const struct region *, const struct resource_type *);

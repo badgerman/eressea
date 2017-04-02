@@ -1074,17 +1074,16 @@ resource_type * read_resource(gamedata *data)
         if (n>0) {
             resource_mod * mod = rtype->modifiers = calloc(n+1, sizeof(resource_mod));
             while (n--) {
-                READ_INT(data->store, &mod->flags);
+                int i;
+                READ_INT(data->store, &i);
+                mod->type = (resource_modifier_type)i;
                 READ_TOK(data->store, zName, sizeof(zName));
                 if (zName[0]) {
                     mod->btype = bt_get_or_create(zName);
                 }
                 mod->race = read_race_reference(data->store);
-                if (mod->flags&RMF_SAVEMATERIAL) {
+                if (mod->type == RMT_PROD_SAVE || mod->type == RMT_PROD_SKILL) {
                     read_fraction(data->store, &mod->value);
-                }
-                else {
-                    READ_INT(data->store, &mod->value.i);
                 }
                 ++mod;
             }
@@ -1151,11 +1150,11 @@ void write_resource(gamedata *data, const resource_type *rtype)
         if (itype->flags & ITF_CONSTRUCTION) {
             write_construction(data, itype->construction);
         }
-
+#ifdef TODO
         if (rtype->modifiers) {
             const resource_mod * mod;
             int n = 0;
-            for (mod = rtype->modifiers; mod->flags; ++mod) {
+            for (mod = rtype->modifiers; mod->type!=RMT_END; ++mod) {
                 ++n;
             }
             WRITE_INT(data->store, n);
@@ -1174,7 +1173,7 @@ void write_resource(gamedata *data, const resource_type *rtype)
         else {
             WRITE_INT(data->store, 0);
         }
-
+#endif
         if (rtype->wtype) {
             assert(rtype->wtype->flags>=0);
             WRITE_INT(data->store, rtype->wtype->flags);

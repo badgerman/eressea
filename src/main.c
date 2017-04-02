@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1998-2015, Enno Rehling <enno@eressea.de>
+Copyright (c) 1998-2017, Enno Rehling <enno@eressea.de>
 Katja Zedel <katze@felidae.kn-bremen.de
 Christian Schlittchen <corwin@amber.kn-bremen.de>
 
@@ -75,6 +75,7 @@ static void load_inifile(void)
 static const char * valid_keys[] = {
     "game.id",
     "game.name",
+    "game.start",
     "game.locale",
     "game.verbose",
     "game.report",
@@ -82,9 +83,11 @@ static const char * valid_keys[] = {
     "game.memcheck",
     "game.email",
     "game.mailcmd",
+    "game.era",
     "game.sender",
     "editor.color",
     "editor.codepage",
+    "editor.population.",
     "lua.",
     NULL
 };
@@ -162,7 +165,7 @@ static int verbosity_to_flags(int verbosity) {
     return flags;
 }
 
-static int parse_args(int argc, char **argv, int *exitcode)
+static int parse_args(int argc, char **argv)
 {
     int i;
     int log_stderr = LOG_CPERROR;
@@ -175,10 +178,10 @@ static int parse_args(int argc, char **argv, int *exitcode)
         }
         else if (argi[1] == '-') {     /* long format */
             if (strcmp(argi + 2, "version") == 0) {
-                printf("\n%s PBEM host\n"
-                    "Copyright (C) 1996-2005 C. Schlittchen, K. Zedel, E. Rehling, H. Peters.\n\n"
-                    "Compilation: " __DATE__ " at " __TIME__ "\nVersion: %s\n\n",
-                    game_name(), eressea_version());
+                printf("Eressea version %s, "
+	            "Copyright (C) 2017 Enno Rehling et al.\n",
+                    eressea_version());
+	return 1;
 #ifdef USE_CURSES          
             }
             else if (strcmp(argi + 2, "color") == 0) {
@@ -226,7 +229,6 @@ static int parse_args(int argc, char **argv, int *exitcode)
                 usage(argv[0], NULL);
                 return 1;
             default:
-                *exitcode = -1;
                 usage(argv[0], argi);
                 return 1;
             }
@@ -297,8 +299,10 @@ int main(int argc, char **argv)
     dictionary *d = 0;
     setup_signal_handler();
     /* parse arguments again, to override ini file */
-    parse_args(argc, argv, &err);
-
+    err = parse_args(argc, argv);
+    if (err!=0) {
+        return (err>0) ? 0 : err;
+    }
     d = parse_config(inifile);
     if (!d) {
         log_error("could not open ini configuration %s\n", inifile);
