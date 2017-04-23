@@ -20,6 +20,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <kernel/config.h>
 #include "building.h"
+#include "save.h"
 
 /* kernel includes */
 #include "curse.h"
@@ -882,6 +883,64 @@ int cmp_current_owner(const building * b, const building * a)
         }
     }
     return -1;
+}
+
+static void bt_write(struct gamedata *data, const building_type *btype)
+{
+    WRITE_INT(data->store, btype->flags);
+    WRITE_TOK(data->store, btype->_name);
+    WRITE_INT(data->store, btype->capacity);
+    WRITE_INT(data->store, btype->maxcapacity);
+    WRITE_INT(data->store, btype->magresbonus);
+    WRITE_INT(data->store, btype->fumblebonus);
+    WRITE_FLT(data->store, (float)btype->auraregen);
+    write_fraction(data->store, btype->magres);
+}
+
+static building_type * bt_read(struct gamedata *data)
+{
+    building_type *btype;
+    char zName[64];
+    int i;
+    float flt;
+
+    READ_INT(data->store, &i);
+    if (i < 0) {
+        return NULL;
+    }
+    READ_TOK(data->store, zName, sizeof(zName));
+    btype = bt_get_or_create(zName);
+    btype->flags = i;
+    READ_INT(data->store, &btype->capacity);
+    READ_INT(data->store, &btype->maxcapacity);
+    READ_INT(data->store, &btype->magresbonus);
+    READ_INT(data->store, &btype->fumblebonus);
+    READ_FLT(data->store, &flt);
+    btype->auraregen = flt;
+    read_fraction(data->store, &btype->magres);
+
+    return btype;
+}
+
+static bool write_building_cb(const void *elem, void *cbdata) {
+    const building_type *btype = (const building_type *)elem;
+    struct gamedata *data = (struct gamedata *)cbdata;
+    bt_write(data, btype);
+    return true;
+}
+
+void write_buildings(struct gamedata *data) 
+{
+    selist_foreach_ex(buildingtypes, write_building_cb, data);
+    WRITE_INT(data->store, -1);
+}
+
+void read_buildings(struct gamedata *data)
+{
+    building_type *btype;
+    do {
+        btype = bt_read(data);
+    } while (btype);
 }
 
 void register_buildings(void)

@@ -19,6 +19,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <platform.h>
 #include <kernel/config.h>
 #include "item.h"
+#include "save.h"
 
 #include <attributes/key.h>
 
@@ -1019,20 +1020,6 @@ void free_resources(void)
         cb_clear(inames + i);
         cb_clear(rnames + i);
     }
-}
-
-void write_fraction(storage *store, const variant v) {
-    WRITE_INT(store, v.sa[0]);
-    WRITE_INT(store, v.sa[1]);
-}
-
-void read_fraction(storage *store, variant *v) {
-    int den, num;
-
-    assert(v);
-    READ_INT(store, &den);
-    READ_INT(store, &num);
-    *v = frac_make(den, num);
 }
 
 resource_type * read_resource(gamedata *data)

@@ -19,7 +19,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef H_KRNL_SAVE
 #define H_KRNL_SAVE
 
+#include <util/variant.h>
 #include <stream.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,6 +62,9 @@ extern "C" {
 
     void write_building(struct gamedata *data, const struct building *b);
     struct building *read_building(struct gamedata *data);
+
+    void write_fraction(struct storage *store, const variant v);
+    void read_fraction(struct storage *store, variant *v);
 
     void write_ship(struct gamedata *data, const struct ship *sh);
     struct ship *read_ship(struct gamedata *data);

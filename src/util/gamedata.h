@@ -4,6 +4,7 @@
 #define _GAMEDATA_H
 
 #include <stream.h>
+#include "variant.h"
 
 #define INTPAK_VERSION 329      /* in binary, ints can get packed. starting with E2/572 */
 #define NOZEROIDS_VERSION 330   /* 2008-05-16 zero is not a valid ID for anything (including factions) */

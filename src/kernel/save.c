@@ -615,6 +615,20 @@ writeorder(struct gamedata *data, const struct order *ord,
         WRITE_STR(data->store, obuf);
 }
 
+void write_fraction(storage *store, const variant v) {
+    WRITE_INT(store, v.sa[0]);
+    WRITE_INT(store, v.sa[1]);
+}
+
+void read_fraction(storage *store, variant *v) {
+    int den, num;
+
+    assert(v);
+    READ_INT(store, &den);
+    READ_INT(store, &num);
+    *v = frac_make(den, num);
+}
+
 unit *read_unit(struct gamedata *data)
 {
     unit *u;

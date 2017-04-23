@@ -1,6 +1,8 @@
 #include <platform.h>
 #include "rules.h"
 
+#include <kernel/building.h>
+#include <kernel/ship.h>
 #include <kernel/race.h>
 #include <kernel/item.h>
 #include <kernel/xmlreader.h>
@@ -41,6 +43,7 @@ int write_rules(const char *filename) {
     WRITE_INT(data->store, TYPE_NONE);
 
     write_resources(data);
+    write_buildings(data);
     gamedata_close(data);
     return 0;
 }
@@ -66,6 +69,7 @@ int read_rules(const char *filename)
     }
 
     read_resources(data);
+    read_buildings(data);
     gamedata_close(data);
     return 0;
 }

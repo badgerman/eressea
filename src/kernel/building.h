@@ -154,6 +154,9 @@ extern "C" {
     const struct building_type *findbuildingtype(const char *name,
         const struct locale *lang);
 
+    void write_buildings(struct gamedata *data);
+    void read_buildings(struct gamedata *data);
+
 #include "build.h"
 #define NOBUILDING NULL
 

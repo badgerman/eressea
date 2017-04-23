@@ -11,4 +11,6 @@
   <xi:include href="config://core/spoils.xml"/>
   <xi:include href="config://game/items.xml"/>
   <xi:include href="config://default/adamantium.xml"/>
+  <xi:include href="config://core/common/buildings.xml"/>
+  <xi:include href="config://game/buildings.xml"/>
 </eressea>

@@ -24,7 +24,6 @@
    obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
    obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
 }
-
 {
    stpncpy sse3
    Memcheck:Value8
@@ -41,9 +40,8 @@
    obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
    obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
 }
-
 {
-   strtod sse
+   strtod class_index_event
    Memcheck:Addr8
    fun:__GI___strncasecmp_l
    fun:____strtod_l_internal
@@ -51,6 +49,22 @@
    obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
    fun:lua_isnumber
    fun:class_index_event
+   obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
+}
+{
+   strtod class_newindex_event
+   Memcheck:Addr8
+   fun:__GI___strncasecmp_l
+   fun:____strtod_l_internal
+   obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
+   fun:lua_isnumber
+   fun:class_newindex_event
    obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
    obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
    obj:/usr/lib/x86_64-linux-gnu/liblua5.2.so.0.0.0
