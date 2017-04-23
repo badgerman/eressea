@@ -51,8 +51,6 @@ extern "C" {
     struct gamedata;
     struct item_type;
 
-    extern int num_races;
-
     typedef enum {
         RC_DWARF,                     /* 0 - Zwerg */
         RC_ELF,
@@ -103,6 +101,9 @@ extern "C" {
         MAXRACES,
         NORACE = -1
     } race_t;
+
+    extern int num_races;
+    extern const char *racenames[MAXRACES];
 
     typedef struct att {
         int type;
@@ -183,6 +184,7 @@ extern "C" {
 
     typedef enum name_t { NAME_SINGULAR, NAME_PLURAL, NAME_DEFINITIVE, NAME_CATEGORY } name_t;
     const char * rc_name_s(const race *rc, name_t n);
+    const char * rc_key(const char *rcname, name_t n, char *name, size_t size);
     const char * rc_name(const race *rc, name_t n, char *name, size_t size);
 
     void rc_set_param(struct race *rc, const char *key, const char *value);
