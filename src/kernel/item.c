@@ -1112,18 +1112,6 @@ resource_type * read_resource(gamedata *data)
             float flt;
             armor_type *atype = rtype->atype = new_armortype(itype, i);
             READ_INT(data->store, &atype->prot);
-            read_fraction(data->store, &rtype->atype->magres);
-            READ_FLT(data->store, &rtype->atype->projectile);
-            READ_FLT(data->store, &flt);
-            rtype->atype->penalty = flt;
-        }
-
-        READ_INT(data->store, &i);
-        if (i >= 0) {
-            float flt;
-            rtype->atype = new_armortype(rtype->itype, i);
-            rtype->atype->flags = i;
-            READ_INT(data->store, &rtype->atype->prot);
             READ_FLT(data->store, &rtype->atype->projectile);
             READ_FLT(data->store, &flt);
             rtype->atype->penalty = flt;
@@ -1197,7 +1185,7 @@ void write_resource(gamedata *data, const resource_type *rtype)
             WRITE_INT(data->store, rtype->atype->flags);
             WRITE_INT(data->store, rtype->atype->prot);
             WRITE_FLT(data->store, rtype->atype->projectile);
-            WRITE_FLT(data->store, rtype->atype->penalty);
+            WRITE_FLT(data->store, (float)rtype->atype->penalty);
             write_fraction(data->store, rtype->atype->magres);
         } else {
             WRITE_INT(data->store, -1);
