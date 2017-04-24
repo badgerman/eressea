@@ -912,6 +912,7 @@ static void bt_write(struct gamedata *data, const building_type *btype)
     WRITE_TOK(data->store, btype->_name);
     WRITE_INT(data->store, btype->capacity);
     WRITE_INT(data->store, btype->maxcapacity);
+    WRITE_INT(data->store, btype->maxsize);
     WRITE_INT(data->store, btype->magresbonus);
     WRITE_INT(data->store, btype->fumblebonus);
     WRITE_FLT(data->store, (float)btype->auraregen);
@@ -956,6 +957,7 @@ static building_type * bt_read(struct gamedata *data)
     btype->flags = i;
     READ_INT(data->store, &btype->capacity);
     READ_INT(data->store, &btype->maxcapacity);
+    READ_INT(data->store, &btype->maxsize);
     READ_INT(data->store, &btype->magresbonus);
     READ_INT(data->store, &btype->fumblebonus);
     READ_FLT(data->store, &flt);
