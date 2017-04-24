@@ -922,7 +922,7 @@ static building_type * bt_read(struct gamedata *data)
     return btype;
 }
 
-static bool write_building_cb(const void *elem, void *cbdata) {
+static bool write_building_cb(void *elem, void *cbdata) {
     const building_type *btype = (const building_type *)elem;
     struct gamedata *data = (struct gamedata *)cbdata;
     bt_write(data, btype);
