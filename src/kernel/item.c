@@ -1025,7 +1025,7 @@ void free_resources(void)
 resource_type * read_resource(gamedata *data)
 {
     resource_type *rtype = NULL;
-    char zName[64];
+    char zName[32];
     
     READ_TOK(data->store, zName, sizeof(zName));
     if (strcmp(zName, "none") == 0) {
@@ -1037,7 +1037,7 @@ resource_type * read_resource(gamedata *data)
         rmt_create(rtype);
     }
     if (rtype->flags & RTF_ITEM) {
-        int i, n;
+        int i;
         item_type *itype = it_get_or_create(rtype);
         READ_INT(data->store, &itype->flags);
         READ_INT(data->store, &itype->weight);
@@ -1056,22 +1056,7 @@ resource_type * read_resource(gamedata *data)
             itype->construction = read_construction(data);
         }
 
-        READ_INT(data->store, &n);
-        if (n>0) {
-            resource_mod * mod = rtype->modifiers = calloc(n+1, sizeof(resource_mod));
-            while (n--) {
-                int i;
-                READ_INT(data->store, &i);
-                mod->type = (resource_modifier_type)i;
-                READ_TOK(data->store, zName, sizeof(zName));
-                if (zName[0]) {
-                    mod->btype = bt_get_or_create(zName);
-                }
-                mod->race = read_race_reference(data->store);
-                read_fraction(data->store, &mod->value);
-                ++mod;
-            }
-        }
+        rtype->modifiers = read_modifiers(data);
 
         READ_INT(data->store, &i);
         if (i >= 0) {
@@ -1134,23 +1119,7 @@ void write_resource(gamedata *data, const resource_type *rtype)
         if (itype->flags & ITF_CONSTRUCTION) {
             write_construction(data, itype->construction);
         }
-        if (rtype->modifiers) {
-            const resource_mod * mod;
-            int n = 0;
-            for (mod = rtype->modifiers; mod->type!=RMT_END; ++mod) {
-                ++n;
-            }
-            WRITE_INT(data->store, n);
-            for (mod = rtype->modifiers; mod->type!=RMT_END; ++mod) {
-                WRITE_INT(data->store, mod->type);
-                WRITE_TOK(data->store, mod->btype ? mod->btype->_name : NULL);
-                write_race_reference(mod->race, data->store);
-                write_fraction(data->store, mod->value);
-            }
-        }
-        else {
-            WRITE_INT(data->store, 0);
-        }
+        write_modifiers(data, rtype->modifiers);
         if (rtype->wtype) {
             assert(rtype->wtype->flags>=0);
             WRITE_INT(data->store, rtype->wtype->flags);

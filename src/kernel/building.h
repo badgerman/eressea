@@ -72,7 +72,6 @@ extern "C" {
             const struct building * b, int size);
         void(*age) (struct building *);
         double(*taxes) (const struct building *, int size);
-        struct attrib *attribs;
     } building_type;
 
     extern struct selist *buildingtypes;

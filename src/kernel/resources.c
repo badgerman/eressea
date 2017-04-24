@@ -16,12 +16,18 @@
 
 /* kernel includes */
 #include "build.h"
+#include "building.h"
 #include "item.h"
+#include "race.h"
 #include "region.h"
+#include "save.h"
 #include "terrain.h"
 
+#include <util/gamedata.h>
 #include <util/rand.h>
 #include <util/rng.h>
+
+#include <storage.h>
 
 #include <stdlib.h>
 #include <assert.h>
@@ -232,5 +238,51 @@ void produce_resource(struct region *r, const struct resource_type *rtype, int a
     assert(!rtype->raw);
     if (res_produce_fun) {
         res_produce_fun(r, rtype, amount);
+    }
+}
+
+resource_mod *read_modifiers(gamedata *data)
+{
+    resource_mod *modifiers = NULL;
+    int n;
+    char zName[32];
+
+    READ_INT(data->store, &n);
+    if (n>0) {
+        resource_mod * mod = modifiers = calloc(n + 1, sizeof(resource_mod));
+        while (n--) {
+            int i;
+            READ_INT(data->store, &i);
+            mod->type = (resource_modifier_type)i;
+            READ_TOK(data->store, zName, sizeof(zName));
+            if (zName[0]) {
+                mod->btype = bt_get_or_create(zName);
+            }
+            mod->race = read_race_reference(data->store);
+            read_fraction(data->store, &mod->value);
+            ++mod;
+        }
+    }
+    return modifiers;
+}
+
+void write_modifiers(gamedata *data, const resource_mod *modifiers)
+{
+    if (modifiers) {
+        const resource_mod * mod;
+        int n = 0;
+        for (mod = modifiers; mod->type != RMT_END; ++mod) {
+            ++n;
+        }
+        WRITE_INT(data->store, n);
+        for (mod = modifiers; mod->type != RMT_END; ++mod) {
+            WRITE_INT(data->store, mod->type);
+            WRITE_TOK(data->store, mod->btype ? mod->btype->_name : NULL);
+            write_race_reference(mod->race, data->store);
+            write_fraction(data->store, mod->value);
+        }
+    }
+    else {
+        WRITE_INT(data->store, 0);
     }
 }

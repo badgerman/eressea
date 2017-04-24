@@ -17,6 +17,7 @@ extern "C" {
 
     struct building_type;
     struct race;
+    struct gamedata;
 
     enum {
         RM_USED = 1 << 0,           /* resource has been used */
@@ -77,6 +78,9 @@ extern "C" {
         struct order *ord);
     int limit_resource(const struct region *r, const struct resource_type *rtype);
     void produce_resource(struct region *r, const struct resource_type *rtype, int amount);
+
+    void write_modifiers(struct gamedata *data, const struct resource_mod *modifiers);
+    struct resource_mod *read_modifiers(struct gamedata *data);
 
 #ifdef __cplusplus
 }

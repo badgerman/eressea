@@ -576,7 +576,7 @@ void write_race_reference(const race * rc, struct storage *store)
 
 race *read_race_reference(struct storage *store)
 {
-    char zName[20];
+    char zName[32];
     READ_TOK(store, zName, sizeof(zName));
 
     if (strcmp(zName, "none") != 0) {
@@ -689,7 +689,7 @@ struct race * read_race(struct gamedata *data)
     race * rc;
     float flt;
     int i, den, num;
-    char zName[64];
+    char zName[32];
 
     READ_TOK(data->store, zName, sizeof(zName));
     rc = rc_get_or_create(zName);

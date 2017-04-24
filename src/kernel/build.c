@@ -1012,16 +1012,13 @@ void free_construction(struct construction *cons)
 
 construction *read_construction(gamedata *data) 
 {
-    char zName[64];
+    char zName[32];
     construction *top = NULL, **iter = &top;
-    int n;
+    int i;
 
-    READ_INT(data->store, &n);
-    while (n-- > 0) {
+    READ_INT(data->store, &i);
+    while (i != NOSKILL) {
         construction *cons = calloc(1, sizeof(construction));
-        int i;
-        
-        READ_INT(data->store, &i);
         cons->skill = (skill_t)i;
         READ_INT(data->store, &cons->minskill);
         READ_INT(data->store, &cons->maxsize);
@@ -1038,19 +1035,13 @@ construction *read_construction(gamedata *data)
         }
         *iter = cons;
         iter = &cons->improvement;
+        READ_INT(data->store, &i);
     }
     return top;
 }
 
 void write_construction(gamedata *data, construction *cons)
 {
-    construction *iter = cons;
-    int i;
-    assert(cons);
-    for (i=0;iter;++i) {
-        iter = cons->improvement;
-    }
-    WRITE_INT(data->store, i);
     while (cons) {
         WRITE_INT(data->store, cons->skill);
         WRITE_INT(data->store, cons->minskill);
@@ -1072,4 +1063,5 @@ void write_construction(gamedata *data, construction *cons)
         assert(!cons->btype);
         cons = cons->improvement;
     }
+    WRITE_INT(data->store, NOSKILL);
 }

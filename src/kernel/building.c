@@ -29,6 +29,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "faction.h"
 #include "race.h"
 #include "region.h"
+#include "resources.h"
 #include "skill.h"
 #include "terrain.h"
 #include "lighthouse.h"
@@ -885,6 +886,26 @@ int cmp_current_owner(const building * b, const building * a)
     return -1;
 }
 
+static void write_maintenance(struct gamedata *data, const maintenance *arr)
+{
+    if (arr) {
+        const maintenance *m;
+        int n = 0;
+        for (m = arr; m->rtype != NULL; ++m) {
+            ++n;
+        }
+        WRITE_INT(data->store, n);
+        for (m = arr; m->rtype != NULL; ++m) {
+            WRITE_TOK(data->store, m->rtype->_name);
+            WRITE_INT(data->store, m->number);
+            WRITE_INT(data->store, m->flags);
+        }
+    }
+    else {
+        WRITE_INT(data->store, 0);
+    }
+}
+
 static void bt_write(struct gamedata *data, const building_type *btype)
 {
     WRITE_INT(data->store, btype->flags);
@@ -895,12 +916,34 @@ static void bt_write(struct gamedata *data, const building_type *btype)
     WRITE_INT(data->store, btype->fumblebonus);
     WRITE_FLT(data->store, (float)btype->auraregen);
     write_fraction(data->store, btype->magres);
+    write_construction(data, btype->construction);
+    write_modifiers(data, btype->modifiers);
+    write_maintenance(data, btype->maintenance);
+}
+
+static maintenance * read_maintenance(gamedata *data)
+{
+    int n;
+    char zName[32];
+    maintenance *arr = NULL;
+    READ_INT(data->store, &n);
+    if (n > 0) {
+        maintenance *m = arr = calloc(n + 1, sizeof(maintenance));
+        while (n--) {
+            READ_TOK(data->store, zName, sizeof(zName));
+            m->rtype = rt_get_or_create(zName);
+            READ_INT(data->store, &m->number);
+            READ_INT(data->store, &m->flags);
+            ++m;
+        }
+    }
+    return arr;
 }
 
 static building_type * bt_read(struct gamedata *data)
 {
     building_type *btype;
-    char zName[64];
+    char zName[32];
     int i;
     float flt;
 
@@ -918,7 +961,9 @@ static building_type * bt_read(struct gamedata *data)
     READ_FLT(data->store, &flt);
     btype->auraregen = flt;
     read_fraction(data->store, &btype->magres);
-
+    btype->construction = read_construction(data);
+    btype->modifiers = read_modifiers(data);
+    btype->maintenance = read_maintenance(data);
     return btype;
 }
 
