@@ -5,9 +5,15 @@
 #include <kernel/xmlreader.h>
 #include <util/xml.h>
 #endif
+#include <util/log.h>
+
+#include <kernel/building.h>
 #include <kernel/race.h>
+#include <kernel/item.h>
 #include <kernel/rules.h>
+
 #include <races/races.h>
+#include <items/weapons.h>
 
 #include <storage.h>
 
@@ -20,7 +26,11 @@ static int usage(void) {
 int main(int argc, char **argv) {
     const char *mode;
 
+    log_to_file(LOG_LEVELS | LOG_FLUSH | LOG_BRIEF, stderr);
     register_races();
+    register_resources();
+    register_weapons();
+    register_buildings();
 #ifdef USE_LIBXML2
     register_xmlreader();
 #endif

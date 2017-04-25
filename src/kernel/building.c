@@ -109,6 +109,13 @@ static void free_buildingtype(void *ptr) {
     free_construction(btype->construction);
     free(btype->maintenance);
     free(btype->_name);
+    if (btype->names) {
+        int i;
+        for (i = 0; btype->names[i].str; ++i) {
+            free(btype->names[i].str);
+        }
+        free(btype->names);
+    }
     free(btype);
 }
 
@@ -168,6 +175,13 @@ const char *buildingtype(const building_type * btype, const building * b, int bs
     assert(btype);
 
     s = btype->_name;
+    if (btype->names) {
+        int i = 0;
+        while (btype->names[i].str && btype->names[i].maxsize < bsize) ++i;
+        if (btype->names[i].str) {
+            return btype->names[i].str;
+        }
+    }
     if (btype->name) {
         s = btype->name(btype, b, bsize);
     }

@@ -53,6 +53,7 @@ extern "C" {
          * can be built (weapons, armour) per turn, must not be NULL,
          * but point to the same type again:
          *   const_sword.improvement = &const_sword
+         * (enno) I disbelieve this statement!
          * last level of a building points to NULL, as do objects of
          * an unlimited size.
          */
