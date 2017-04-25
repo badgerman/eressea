@@ -1,10 +1,8 @@
 <?xml version="1.0"?>
 <eressea xmlns:xi="http://www.w3.org/2001/XInclude">
-  <xi:include href="config://core/common/buildings.xml"/>
   <xi:include href="config://game/familiars.xml"/>
   <xi:include href="config://game/ships.xml"/>
   <xi:include href="config://core/calendar.xml"/>
-  <xi:include href="config://game/buildings.xml"/>
   <xi:include href="config://game/equipment.xml"/>
   <xi:include href="config://game/spells.xml"/>
 
