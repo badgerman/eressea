@@ -459,6 +459,25 @@ static void test_building_effsize(CuTest *tc) {
     test_cleanup();
 }
 
+static void test_building_type_names(CuTest *tc) {
+    building_type *btype;
+    test_setup();
+    btype = test_create_buildingtype("castle");
+    CuAssertStrEquals(tc, "castle", buildingtype(btype, NULL, 0));
+    CuAssertStrEquals(tc, "castle", buildingtype(btype, NULL, 10));
+    btype->names = calloc(3, sizeof(struct names));
+    btype->names[0].maxsize = 2;
+    btype->names[0].str = strdup("site");
+    btype->names[1].maxsize = 10;
+    btype->names[1].str = strdup("tower");
+    btype->names[2].maxsize = 0;
+    CuAssertStrEquals(tc, "site", buildingtype(btype, NULL, 2));
+    CuAssertStrEquals(tc, "tower", buildingtype(btype, NULL, 3));
+    CuAssertStrEquals(tc, "tower", buildingtype(btype, NULL, 10));
+    CuAssertStrEquals(tc, "castle", buildingtype(btype, NULL, 11));
+    test_cleanup();
+}
+
 CuSuite *get_building_suite(void)
 {
     CuSuite *suite = CuSuiteNew();
@@ -476,6 +495,7 @@ CuSuite *get_building_suite(void)
     SUITE_ADD_TEST(suite, test_buildingowner_goes_to_same_faction_after_leave);
     SUITE_ADD_TEST(suite, test_buildingowner_goes_to_empty_unit_after_leave);
     SUITE_ADD_TEST(suite, test_building_type);
+    SUITE_ADD_TEST(suite, test_building_type_names);
     SUITE_ADD_TEST(suite, test_active_building);
     SUITE_ADD_TEST(suite, test_buildingtype_exists);
     SUITE_ADD_TEST(suite, test_safe_building);
