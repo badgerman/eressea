@@ -1004,6 +1004,9 @@ void free_construction(struct construction *cons)
 {
     while (cons) {
         construction *next = cons->improvement;
+        if (cons->type == CONS_BUILDING) {
+            free(cons->extra.name);
+        }
         free(cons->materials);
         free(cons);
         cons = next;
@@ -1060,7 +1063,7 @@ void write_construction(gamedata *data, construction *cons)
         else {
             WRITE_INT(data->store, 0);
         }
-        assert(!cons->btype);
+        assert(cons->type!=CONS_ITEM || !cons->extra.btype);
         cons = cons->improvement;
     }
     WRITE_INT(data->store, NOSKILL);

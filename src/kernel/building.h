@@ -55,11 +55,6 @@ extern "C" {
 
     typedef struct building_type {
         char *_name;
-        struct names {
-            char *str;
-            int maxsize;
-        } * names;
-
         int flags;                  /* flags */
         int capacity;               /* Kapazit�t pro Gr��enpunkt */
         int maxcapacity;            /* Max. Kapazit�t */

@@ -109,13 +109,6 @@ static void free_buildingtype(void *ptr) {
     free_construction(btype->construction);
     free(btype->maintenance);
     free(btype->_name);
-    if (btype->names) {
-        int i;
-        for (i = 0; btype->names[i].str; ++i) {
-            free(btype->names[i].str);
-        }
-        free(btype->names);
-    }
     free(btype);
 }
 

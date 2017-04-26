@@ -30,7 +30,6 @@ int main(int argc, char **argv) {
     register_races();
     register_resources();
     register_weapons();
-    register_buildings();
 #ifdef USE_LIBXML2
     register_xmlreader();
 #endif

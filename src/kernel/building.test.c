@@ -461,20 +461,28 @@ static void test_building_effsize(CuTest *tc) {
 
 static void test_building_type_names(CuTest *tc) {
     building_type *btype;
+    construction *cons;
+
     test_setup();
     btype = test_create_buildingtype("castle");
     CuAssertStrEquals(tc, "castle", buildingtype(btype, NULL, 0));
     CuAssertStrEquals(tc, "castle", buildingtype(btype, NULL, 10));
-    btype->names = calloc(3, sizeof(struct names));
-    btype->names[0].maxsize = 2;
-    btype->names[0].str = strdup("site");
-    btype->names[1].maxsize = 10;
-    btype->names[1].str = strdup("tower");
-    btype->names[2].maxsize = 0;
-    CuAssertStrEquals(tc, "site", buildingtype(btype, NULL, 2));
-    CuAssertStrEquals(tc, "tower", buildingtype(btype, NULL, 3));
+    cons = btype->construction = calloc(1, sizeof(construction));
+    cons->type = CONS_BUILDING;
+    cons->maxsize = 2;
+    cons->extra.name = strdup("site");
+    cons = cons->improvement = calloc(1, sizeof(construction));
+    cons->type = CONS_BUILDING;
+    cons->maxsize = 8;
+    cons->extra.name = strdup("walls");
+    cons = cons->improvement = calloc(1, sizeof(construction));
+    cons->type = CONS_BUILDING;
+    cons->extra.name = strdup("tower");
+    cons->maxsize = -1;
+    CuAssertStrEquals(tc, "site", buildingtype(btype, NULL, 1));
+    CuAssertStrEquals(tc, "walls", buildingtype(btype, NULL, 2));
+    CuAssertStrEquals(tc, "walls", buildingtype(btype, NULL, 9));
     CuAssertStrEquals(tc, "tower", buildingtype(btype, NULL, 10));
-    CuAssertStrEquals(tc, "castle", buildingtype(btype, NULL, 11));
     test_cleanup();
 }
 
