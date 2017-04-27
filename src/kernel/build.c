@@ -875,7 +875,7 @@ static void build_ship(unit * u, ship * sh, int want)
     const construction *construction = sh->type->construction;
     int size = (sh->size * DAMAGE_SCALE - sh->damage) / DAMAGE_SCALE;
     int n;
-    int can = build(u, construction, CONS_OTHER, size, want, 0);
+    int can = build(u, construction, CONS_SHIP, size, want, 0);
 
     if ((n = construction->maxsize - sh->size) > 0 && can > 0) {
         if (can >= n) {
@@ -1043,6 +1043,7 @@ construction *read_construction(gamedata *data, construct_t type)
                     cons->extra.name = strdup(zName);
                 }
                 break;
+            case CONS_SHIP:
             case CONS_ITEM:
             case CONS_OTHER:
             default:
@@ -1084,6 +1085,7 @@ void write_construction(gamedata *data, construction *cons, construct_t type)
             case CONS_BUILDING:
                 WRITE_TOK(data->store, cons->extra.name);
                 break;
+            case CONS_SHIP:
             case CONS_OTHER:
             default:
                 /* no data */

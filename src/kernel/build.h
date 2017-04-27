@@ -41,7 +41,8 @@ extern "C" {
     typedef enum construct_t {
         CONS_OTHER,
         CONS_ITEM,
-        CONS_BUILDING
+        CONS_BUILDING,
+        CONS_SHIP
     } construct_t;
 
     typedef struct construction {

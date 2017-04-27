@@ -581,7 +581,8 @@ static int parse_ships(xmlDocPtr doc)
             /* reading eressea/ships/ship/construction */
             xpath->node = node;
             result = xmlXPathEvalExpression(BAD_CAST "construction", xpath);
-            xml_readconstruction(xpath, result->nodesetval, &st->construction, CONS_OTHER);
+            xml_readconstruction(xpath, result->nodesetval,
+                    &st->construction, CONS_SHIP);
             xmlXPathFreeObject(result);
 
             for (child = node->children; child; child = child->next) {
