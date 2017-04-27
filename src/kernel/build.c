@@ -1013,7 +1013,7 @@ void free_construction(struct construction *cons, construct_t type)
     }
 }
 
-construction *read_construction(gamedata *data, construct_t type) 
+construction *read_construction(gamedata *data, construct_t type)
 {
     char zName[32];
     construction *top = NULL, **iter = &top;
@@ -1039,7 +1039,9 @@ construction *read_construction(gamedata *data, construct_t type)
         switch (type) {
             case CONS_BUILDING:
                 READ_TOK(data->store, zName, sizeof(zName));
-                cons->extra.name = strdup(zName);
+                if (zName[0]) {
+                    cons->extra.name = strdup(zName);
+                }
                 break;
             case CONS_ITEM:
             case CONS_OTHER:

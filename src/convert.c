@@ -18,8 +18,10 @@
 #include <storage.h>
 
 #include <string.h>
+#include <stdio.h>
 
 static int usage(void) {
+    fputs("usage: convert rules config.xml catalog.xml [config.dat]\n", stderr);
     return -1;
 }
 
@@ -44,6 +46,8 @@ int main(int argc, char **argv) {
         read_xml(xmlfile, catalog);
         write_rules("rules.dat");
         return 0;
+    } else {
+        return usage();
     }
 #endif
     if (strcmp(mode, "po")==0) {
