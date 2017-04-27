@@ -45,7 +45,6 @@ extern "C" {
     } construct_t;
 
     typedef struct construction {
-        construct_t type;
         skill_t skill;              /* skill req'd per point of size */
         int minskill;               /* skill req'd per point of size */
 
@@ -71,10 +70,12 @@ extern "C" {
          */
     } construction;
 
-    struct construction *read_construction(struct gamedata *data);
-    void write_construction(struct gamedata *data, struct construction *cons);
+    struct construction *read_construction(struct gamedata *data,
+            construct_t type);
+    void write_construction(struct gamedata *data, 
+            struct construction *cons, construct_t type);
 
-    void free_construction(struct construction *cons);
+    void free_construction(struct construction *cons, construct_t type);
     int destroy_cmd(struct unit *u, struct order *ord);
     int leave_cmd(struct unit *u, struct order *ord);
 
@@ -90,7 +91,8 @@ extern "C" {
     void sunhash(struct ship *sh);
     int roqf_factor(void);
 
-    int build(struct unit *u, const construction * ctype, int completed, int want, int skill_mod);
+    int build(struct unit *u, const construction * ctype,
+            construct_t type, int completed, int want, int skill_mod);
     int maxbuild(const struct unit *u, const construction * cons);
     struct message *msg_materials_required(struct unit *u, struct order *ord,
         const struct construction *ctype, int multi);

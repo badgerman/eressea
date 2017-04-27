@@ -106,7 +106,7 @@ void bt_register(building_type * type)
 
 static void free_buildingtype(void *ptr) {
     building_type *btype = (building_type *)ptr;
-    free_construction(btype->construction);
+    free_construction(btype->construction, CONS_BUILDING);
     free(btype->maintenance);
     free(btype->_name);
     free(btype);
@@ -888,7 +888,7 @@ static void bt_write(struct gamedata *data, const building_type *btype)
     WRITE_INT(data->store, btype->fumblebonus);
     WRITE_FLT(data->store, (float)btype->auraregen);
     write_fraction(data->store, btype->magres);
-    write_construction(data, btype->construction);
+    write_construction(data, btype->construction, CONS_BUILDING);
     write_modifiers(data, btype->modifiers);
     write_maintenance(data, btype->maintenance);
 }
@@ -934,7 +934,7 @@ static building_type * bt_read(struct gamedata *data)
     READ_FLT(data->store, &flt);
     btype->auraregen = flt;
     read_fraction(data->store, &btype->magres);
-    btype->construction = read_construction(data);
+    btype->construction = read_construction(data, CONS_BUILDING);
     btype->modifiers = read_modifiers(data);
     btype->maintenance = read_maintenance(data);
     return btype;

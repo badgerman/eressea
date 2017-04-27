@@ -503,7 +503,7 @@ static int count_materials(unit *u, const construction *type, int n, int complet
 * of the first object have already been finished. return the
 * actual size that could be built.
 */
-int build(unit * u, const construction * ctype, int completed, int want, int skill_mod)
+int build(unit * u, const construction * ctype, construct_t type, int completed, int want, int skill_mod)
 {
     const construction *con = ctype;
     int skills = INT_MAX;         /* number of skill points remainig */
@@ -516,7 +516,7 @@ int build(unit * u, const construction * ctype, int completed, int want, int ski
         return ENOMATERIALS;
     if (con->improvement == NULL && completed == con->maxsize)
         return ECOMPLETE;
-    if (con->type==CONS_ITEM && con->extra.btype) {
+    if (type==CONS_ITEM && con->extra.btype) {
         building *b;
         if (!u->building || u->building->type != con->extra.btype) {
             return EBUILDINGREQ;
@@ -790,7 +790,7 @@ build_building(unit * u, const building_type * btype, int id, int want, order * 
             }
         }
     }
-    built = build(u, btype->construction, built, n, 0);
+    built = build(u, btype->construction, CONS_BUILDING, built, n, 0);
 
     switch (built) {
     case ECOMPLETE:
@@ -875,7 +875,7 @@ static void build_ship(unit * u, ship * sh, int want)
     const construction *construction = sh->type->construction;
     int size = (sh->size * DAMAGE_SCALE - sh->damage) / DAMAGE_SCALE;
     int n;
-    int can = build(u, construction, size, want, 0);
+    int can = build(u, construction, CONS_OTHER, size, want, 0);
 
     if ((n = construction->maxsize - sh->size) > 0 && can > 0) {
         if (can >= n) {
@@ -1000,11 +1000,11 @@ void continue_ship(unit * u, int want)
     build_ship(u, sh, want);
 }
 
-void free_construction(struct construction *cons)
+void free_construction(struct construction *cons, construct_t type)
 {
     while (cons) {
         construction *next = cons->improvement;
-        if (cons->type == CONS_BUILDING) {
+        if (type == CONS_BUILDING) {
             free(cons->extra.name);
         }
         free(cons->materials);
@@ -1013,7 +1013,7 @@ void free_construction(struct construction *cons)
     }
 }
 
-construction *read_construction(gamedata *data) 
+construction *read_construction(gamedata *data, construct_t type) 
 {
     char zName[32];
     construction *top = NULL, **iter = &top;
@@ -1036,6 +1036,18 @@ construction *read_construction(gamedata *data)
                 ++req;
             }
         }
+        switch (type) {
+            case CONS_BUILDING:
+                READ_TOK(data->store, zName, sizeof(zName));
+                cons->extra.name = strdup(zName);
+                break;
+            case CONS_ITEM:
+            case CONS_OTHER:
+            default:
+                /* no extra data */
+                break;
+        }
+
         *iter = cons;
         iter = &cons->improvement;
         READ_INT(data->store, &i);
@@ -1043,7 +1055,7 @@ construction *read_construction(gamedata *data)
     return top;
 }
 
-void write_construction(gamedata *data, construction *cons)
+void write_construction(gamedata *data, construction *cons, construct_t type)
 {
     while (cons) {
         WRITE_INT(data->store, cons->skill);
@@ -1063,7 +1075,19 @@ void write_construction(gamedata *data, construction *cons)
         else {
             WRITE_INT(data->store, 0);
         }
-        assert(cons->type!=CONS_ITEM || !cons->extra.btype);
+        switch (type) {
+            case CONS_ITEM:
+                assert(!cons->extra.btype);
+                break;
+            case CONS_BUILDING:
+                WRITE_TOK(data->store, cons->extra.name);
+                break;
+            case CONS_OTHER:
+            default:
+                /* no data */
+                break;
+        }
+
         cons = cons->improvement;
     }
     WRITE_INT(data->store, NOSKILL);

@@ -241,7 +241,6 @@ construction ** consPtr, construct_t type)
         *consPtr = con = (construction *)calloc(sizeof(construction), 1);
         consPtr = &con->improvement;
 
-        con->type = type;
         con->skill = sk;
         con->maxsize = xml_ivalue(node, "maxsize", -1);
         con->minskill = xml_ivalue(node, "minskill", -1);

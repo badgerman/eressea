@@ -967,7 +967,7 @@ void write_items(struct storage *store, item * ilist)
 
 static void free_itype(item_type *itype) {
     assert(itype);
-    free(itype->construction);
+    free_construction(itype->construction, CONS_ITEM);
     free(itype->_appearance[0]);
     free(itype->_appearance[1]);
     free(itype);
@@ -1053,7 +1053,7 @@ resource_type * read_resource(gamedata *data)
         }
 
         if (itype->flags & ITF_CONSTRUCTION) {
-            itype->construction = read_construction(data);
+            itype->construction = read_construction(data, CONS_ITEM);
         }
 
         rtype->modifiers = read_modifiers(data);
@@ -1117,7 +1117,7 @@ void write_resource(gamedata *data, const resource_type *rtype)
         WRITE_TOK(data->store, itype->_appearance[1]);
 
         if (itype->flags & ITF_CONSTRUCTION) {
-            write_construction(data, itype->construction);
+            write_construction(data, itype->construction, CONS_ITEM);
         }
         write_modifiers(data, rtype->modifiers);
         if (rtype->wtype) {
