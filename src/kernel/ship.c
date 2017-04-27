@@ -35,6 +35,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <util/base36.h>
 #include <util/bsdstring.h>
 #include <util/event.h>
+#include <util/gamedata.h>
 #include <util/language.h>
 #include <util/lists.h>
 #include <util/umlaut.h>
@@ -174,6 +175,80 @@ void damage_ship(ship * sh, double percent)
     double damage =
         DAMAGE_SCALE * sh->type->damage * percent * sh->size + sh->damage + .000001;
     sh->damage = (int)damage;
+}
+
+static ship_type * st_read(gamedata *data) {
+    char zName[32];
+    ship_type *stype;
+    int i;
+
+    READ_INT(data->store, &i);
+    if (i<0) {
+        return NULL;
+    }
+    READ_TOK(data->store, zName, sizeof(zName));
+    stype = st_get_or_create(zName);
+    stype->flags = i; 
+    READ_INT(data->store, &stype->range);
+    READ_INT(data->store, &stype->range_max);
+    READ_INT(data->store, &stype->combat);
+    READ_INT(data->store, &stype->fishing);
+    READ_INT(data->store, &stype->cabins);
+    READ_INT(data->store, &stype->cargo);
+    READ_INT(data->store, &stype->cptskill);
+    READ_INT(data->store, &stype->minskill);
+    READ_INT(data->store, &stype->sumskill);
+    READ_INT(data->store, &stype->at_bonus);
+    READ_INT(data->store, &stype->df_bonus);
+    READ_FLT(data->store, &stype->tac_bonus);
+    READ_FLT(data->store, &stype->storm);
+    READ_FLT(data->store, &stype->damage);
+    stype->construction = read_construction(data, 
+            CONS_SHIP);
+    /* TODO: coasts */
+    return stype;
+}
+
+static void st_write(gamedata *data, const ship_type *stype) {
+    WRITE_INT(data->store, stype->flags);
+    WRITE_TOK(data->store, stype->_name);
+    WRITE_INT(data->store, stype->range);
+    WRITE_INT(data->store, stype->range_max);
+    WRITE_INT(data->store, stype->combat);
+    WRITE_INT(data->store, stype->fishing);
+    WRITE_INT(data->store, stype->cabins);
+    WRITE_INT(data->store, stype->cargo);
+    WRITE_INT(data->store, stype->cptskill);
+    WRITE_INT(data->store, stype->minskill);
+    WRITE_INT(data->store, stype->sumskill);
+    WRITE_INT(data->store, stype->at_bonus);
+    WRITE_INT(data->store, stype->df_bonus);
+    WRITE_FLT(data->store, stype->tac_bonus);
+    WRITE_FLT(data->store, stype->storm);
+    WRITE_FLT(data->store, stype->damage);
+    write_construction(data, stype->construction, CONS_SHIP);
+    /* TODO: coasts */
+} 
+
+static bool write_ship_cb(void *elem, void *cbdata) {
+    const ship_type *stype = (const ship_type *)elem;
+    struct gamedata *data = (struct gamedata *)cbdata;
+    st_write(data, stype);
+    return true;
+}
+
+void write_ships(gamedata *data)
+{
+    selist_foreach_ex(shiptypes, write_ship_cb, data);
+    WRITE_INT(data->store, -1);
+}
+
+void read_ships(gamedata *data)
+{
+    ship_type *stype;
+    do {
+        stype = st_read(data);
+    } while (stype);
 }
 
 /* Alte Schiffstypen: */

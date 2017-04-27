@@ -19,6 +19,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef H_KRNL_SHIP
 #define H_KRNL_SHIP
 
+struct gamedata;
+
 #include "types.h"
 #include "direction.h"
 
@@ -44,8 +46,8 @@ extern "C" {
         int combat;                 /* modifier for combat */
         int fishing;                /* weekly income from fishing */
 
-        double storm;               /* multiplier for chance to drift in storm */
-        double damage;              /* multiplier for damage taken by the ship */
+        float storm;               /* multiplier for chance to drift in storm */
+        float damage;              /* multiplier for damage taken by the ship */
 
         int cabins;                 /* max. cabins (weight) */
         int cargo;                  /* max. cargo (weight) */
@@ -131,6 +133,10 @@ extern "C" {
     int crew_skill(const struct ship *sh);
 
     int ship_damage_percent(const struct ship *ship);
+
+    void write_ships(struct gamedata *data);
+    void read_ships(struct gamedata *data);
+
 #ifdef __cplusplus
 }
 #endif

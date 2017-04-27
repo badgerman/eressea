@@ -44,6 +44,7 @@ int write_rules(const char *filename) {
 
     write_resources(data);
     write_buildings(data);
+    write_ships(data);
     gamedata_close(data);
     return 0;
 }
@@ -70,6 +71,7 @@ int read_rules(const char *filename)
 
     read_resources(data);
     read_buildings(data);
+    read_ships(data);
     gamedata_close(data);
     return 0;
 }
