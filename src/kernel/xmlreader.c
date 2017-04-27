@@ -563,7 +563,7 @@ static int parse_ships(xmlDocPtr doc)
             st->cabins = xml_ivalue(node, "cabins", 0) * PERSON_WEIGHT;
             st->cargo = xml_ivalue(node, "cargo", st->cargo);
             st->combat = xml_ivalue(node, "combat", st->combat);
-            st->damage = xml_fvalue(node, "damage", st->damage);
+            st->damage = (float)xml_fvalue(node, "damage", st->damage);
             if (xml_bvalue(node, "nocoast", false))
                 st->flags |= SFL_NOCOAST;
             if (xml_bvalue(node, "fly", false))
@@ -576,7 +576,7 @@ static int parse_ships(xmlDocPtr doc)
             st->sumskill = xml_ivalue(node, "sumskill", st->sumskill);
             st->range = xml_ivalue(node, "range", st->range);
             st->range_max = xml_ivalue(node, "maxrange", st->range_max);
-            st->storm = xml_fvalue(node, "storm", st->storm);
+            st->storm = (float)xml_fvalue(node, "storm", st->storm);
 
             /* reading eressea/ships/ship/construction */
             xpath->node = node;

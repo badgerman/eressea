@@ -37,8 +37,11 @@ int main(int argc, char **argv) {
 #endif
     if (argc < 2) return usage();
     mode = argv[1];
+    if (strcmp(mode, "po")==0) {
+        return 0;
+    }
 #ifdef USE_LIBXML2
-    if (strcmp(mode, "rules")==0) {
+    else if (strcmp(mode, "rules") == 0) {
         const char *xmlfile, *catalog;
         if (argc < 4) return usage();
         xmlfile = argv[2];
@@ -46,12 +49,7 @@ int main(int argc, char **argv) {
         read_xml(xmlfile, catalog);
         write_rules("rules.dat");
         return 0;
-    } else {
-        return usage();
     }
 #endif
-    if (strcmp(mode, "po")==0) {
-        return 0;
-    }
     return usage();
 }
