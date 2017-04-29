@@ -471,7 +471,7 @@ int bt_effsize(const building_type * btype, const building * b, int bsize)
         bsize = adjust_size(b, bsize);
     }
 
-    if (!cons || !cons->improvement) {
+    if (!cons) {
         return 0;
     }
 
@@ -525,10 +525,10 @@ static unit *building_owner_ex(const building * bld, const struct faction * last
     }
     if (!heir && config_token("rules.region_owner_pay_building", bld->type->_name)) {
         if (rule_region_owners()) {
-            u = building_owner(largestbuilding(bld->region, &cmp_taxes, false));
+            u = building_owner(largestbuilding(bld->region, cmp_taxes, false));
         }
         else {
-            u = building_owner(largestbuilding(bld->region, &cmp_wage, false));
+            u = building_owner(largestbuilding(bld->region, cmp_wage, false));
         }
         if (u) {
             heir = u;
@@ -647,7 +647,7 @@ building *largestbuilding(const region * r, cmp_building_cb cmp_gt,
 {
     building *b, *best = NULL;
 
-    for (b = rbuildings(r); b; b = b->next) {
+    for (b = r->buildings; b; b = b->next) {
         if (cmp_gt(b, best) <= 0)
             continue;
         if (!imaginary) {
@@ -675,7 +675,7 @@ static const int wagetable[7][4] = {
 static int
 default_wage(const region * r, const faction * f, const race * rc, int in_turn)
 {
-    building *b = largestbuilding(r, &cmp_wage, false);
+    building *b = largestbuilding(r, cmp_wage, false);
     int esize = 0;
     double wage;
     static int ct_cache;
@@ -786,6 +786,12 @@ bool is_owner_building(const struct building * b)
     return false;
 }
 
+int building_taxes(const building *b) {
+    assert(b);
+    return b->type->taxes;
+}
+
+
 int cmp_taxes(const building * b, const building * a)
 {
     faction *f = region_get_owner(b->region);
@@ -795,14 +801,12 @@ int cmp_taxes(const building * b, const building * a)
             return -1;
         }
         else if (a) {
-            int newsize = buildingeffsize(b, false);
-            double newtaxes = b->type->taxes(b, newsize);
-            int oldsize = buildingeffsize(a, false);
-            double oldtaxes = a->type->taxes(a, oldsize);
+            int newtaxes = building_taxes(b);
+            int oldtaxes = building_taxes(a);
 
-            if (newtaxes < oldtaxes)
+            if (newtaxes > oldtaxes)
                 return -1;
-            else if (newtaxes > oldtaxes)
+            else if (newtaxes < oldtaxes)
                 return 1;
             else if (b->size < a->size)
                 return -1;
@@ -811,8 +815,9 @@ int cmp_taxes(const building * b, const building * a)
             else {
                 if (u && u->faction == f) {
                     u = building_owner(a);
-                    if (u && u->faction == f)
-                        return -1;
+                    if (u && u->faction == f) {
+                        return 0;
+                    }
                     return 1;
                 }
             }
@@ -821,7 +826,7 @@ int cmp_taxes(const building * b, const building * a)
             return 1;
         }
     }
-    return -1;
+    return 0;
 }
 
 int cmp_current_owner(const building * b, const building * a)
@@ -834,10 +839,8 @@ int cmp_current_owner(const building * b, const building * a)
         if (!u || u->faction != f)
             return -1;
         if (a) {
-            int newsize = buildingeffsize(b, false);
-            double newtaxes = b->type->taxes(b, newsize);
-            int oldsize = buildingeffsize(a, false);
-            double oldtaxes = a->type->taxes(a, oldsize);
+            int newtaxes = building_taxes(b);
+            int oldtaxes = building_taxes(a);
 
             if (newtaxes > oldtaxes) {
                 return 1;
@@ -845,16 +848,13 @@ int cmp_current_owner(const building * b, const building * a)
             if (newtaxes < oldtaxes) {
                 return -1;
             }
-            if (newsize != oldsize) {
-                return newsize - oldsize;
-            }
             return (b->size - a->size);
         }
         else {
             return 1;
         }
     }
-    return -1;
+    return 0;
 }
 
 static void write_maintenance(struct gamedata *data, const maintenance *arr)
