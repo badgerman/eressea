@@ -53,19 +53,19 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* util includes */
 #include <util/attrib.h>
+#include <util/base36.h>
+#include <util/event.h>
 #include <util/gamedata.h>
 #include <util/language.h>
 #include <util/lists.h>
 #include <util/log.h>
 #include <util/parser.h>
-#include <selist.h>
-#include <util/resolve.h>
 #include <util/rand.h>
+#include <util/resolve.h>
 #include <util/rng.h>
 #include <util/umlaut.h>
-#include <util/base36.h>
-#include <util/event.h>
 
+#include <selist.h>
 #include <critbit.h>
 #include <storage.h>
 

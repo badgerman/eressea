@@ -21,11 +21,14 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "spell.h"
 
 /* util includes */
-#include <critbit.h>
-#include <util/strings.h>
+#include <util/gamedata.h>
 #include <util/language.h>
 #include <util/log.h>
+#include <util/strings.h>
 #include <util/umlaut.h>
+
+#include <storage.h>
+#include <critbit.h>
 #include <selist.h>
 
 /* libc includes */
@@ -181,3 +184,29 @@ struct spell *spellref_get(struct spellref *spref)
     }
     return spref->sp;
 }
+
+static void write_spell(gamedata *data, spell *sp) {
+    assert(sp->sptyp > 0);
+    WRITE_INT(data->store, sp->sptyp);
+    WRITE_TOK(data->store, sp->sname);
+    WRITE_TOK(data->store, sp->syntax);
+    WRITE_TOK(data->store, sp->parameter);
+    WRITE_INT(data->store, sp->rank);
+}
+
+static bool write_spell_cb(void *el, void *cbdata) {
+    spell *sp = (spell *)el;
+    gamedata *data = (gamedata *)cbdata;
+    write_spell(data, sp);
+    return true;
+}
+
+void write_spells(gamedata *data) {
+    selist_foreach_ex(spells, write_spell_cb, data);
+    WRITE_INT(data->store, -1);
+}
+
+void read_spells(gamedata *data) {
+    assert(!"not implemented");
+}
+

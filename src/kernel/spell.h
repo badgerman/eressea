@@ -18,17 +18,24 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #ifndef H_KRNL_SPELL
 #define H_KRNL_SPELL
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
     struct castorder;
+    struct gamedata;
     struct unit;
     struct region;
     struct spell;
     struct spell_component;
     struct selist;
     struct attrib_type;
+
+    /** globals **/
+    extern struct attrib_type at_unitdissolve;
+    extern struct attrib_type at_wdwpyramid;
+    extern struct selist * spells;
 
     typedef int(*spell_f)(struct castorder * co);
     typedef void(*fumble_f)(const struct castorder * co);
@@ -61,11 +68,9 @@ extern "C" {
     struct spell * find_spellbyid(unsigned int i);
     void add_spell(struct selist **slistp, spell * sp);
     void free_spells(void);
+    void write_spells(struct gamedata *data);
+    void read_spells(struct gamedata *data);
 
-    /** globals **/
-    extern struct attrib_type at_unitdissolve;
-    extern struct attrib_type at_wdwpyramid;
-    extern struct selist * spells;
 #ifdef __cplusplus
 }
 #endif
