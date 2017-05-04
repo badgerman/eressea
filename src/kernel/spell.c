@@ -206,6 +206,25 @@ struct spell *spellref_get(struct spellref *spref)
     return spref->sp;
 }
 
+static spell *read_spell(gamedata *data) {
+    spell *sp;
+    int i;
+    char zName[20];
+    READ_INT(data->store, &i);
+    if (i<0) {
+        return NULL;;
+    }
+    READ_TOK(data->store, zName, sizeof(zName));
+    sp = create_spell(zName);
+    sp->sptyp = i;
+    READ_TOK(data->store, zName, sizeof(zName));
+    sp->syntax = strdup(zName);
+    READ_TOK(data->store, zName, sizeof(zName));
+    sp->parameter = strdup(zName);
+    READ_INT(data->store, &sp->rank);
+    return sp;
+}
+
 static void write_spell(gamedata *data, spell *sp) {
     assert(sp->sptyp > 0);
     WRITE_INT(data->store, sp->sptyp);
@@ -228,6 +247,10 @@ void write_spells(gamedata *data) {
 }
 
 void read_spells(gamedata *data) {
-    assert(!"not implemented");
+    spell *sp;
+
+    do {
+        sp = read_spell(data);
+    } while (sp);
 }
 
