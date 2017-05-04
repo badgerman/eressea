@@ -3,7 +3,6 @@
   <xi:include href="config://game/familiars.xml"/>
   <xi:include href="config://core/calendar.xml"/>
   <xi:include href="config://game/equipment.xml"/>
-  <xi:include href="config://game/spells.xml"/>
 
   <calendar name="thirdage" newyear="month_1" start="1"/>
   <rules>

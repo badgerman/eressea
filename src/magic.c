@@ -3022,6 +3022,26 @@ int cast_spell(struct castorder *co)
 
 static critbit_tree cb_spellbooks;
 
+static int write_spellbook_cb(const void *match, const void *key,
+        size_t keylen, void *cbdata)
+{
+    gamedata *data = (gamedata *)cbdata;
+    const spellbook *sb;
+    
+    cb_get_kv(match, &sb, sizeof(sb));
+    write_spellbook(sb, data->store);
+    return 0;
+}
+
+void write_spellbooks(gamedata *data)
+{
+    cb_foreach(&cb_spellbooks, "", 0, write_spellbook_cb, data);
+}
+
+void read_spellbooks(gamedata *data)
+{
+}
+
 spellbook * get_spellbook(const char * name)
 {
     char buffer[64];
@@ -3065,3 +3085,4 @@ void free_spellbooks(void)
     cb_foreach(&cb_spellbooks, "", 0, free_spellbook_cb, NULL);
     cb_clear(&cb_spellbooks);
 }
+

@@ -26,6 +26,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 extern "C" {
 #endif
 
+    struct gamedata;
+
     extern const char *magic_school[MAXMAGIETYP];
     extern struct attrib_type at_seenspell;
     extern struct attrib_type at_mage;
@@ -334,6 +336,8 @@ extern "C" {
     struct order *ord, const struct spllprm *spobj);
     bool FactionSpells(void);
 
+    void write_spellbooks(struct gamedata *data);
+    void read_spellbooks(struct gamedata *data);
     struct spellbook * get_spellbook(const char * name);
     void free_spellbooks(void);
     void free_spellbook(struct spellbook *sb);

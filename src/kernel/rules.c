@@ -47,6 +47,7 @@ int write_rules(const char *filename) {
     write_buildings(data);
     write_ships(data);
     write_spells(data);
+    write_spellbooks(data);
     gamedata_close(data);
     return 0;
 }
@@ -75,6 +76,7 @@ int read_rules(const char *filename)
     read_buildings(data);
     read_ships(data);
     read_spells(data);
+    read_spellbooks(data);
     gamedata_close(data);
     return 0;
 }

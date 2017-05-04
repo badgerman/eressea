@@ -1278,7 +1278,7 @@ static int parse_spellbooks(xmlDocPtr doc)
                 xmlFree(propValue);
             }
             else {
-                log_error("spellbook at index '%d' has n name\n", i);
+                log_error("spellbook at index '%d' has no name\n", i);
                 continue;
             }
 

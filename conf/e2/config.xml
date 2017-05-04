@@ -5,7 +5,6 @@
   <xi:include href="config://core/calendar.xml"/>
   <calendar name="secondage" newyear="month_1" start="184"/>
   <xi:include href="config://game/equipment.xml"/>
-  <xi:include href="config://game/spells.xml"/>
   <equipment>
     <set name="autoseed_unit">
       <item name="log" amount="50"/>
