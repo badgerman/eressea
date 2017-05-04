@@ -62,6 +62,7 @@ extern "C" {
         variant magres;                 /* how well it resists against spells */
         int magresbonus;            /* bonus it gives the target against spells */
         int fumblebonus;            /* bonus that reduces fumbling */
+        int taxes;                  /* receive $1 tax per `taxes` in region */
         double auraregen;           /* modifier for aura regeneration inside building */
         struct maintenance *maintenance;    /* array of requirements */
         struct construction *construction;  /* construction of 1 building-level */
@@ -69,8 +70,6 @@ extern "C" {
 
         const char *(*name) (const struct building_type *,
             const struct building * b, int size);
-        void(*age) (struct building *);
-        double(*taxes) (const struct building *, int size);
     } building_type;
 
     extern struct selist *buildingtypes;
@@ -137,6 +136,7 @@ extern "C" {
     int cmp_taxes(const struct building *b, const struct building *bother);
     int cmp_current_owner(const struct building *b,
         const struct building *bother);
+    int building_taxes(const building *b);
 
     /* old functions, still in build.c: */
     int buildingeffsize(const building * b, int imaginary);

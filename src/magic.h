@@ -26,17 +26,15 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 extern "C" {
 #endif
 
-    /* ------------------------------------------------------------- */
-
-#define MAXCOMBATSPELLS 3       /* PRECOMBAT COMBAT POSTCOMBAT */
-#define MAX_SPELLRANK 9         /* Standard-Rank 5 */
-#define MAXINGREDIENT	5       /* bis zu 5 Komponenten pro Zauber */
-#define CHAOSPATZERCHANCE 10    /* +10% Chance zu Patzern */
-
-    /* ------------------------------------------------------------- */
-
-#define IRONGOLEM_CRUMBLE   15  /* monatlich Chance zu zerfallen */
-#define STONEGOLEM_CRUMBLE  10  /* monatlich Chance zu zerfallen */
+    extern const char *magic_school[MAXMAGIETYP];
+    extern struct attrib_type at_seenspell;
+    extern struct attrib_type at_mage;
+    extern struct attrib_type at_familiarmage;
+    extern struct attrib_type at_familiar;
+    extern struct attrib_type at_clonemage;
+    extern struct attrib_type at_clone;
+    extern struct attrib_type at_reportspell;
+    extern struct attrib_type at_icastle;
 
     /* ------------------------------------------------------------- */
     /* Spruchparameter
@@ -79,25 +77,18 @@ extern "C" {
         char **strings;
     } strarray;
 
+    /* constants --------------------------------------------------- */
+
+#define MAXCOMBATSPELLS 3       /* PRECOMBAT COMBAT POSTCOMBAT */
+#define MAX_SPELLRANK 9         /* Standard-Rank 5 */
+#define MAXINGREDIENT	5       /* bis zu 5 Komponenten pro Zauber */
+#define CHAOSPATZERCHANCE 10    /* +10% Chance zu Patzern */
+#define IRONGOLEM_CRUMBLE   15  /* monatlich Chance zu zerfallen */
+#define STONEGOLEM_CRUMBLE  10  /* monatlich Chance zu zerfallen */
+
+    /* antimagic result codes -------------------------------------- */
 #define TARGET_RESISTS (1<<0)
 #define TARGET_NOTFOUND (1<<1)
-
-    /* ------------------------------------------------------------- */
-    /* Magierichtungen */
-
-    extern const char *magic_school[MAXMAGIETYP];
-
-    /* ------------------------------------------------------------- */
-    /* Magier:
-     * - Magierichtung
-     * - Magiepunkte derzeit
-     * - Malus (neg. Wert)/ Bonus (pos. Wert) auf maximale Magiepunkte
-     *   (können sich durch Questen absolut verändern und durch Gegenstände
-     *   temporär). Auch für Artefakt benötigt man permanente MP
-     * - Anzahl bereits gezauberte Sprüche diese Runde
-     * - Kampfzauber (3) (vor/während/nach)
-     * - Spruchliste
-     */
 
     typedef struct combatspell {
         int level;
@@ -110,6 +101,17 @@ extern "C" {
         void * tokens;
     } spell_names;
 
+    /* ------------------------------------------------------------- */
+    /* Magier:
+    * - Magierichtung
+    * - Magiepunkte derzeit
+    * - Malus (neg. Wert)/ Bonus (pos. Wert) auf maximale Magiepunkte
+    *   (können sich durch Questen absolut verändern und durch Gegenstände
+    *   temporär). Auch für Artefakt benötigt man permanente MP
+    * - Anzahl bereits gezauberte Sprüche diese Runde
+    * - Kampfzauber (3) (vor/während/nach)
+    * - Spruchliste
+    */
     typedef struct sc_mage {
         magic_t magietyp;
         int spellpoints;
@@ -185,21 +187,14 @@ extern "C" {
         SPC_LINEAR                  /* Komponenten pro Level und müssen vorhanden sein */
     };
 
-    /* ------------------------------------------------------------- */
-    /* Prototypen */
+    typedef struct spellrank {
+        struct castorder *begin;
+        struct castorder **end;
+    } spellrank;
 
     void magic(void);
 
     void regenerate_aura(void);
-
-    extern struct attrib_type at_seenspell;
-    extern struct attrib_type at_mage;
-    extern struct attrib_type at_familiarmage;
-    extern struct attrib_type at_familiar;
-    extern struct attrib_type at_clonemage;
-    extern struct attrib_type at_clone;
-    extern struct attrib_type at_reportspell;
-    extern struct attrib_type at_icastle;
 
     void make_icastle(struct building *b, const struct building_type *btype, int timeout);
     const struct building_type *icastle_type(const struct attrib *a);
@@ -244,10 +239,6 @@ extern "C" {
     /* prüft, ob der Spruch in der Spruchliste der Einheit steht. */
     void pick_random_spells(struct faction *f, int level, struct spellbook * book, int num_spells);
     void show_new_spells(struct faction * f, int level, const struct spellbook *book);
-    void updatespelllist(struct unit *u);
-    /* fügt alle Zauber des Magiegebietes der Einheit, deren Stufe kleiner
-     * als das aktuelle Magietalent ist, in die Spruchliste der Einheit
-     * ein */
     bool knowsspell(const struct region *r, const struct unit *u,
         const struct spell * sp);
     /* prüft, ob die Einheit diesen Spruch gerade beherrscht, dh
@@ -269,17 +260,12 @@ extern "C" {
     /* verändert die maximalen Magiepunkte einer Einheit */
 
     /* Zaubern */
-    extern double spellpower(struct region *r, struct unit *u, const struct spell * sp,
+    double spellpower(struct region *r, struct unit *u, const struct spell * sp,
         int cast_level, struct order *ord);
     /*      ermittelt die Stärke eines Spruchs */
     bool fumble(struct region *r, struct unit *u, const struct spell * sp,
         int cast_level);
     /*      true, wenn der Zauber misslingt, bei false gelingt der Zauber */
-
-    typedef struct spellrank {
-        struct castorder *begin;
-        struct castorder **end;
-    } spellrank;
 
     struct castorder *create_castorder(struct castorder * co, struct unit *caster,
     struct unit * familiar, const struct spell * sp, struct region * r,
@@ -290,6 +276,7 @@ extern "C" {
     /* Hänge c-order co an die letze c-order von cll an */
     void free_castorders(struct castorder *co);
     /* Speicher wieder freigeben */
+    int cast_spell(struct castorder *co);
 
     /* Prüfroutinen für Zaubern */
     int countspells(struct unit *u, int step);
@@ -322,21 +309,19 @@ extern "C" {
         int resist_bonus);
     /*      gibt false zurück, wenn der Zauber gelingt, true, wenn das Ziel
      *      widersteht */
-    extern struct spell * unit_getspell(struct unit *u, const char *s,
+    struct spell * unit_getspell(struct unit *u, const char *s,
         const struct locale *lang);
 
     /* Sprüche in der struct region */
     /* (sind in curse) */
-    extern struct unit *get_familiar(const struct unit *u);
-    extern struct unit *get_familiar_mage(const struct unit *u);
-    extern struct unit *get_clone(const struct unit *u);
-    extern struct unit *get_clone_mage(const struct unit *u);
-    extern struct attrib_type at_familiar;
-    extern struct attrib_type at_familiarmage;
-    extern void remove_familiar(struct unit *mage);
-    extern bool create_newfamiliar(struct unit *mage, struct unit *familiar);
-    extern void create_newclone(struct unit *mage, struct unit *familiar);
-    extern struct unit *has_clone(struct unit *mage);
+    struct unit *get_familiar(const struct unit *u);
+    struct unit *get_familiar_mage(const struct unit *u);
+    struct unit *get_clone(const struct unit *u);
+    struct unit *get_clone_mage(const struct unit *u);
+    void remove_familiar(struct unit *mage);
+    bool create_newfamiliar(struct unit *mage, struct unit *familiar);
+    void create_newclone(struct unit *mage, struct unit *familiar);
+    struct unit *has_clone(struct unit *mage);
 
     const char *spell_info(const struct spell *sp,
         const struct locale *lang);
@@ -348,10 +333,6 @@ extern "C" {
     struct message *msg_unitnotfound(const struct unit *mage,
     struct order *ord, const struct spllprm *spobj);
     bool FactionSpells(void);
-
-    void write_spells(struct selist *slist, struct storage *store);
-    void read_spells(struct selist **slistp, magic_t mtype,
-        struct storage *store);
 
     struct spellbook * get_spellbook(const char * name);
     void free_spellbooks(void);

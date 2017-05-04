@@ -29,6 +29,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "race.h"
 #include "region.h"
 #include "skill.h"
+#include "terrain.h"
 
 /* util includes */
 #include <util/attrib.h>
@@ -180,7 +181,7 @@ void damage_ship(ship * sh, double percent)
 static ship_type * st_read(gamedata *data) {
     char zName[32];
     ship_type *stype;
-    int i;
+    int i, n;
 
     READ_INT(data->store, &i);
     if (i<0) {
@@ -205,11 +206,19 @@ static ship_type * st_read(gamedata *data) {
     READ_FLT(data->store, &stype->damage);
     stype->construction = read_construction(data, 
             CONS_SHIP);
-    /* TODO: coasts */
+
+    READ_INT(data->store, &n);
+    stype->coasts = calloc(n + 1, sizeof(terrain_type *));
+    for (i = 0; i != n; ++i) {
+        READ_TOK(data->store, zName, sizeof(zName));
+        stype->coasts[i] = get_or_create_terrain(zName);
+    }
     return stype;
 }
 
 static void st_write(gamedata *data, const ship_type *stype) {
+    int i;
+
     WRITE_INT(data->store, stype->flags);
     WRITE_TOK(data->store, stype->_name);
     WRITE_INT(data->store, stype->range);
@@ -227,8 +236,14 @@ static void st_write(gamedata *data, const ship_type *stype) {
     WRITE_FLT(data->store, stype->storm);
     WRITE_FLT(data->store, stype->damage);
     write_construction(data, stype->construction, CONS_SHIP);
-    /* TODO: coasts */
-} 
+
+    for (i = 0; stype->coasts[i]; ++i) { /* count coasts */ }
+
+    WRITE_INT(data->store, i);
+    for (i = 0; stype->coasts[i]; ++i) {
+        WRITE_TOK(data->store, stype->coasts[i]->_name);
+    }
+}
 
 static bool write_ship_cb(void *elem, void *cbdata) {
     const ship_type *stype = (const ship_type *)elem;

@@ -12,4 +12,5 @@
   <xi:include href="config://game/weapons.xml" />
   <xi:include href="config://game/armor.xml" />
   <xi:include href="config://game/resources.xml" />
+  <xi:include href="config://game/ships.xml"/>
 </eressea>

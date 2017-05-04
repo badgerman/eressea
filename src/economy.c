@@ -575,7 +575,7 @@ void give_control(unit * u, unit * u2)
 
             assert(u->building == u2->building);
             if (f == u->faction) {
-                building *b = largestbuilding(r, &cmp_current_owner, false);
+                building *b = largestbuilding(r, cmp_current_owner, false);
                 if (b == u->building) {
                     friendly_takeover(r, u2->faction);
                 }
@@ -2658,8 +2658,7 @@ expandwork(region * r, request * work_begin, request * work_end, int maxwork)
         const curse_type *blessedharvest_ct = ct_find("blessedharvest");
         if (blessedharvest_ct) {
             int happy =
-                (int)curse_geteffect(get_curse(r->attribs, blessedharvest_ct));
-            happy = MIN(happy, jobs);
+                (int)(jobs * curse_geteffect(get_curse(r->attribs, blessedharvest_ct)));
             earnings += happy;
         }
     }
@@ -2929,7 +2928,7 @@ static void peasant_taxes(region * r)
     unit *u;
     building *b;
     int money;
-    int maxsize;
+    int level;
 
     f = region_get_owner(r);
     if (f == NULL || is_mourning(r, turn)) {
@@ -2947,10 +2946,10 @@ static void peasant_taxes(region * r)
     if (u == NULL || u->faction != f)
         return;
 
-    maxsize = buildingeffsize(b, false);
-    if (maxsize > 0) {
-        double taxfactor = money * b->type->taxes(b, maxsize);
-        double morale = MORALE_TAX_FACTOR * money * region_get_morale(r);
+    level = buildingeffsize(b, false);
+    if (level > 0) {
+        double taxfactor = money * level / building_taxes(b);
+        double morale = money * region_get_morale(r) / MORALE_TAX_FACTOR;
         if (taxfactor > morale) {
             taxfactor = morale;
         }
