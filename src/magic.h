@@ -146,12 +146,6 @@ extern "C" {
     struct unit * co_get_caster(const struct castorder * co);
     struct region * co_get_region(const struct castorder * co);
 
-    typedef struct spell_component {
-        const struct resource_type *type;
-        int amount;
-        int cost;
-    } spell_component;
-
     /* ------------------------------------------------------------- */
 
     /* besondere Spruchtypen */

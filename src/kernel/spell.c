@@ -17,8 +17,10 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 **/
 
 #include <platform.h>
-#include <kernel/config.h>
 #include "spell.h"
+
+#include <kernel/config.h>
+#include <kernel/item.h>
 
 /* util includes */
 #include <util/gamedata.h>
@@ -208,8 +210,8 @@ struct spell *spellref_get(struct spellref *spref)
 
 static spell *read_spell(gamedata *data) {
     spell *sp;
-    int i;
-    char zName[20];
+    int i, n;
+    char zName[32];
     READ_INT(data->store, &i);
     if (i<0) {
         return NULL;;
@@ -218,20 +220,53 @@ static spell *read_spell(gamedata *data) {
     sp = create_spell(zName);
     sp->sptyp = i;
     READ_TOK(data->store, zName, sizeof(zName));
-    sp->syntax = strdup(zName);
+    if (zName[0]) {
+        sp->syntax = strdup(zName);
+    }
     READ_TOK(data->store, zName, sizeof(zName));
-    sp->parameter = strdup(zName);
+    if (zName[0]) {
+        sp->parameter = strdup(zName);
+    }
     READ_INT(data->store, &sp->rank);
+
+    READ_INT(data->store, &n);
+    if (n > 0) {
+        sp->components = calloc(n + 1, sizeof(spell_component));
+        for (i = 0; i != n; ++i) {
+            spell_component *sc = sp->components + i;
+            READ_INT(data->store, &sc->amount);
+            READ_INT(data->store, &sc->cost);
+            READ_TOK(data->store, zName, sizeof(zName));
+            if (zName[0]) {
+                sc->type = rt_get_or_create(zName);
+            }
+        }
+    }
     return sp;
 }
 
 static void write_spell(gamedata *data, spell *sp) {
+    int i, n = 0;
     assert(sp->sptyp > 0);
     WRITE_INT(data->store, sp->sptyp);
     WRITE_TOK(data->store, sp->sname);
     WRITE_TOK(data->store, sp->syntax);
     WRITE_TOK(data->store, sp->parameter);
     WRITE_INT(data->store, sp->rank);
+    if (sp->components) {
+        for (i = 0; sp->components[i].amount > 0; ++i) ++n;
+
+        WRITE_INT(data->store, n);
+        for (i = 0; i != n; ++i) {
+            spell_component *sc = sp->components + i;
+            WRITE_INT(data->store, sc->amount);
+            WRITE_INT(data->store, sc->cost);
+            WRITE_TOK(data->store, sc->type->_name);
+        }
+    }
+    else {
+        WRITE_INT(data->store, 0);
+    }
 }
 
 static bool write_spell_cb(void *el, void *cbdata) {

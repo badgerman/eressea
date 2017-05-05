@@ -40,6 +40,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <kernel/pool.h>
 #include <kernel/race.h>
 #include <kernel/region.h>
+#include <kernel/save.h>
 #include <kernel/ship.h>
 #include <kernel/spell.h>
 #include <kernel/spellbook.h>
@@ -257,9 +258,8 @@ static int read_mage(attrib * a, void *owner, struct gamedata *data)
         int level = 0;
         READ_TOK(store, spname, sizeof(spname));
         READ_INT(store, &level);
-
-        if (strcmp("none", spname) != 0) {
-            sp = find_spell(spname);
+        if (!last_token(data, spname, "none")) {
+            spell * sp = find_spell(spname);
             if (!sp) {
                 log_error("read_mage: could not find combat spell '%s' in school '%s'\n", spname, magic_school[mage->magietyp]);
             }
@@ -298,7 +298,7 @@ write_mage(const attrib * a, const void *owner, struct storage *store)
     WRITE_INT(store, mage->spchange);
     for (i = 0; i != MAXCOMBATSPELLS; ++i) {
         WRITE_TOK(store,
-            mage->combatspells[i].sp ? mage->combatspells[i].sp->sname : "none");
+            mage->combatspells[i].sp ? mage->combatspells[i].sp->sname : NULL);
         WRITE_INT(store, mage->combatspells[i].level);
     }
     write_spellbook(mage->spellbook, store);
@@ -3026,9 +3026,10 @@ static int write_spellbook_cb(const void *match, const void *key,
         size_t keylen, void *cbdata)
 {
     gamedata *data = (gamedata *)cbdata;
-    const spellbook *sb;
+    spellbook *sb;
     
     cb_get_kv(match, &sb, sizeof(sb));
+    WRITE_TOK(data->store, sb->name);
     write_spellbook(sb, data->store);
     return 0;
 }
@@ -3036,10 +3037,18 @@ static int write_spellbook_cb(const void *match, const void *key,
 void write_spellbooks(gamedata *data)
 {
     cb_foreach(&cb_spellbooks, "", 0, write_spellbook_cb, data);
+    WRITE_TOK(data->store, NULL);
 }
 
 void read_spellbooks(gamedata *data)
 {
+    char zName[64];
+    READ_TOK(data->store, zName, sizeof(zName));
+    while (zName[0]) {
+        spellbook *sb = create_spellbook(zName);
+        read_spellbook(&sb, data, NULL, NULL);
+        READ_TOK(data->store, zName, sizeof(zName));
+    }
 }
 
 spellbook * get_spellbook(const char * name)

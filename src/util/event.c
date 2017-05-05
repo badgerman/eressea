@@ -40,7 +40,7 @@ void write_triggers(struct storage *store, const trigger * t)
         }
         t = t->next;
     }
-    WRITE_TOK(store, "end");
+    WRITE_TOK(store, NULL);
 }
 
 int read_triggers(struct gamedata *data, trigger ** tp)
@@ -50,7 +50,7 @@ int read_triggers(struct gamedata *data, trigger ** tp)
         char zText[128];
 
         READ_TOK(data->store, zText, sizeof(zText));
-        if (!strcmp(zText, "end"))
+        if (!zText[0] || strcmp(zText, "end")==0)
             break;
         ttype = tt_find(zText);
         assert(ttype || !"unknown trigger-type");

@@ -28,7 +28,6 @@ extern "C" {
     struct unit;
     struct region;
     struct spell;
-    struct spell_component;
     struct selist;
     struct attrib_type;
 
@@ -39,6 +38,12 @@ extern "C" {
 
     typedef int(*spell_f)(struct castorder * co);
     typedef void(*fumble_f)(const struct castorder * co);
+
+    typedef struct spell_component {
+        const struct resource_type *type;
+        int amount;
+        int cost;
+    } spell_component;
 
     typedef struct spell {
         char *sname;

@@ -571,7 +571,7 @@ const char *racename(const struct locale *loc, const unit * u, const race * rc)
 
 void write_race_reference(const race * rc, struct storage *store)
 {
-    WRITE_TOK(store, rc ? rc->_name : "none");
+    WRITE_TOK(store, rc ? rc->_name : NULL);
 }
 
 race *read_race_reference(struct storage *store)
@@ -579,7 +579,8 @@ race *read_race_reference(struct storage *store)
     char zName[32];
     READ_TOK(store, zName, sizeof(zName));
 
-    if (strcmp(zName, "none") != 0) {
+    /* TODO: check for NULLTOK_VERSION to save strcmp (needs gamedata) */
+    if (zName[0] && strcmp(zName, "none") != 0) {
         race *rc = rc_get_or_create(zName);
         return rc;
     }

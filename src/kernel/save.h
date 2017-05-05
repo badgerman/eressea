@@ -75,6 +75,9 @@ extern "C" {
     /* test-only functions that give access to internal implementation details (BAD) */
     void _test_write_password(struct gamedata *data, const struct faction *f);
     void _test_read_password(struct gamedata *data, struct faction *f);
+
+    bool last_token(struct gamedata *data, const char *tok, const char *terminator);
+
 #ifdef __cplusplus
 }
 #endif

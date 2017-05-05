@@ -34,10 +34,11 @@
 #define ATHASH_VERSION 353 /* attribute-type hash, not name */
 #define NOWATCH_VERSION 354 /* plane->watchers is gone */
 #define KEYVAL_VERSION 355 /* at_keys has values */
+#define NULLTOK_VERSION 356 /* terminate WRITE_TOK with NULL, not "end" */
 /* unfinished: */
 #define CRYPT_VERSION 400 /* passwords are encrypted */
 
-#define RELEASE_VERSION KEYVAL_VERSION /* current datafile */
+#define RELEASE_VERSION NULLTOK_VERSION /* current datafile */
 #define MIN_VERSION INTPAK_VERSION      /* minimal datafile we support */
 #define MAX_VERSION RELEASE_VERSION /* change this if we can need to read the future datafile, and we can do so */
 

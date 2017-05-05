@@ -474,6 +474,7 @@ int a_read(gamedata *data, attrib ** attribs, void *owner) {
 
 int a_read_orig(gamedata *data, attrib ** attribs, void *owner)
 {
+    /* this data was never written with NULLTOK_VERSION, only check for "end" tokens */
     int key, retval = AT_READ_OK;
     char zText[128];
 
@@ -489,8 +490,9 @@ int a_read_orig(gamedata *data, attrib ** attribs, void *owner)
     while (key > 0) {
         retval = a_read_i(data, attribs, owner, key);
         READ_TOK(data->store, zText, sizeof(zText));
-        if (!strcmp(zText, "end"))
+        if (strcmp(zText, "end") == 0) {
             break;
+        }
         key = __at_hashkey(zText);
     }
     return retval;
@@ -528,7 +530,7 @@ void a_write_orig(struct storage *store, const attrib * attribs, const void *own
             na = na->nexttype;
         }
     }
-    WRITE_TOK(store, "end");
+    WRITE_TOK(store, NULL);
 }
 
 void attrib_done(void) {
