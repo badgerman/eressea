@@ -107,13 +107,6 @@ void free_spells(void) {
     spells = 0;
 }
 
-void add_spell(struct selist **slistp, spell * sp)
-{
-    if (!selist_set_insert(slistp, sp, NULL)) {
-        log_error("add_spell: the list already contains the spell '%s'.\n", sp->sname);
-    }
-}
-
 spell * create_spell(const char * name)
 {
     spell * sp;
@@ -130,7 +123,7 @@ spell * create_spell(const char * name)
     len = cb_new_kv(name, len, &sp, sizeof(sp), buffer);
     if (cb_insert(&cb_spells, buffer, len) == CB_SUCCESS) {
         sp->sname = strdup(name);
-        add_spell(&spells, sp);
+        selist_push(&spells, sp);
         return sp;
     }
     free(sp);
@@ -269,15 +262,18 @@ static void write_spell(gamedata *data, spell *sp) {
     }
 }
 
-static bool write_spell_cb(void *el, void *cbdata) {
-    spell *sp = (spell *)el;
+static int write_spell_cb(const void *match, const void *key, size_t keylen, void *cbdata) {
+    spell *sp;
     gamedata *data = (gamedata *)cbdata;
+    UNUSED_ARG(key);
+    UNUSED_ARG(keylen);
+    cb_get_kv(match, &sp, sizeof(sp));
     write_spell(data, sp);
-    return true;
+    return 0;
 }
 
 void write_spells(gamedata *data) {
-    selist_foreach_ex(spells, write_spell_cb, data);
+    cb_foreach(&cb_spells, NULL, 0, write_spell_cb, data);
     WRITE_INT(data->store, -1);
 }
 
