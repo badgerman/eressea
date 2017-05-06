@@ -119,6 +119,13 @@ char *rns(FILE * f, char *c, size_t size)
     return c;
 }
 
+bool last_token(gamedata *data, const char *tok, const char *terminator)
+{
+    if (data->version >= NULLTOK_VERSION) {
+        return tok[0] == '\0';
+    }
+    return strcmp(tok, terminator) == 0;
+}
 
 static unit *unitorders(FILE * F, int enc, struct faction *f)
 {
@@ -449,7 +456,7 @@ void read_planes(gamedata *data) {
             /* before this version, watcher storage was pretty broken. we are incompatible and don't read them */
             for (;;) {
                 READ_TOK(store, rname, sizeof(rname));
-                if (strcmp(rname, "end") == 0) {
+                if (last_token(data, rname, "end")) {
                     break;                /* this is most likely the end of the list */
                 }
                 else {
@@ -965,7 +972,7 @@ static region *readregion(struct gamedata *data, int x, int y)
         for (;;) {
             rawmaterial *res;
             READ_STR(data->store, name, sizeof(name));
-            if (strcmp(name, "end") == 0)
+            if (last_token(data, name, "end"))
                 break;
             res = malloc(sizeof(rawmaterial));
             res->rtype = rt_find(name);
@@ -1025,7 +1032,7 @@ static region *readregion(struct gamedata *data, int x, int y)
         for (;;) {
             const struct resource_type *rtype;
             READ_STR(data->store, name, sizeof(name));
-            if (!strcmp(name, "end"))
+            if (last_token(data, name, "end"))
                 break;
             rtype = rt_find(name);
             assert(rtype && rtype->ltype);
@@ -1092,7 +1099,7 @@ void writeregion(struct gamedata *data, const region * r)
             WRITE_INT(data->store, res->divisor);
             res = res->next;
         }
-        WRITE_TOK(data->store, "end");
+        WRITE_TOK(data->store, NULL);
 
         rht = rherbtype(r);
         if (rht) {
@@ -1108,7 +1115,7 @@ void writeregion(struct gamedata *data, const region * r)
             WRITE_TOK(data->store, resourcename(demand->type->itype->rtype, 0));
             WRITE_INT(data->store, demand->value);
         }
-        WRITE_TOK(data->store, "end");
+        WRITE_TOK(data->store, NULL);
         write_items(data->store, r->land->items);
         WRITE_SECTION(data->store);
 #if RELEASE_VERSION>=REGIONOWNER_VERSION
@@ -1337,7 +1344,7 @@ faction *read_faction(struct gamedata * data)
     read_items(data->store, &f->items);
     for (;;) {
         READ_TOK(data->store, name, sizeof(name));
-        if (strcmp("end", name) == 0)
+        if (last_token(data, name, "end"))
             break;
         READ_INT(data->store, &n); /* there used to be a level here, which is now ignored */
     }
@@ -1423,7 +1430,7 @@ void write_faction(struct gamedata *data, const faction * f)
     WRITE_SECTION(data->store);
     write_items(data->store, f->items);
     WRITE_SECTION(data->store);
-    WRITE_TOK(data->store, "end");
+    WRITE_TOK(data->store, NULL);
     WRITE_SECTION(data->store);
     WRITE_INT(data->store, listlen(f->ursprung));
     for (ur = f->ursprung; ur; ur = ur->next) {

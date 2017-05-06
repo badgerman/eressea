@@ -21,6 +21,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "connection.h"
 
 #include "region.h"
+#include "save.h"
 #include "terrain.h"
 #include "unit.h"
 
@@ -599,7 +600,7 @@ void write_borders(struct storage *store)
             }
         }
     }
-    WRITE_TOK(store, "end");
+    WRITE_TOK(store, NULL);
 }
 
 int read_borders(gamedata *data)
@@ -612,8 +613,9 @@ int read_borders(gamedata *data)
         border_type *type;
 
         READ_TOK(store, zText, sizeof(zText));
-        if (!strcmp(zText, "end"))
-            break;
+        if (!zText[0]) break;
+        else if (data->version < NULLTOK_VERSION && strcmp(zText, "end") == 0) break;
+
         type = find_bordertype(zText);
         if (type == NULL) {
             log_error("[read_borders] connection %d type %s is not registered", bid, zText);

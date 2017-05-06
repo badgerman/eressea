@@ -1,5 +1,6 @@
 #include <platform.h>
 #include <kernel/config.h>
+#include <kernel/save.h>
 #include <kernel/spell.h>
 #include <selist.h>
 #include <util/log.h>
@@ -25,16 +26,16 @@ void read_spellbook(spellbook **bookp, gamedata *data, int(*get_level)(const spe
 {
     for (;;) {
         spell *sp = 0;
-        char spname[64];
+        char zText[64];
         int level = 0;
 
-        READ_TOK(data->store, spname, sizeof(spname));
-        if (strcmp(spname, "end") == 0)
-            break;
+        READ_TOK(data->store, zText, sizeof(zText));
+        if (!zText[0]) break;
+        else if (data->version < NULLTOK_VERSION && strcmp(zText, "end") == 0) break;
         if (bookp) {
-            sp = find_spell(spname);
+            sp = find_spell(zText);
             if (!sp) {
-                log_error("read_spells: could not find spell '%s'", spname);
+                log_error("read_spells: could not find spell '%s'", zText);
             }
         }
         if (data->version >= SPELLBOOK_VERSION) {
@@ -68,7 +69,7 @@ void write_spellbook(const struct spellbook *book, struct storage *store)
             WRITE_INT(store, sbe->level);
         }
     }
-    WRITE_TOK(store, "end");
+    WRITE_TOK(store, NULL);
 }
 
 void spellbook_add(spellbook *sb, spell *sp, int level)

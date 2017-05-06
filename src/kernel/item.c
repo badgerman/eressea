@@ -163,7 +163,7 @@ const char *resourcename(const resource_type * rtype, int flags)
         }
         return rtype->_name;
     }
-    return "none";
+    return NULL;
 }
 
 static int num_resources;
@@ -932,7 +932,7 @@ void read_items(struct storage *store, item ** ilist)
         const item_type *itype;
         int i;
         READ_STR(store, ibuf, sizeof(ibuf));
-        if (!strcmp("end", ibuf)) {
+        if (!ibuf[0] || strcmp("end", ibuf)==0) {
             break;
         }
         itype = it_find(ibuf);
@@ -962,7 +962,7 @@ void write_items(struct storage *store, item * ilist)
             WRITE_INT(store, itm->number);
         }
     }
-    WRITE_TOK(store, "end");
+    WRITE_TOK(store, NULL);
 }
 
 static void free_itype(item_type *itype) {
@@ -1028,7 +1028,7 @@ resource_type * read_resource(gamedata *data)
     char zName[32];
     
     READ_TOK(data->store, zName, sizeof(zName));
-    if (strcmp(zName, "none") == 0) {
+    if (!zName[0]) {
         return NULL;
     }
     rtype = rt_get_or_create(zName);
@@ -1177,7 +1177,7 @@ static int write_resource_cb(const void *match, const void *key, size_t keylen, 
 void write_resources(gamedata *data)
 {
     cb_foreach(&cb_resources, "", 0, write_resource_cb, data);
-    WRITE_TOK(data->store, "none");
+    WRITE_TOK(data->store, NULL);
 }
 
 void read_resources(gamedata *data)
