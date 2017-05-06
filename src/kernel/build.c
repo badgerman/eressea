@@ -516,17 +516,6 @@ int build(unit * u, const construction * ctype, construct_t type, int completed,
         return ENOMATERIALS;
     if (con->improvement == NULL && completed == con->maxsize)
         return ECOMPLETE;
-    if (type==CONS_ITEM && con->extra.btype) {
-        building *b;
-        if (!u->building || u->building->type != con->extra.btype) {
-            return EBUILDINGREQ;
-        }
-        b = inside_building(u);
-        if (!b || !building_is_active(b)) {
-            return EBUILDINGREQ;
-        }
-    }
-
     if (con->skill != NOSKILL) {
         int effsk;
         int dm = get_effect(u, oldpotiontype[P_DOMORE]);
