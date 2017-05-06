@@ -254,7 +254,7 @@ static void write_spell(gamedata *data, spell *sp) {
     WRITE_TOK(data->store, sp->parameter);
     WRITE_INT(data->store, sp->rank);
     if (sp->components) {
-        for (i = 0; sp->components[i].amount > 0; ++i) ++n;
+        for (i = 0; sp->components[i].type; ++i) ++n;
 
         WRITE_INT(data->store, n);
         for (i = 0; i != n; ++i) {
