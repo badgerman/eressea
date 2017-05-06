@@ -567,12 +567,12 @@ static void test_building_type_names(CuTest *tc) {
     CuAssertStrEquals(tc, "castle", buildingtype(btype, NULL, 10));
     cons = btype->construction = calloc(1, sizeof(construction));
     cons->maxsize = 2;
-    cons->extra.name = strdup("site");
+    cons->name = strdup("site");
     cons = cons->improvement = calloc(1, sizeof(construction));
     cons->maxsize = 8;
-    cons->extra.name = strdup("walls");
+    cons->name = strdup("walls");
     cons = cons->improvement = calloc(1, sizeof(construction));
-    cons->extra.name = strdup("tower");
+    cons->name = strdup("tower");
     cons->maxsize = -1;
     CuAssertStrEquals(tc, "site", buildingtype(btype, NULL, 1));
     CuAssertStrEquals(tc, "walls", buildingtype(btype, NULL, 2));

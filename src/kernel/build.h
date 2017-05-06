@@ -26,12 +26,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-    /* Die enums fuer Gebauede werden nie gebraucht, nur bei der Bestimmung
-     * des Schutzes durch eine Burg wird die Reihenfolge und MAXBUILDINGS
-     * wichtig
-     */
-
+    
     struct gamedata;
     typedef struct requirement {
         const struct resource_type *rtype;
