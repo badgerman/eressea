@@ -73,7 +73,6 @@ extern "C" {
 
     struct spell * create_spell(const char * name);
     struct spell * find_spell(const char *name);
-    void add_spell(struct selist **slistp, spell * sp);
     void free_spells(void);
     void write_spells(struct gamedata *data);
     void read_spells(struct gamedata *data);

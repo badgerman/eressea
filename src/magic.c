@@ -3084,6 +3084,8 @@ void free_spellbook(spellbook *sb) {
 
 static int free_spellbook_cb(const void *match, const void *key, size_t keylen, void *data) {
     spellbook *sb;
+    UNUSED_ARG(key);
+    UNUSED_ARG(keylen);
     cb_get_kv(match, &sb, sizeof(sb));
     free_spellbook(sb);
     return 0;
