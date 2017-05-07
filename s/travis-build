@@ -22,6 +22,7 @@ s/cmake-init
 s/build
 cd $ROOT
 inifile
+s/convert
 s/runtests
 
 integration_tests
