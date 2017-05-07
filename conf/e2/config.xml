@@ -2,7 +2,6 @@
 <eressea xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <xi:include href="config://game/familiars.xml"/>
-  <calendar name="secondage" newyear="month_1" start="184"/>
   <xi:include href="config://game/equipment.xml"/>
   <equipment>
     <set name="autoseed_unit">
