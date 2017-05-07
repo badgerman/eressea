@@ -78,7 +78,7 @@ static building_type *bt_find_i(const char *name)
         cb_get_kv(match, &btype, sizeof(btype));
     }
     else {
-        log_warning("st_find: could not find ship '%s'\n", name);
+        log_info("bt_find: could not find building '%s'\n", name);
     }
     return btype;
 }

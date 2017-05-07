@@ -100,7 +100,7 @@ static ship_type *st_find_i(const char *name)
         cb_get_kv(match, &st, sizeof(st));
     }
     else {
-        log_warning("st_find: could not find ship '%s'\n", name);
+        log_info("st_find: could not find ship '%s'\n", name);
     }
     return st;
 }

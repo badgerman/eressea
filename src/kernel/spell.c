@@ -273,7 +273,7 @@ static int write_spell_cb(const void *match, const void *key, size_t keylen, voi
 }
 
 void write_spells(gamedata *data) {
-    cb_foreach(&cb_spells, NULL, 0, write_spell_cb, data);
+    cb_foreach(&cb_spells, "", 0, write_spell_cb, data);
     WRITE_INT(data->store, -1);
 }
 
