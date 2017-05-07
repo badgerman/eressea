@@ -2,6 +2,7 @@
 #include "rules.h"
 
 #include <kernel/building.h>
+#include <kernel/equipment.h>
 #include <kernel/item.h>
 #include <kernel/race.h>
 #include <kernel/ship.h>
@@ -38,6 +39,7 @@ int write_rules(const char *filename) {
     write_ships(data);
     write_spells(data);
     write_spellbooks(data);
+    write_equipments(data);
     gamedata_close(data);
     return 0;
 }
@@ -67,6 +69,7 @@ int read_rules(const char *filename)
     read_ships(data);
     read_spells(data);
     read_spellbooks(data);
+    read_equipments(data);
     gamedata_close(data);
     return 0;
 }
