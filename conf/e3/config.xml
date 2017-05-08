@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<eressea xmlns:xi="http://www.w3.org/2001/XInclude">
-
-  <calendar name="thirdage" newyear="month_1" start="1"/>
-  <rules>
-    <function name="wage" value="minimum_wage"/>
-  </rules>
-</eressea>
