@@ -28,7 +28,7 @@ static int usage(void) {
 int main(int argc, char **argv) {
     const char *mode;
 
-    log_to_file(LOG_LEVELS | LOG_FLUSH | LOG_BRIEF, stderr);
+    log_to_file(LOG_CPERROR | LOG_CPWARNING | LOG_CPDEBUG | LOG_FLUSH | LOG_BRIEF, stderr);
     register_races();
     register_resources();
     register_weapons();

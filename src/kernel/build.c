@@ -516,17 +516,6 @@ int build(unit * u, const construction * ctype, construct_t type, int completed,
         return ENOMATERIALS;
     if (con->improvement == NULL && completed == con->maxsize)
         return ECOMPLETE;
-    if (type==CONS_ITEM && con->extra.btype) {
-        building *b;
-        if (!u->building || u->building->type != con->extra.btype) {
-            return EBUILDINGREQ;
-        }
-        b = inside_building(u);
-        if (!b || !building_is_active(b)) {
-            return EBUILDINGREQ;
-        }
-    }
-
     if (con->skill != NOSKILL) {
         int effsk;
         int dm = get_effect(u, oldpotiontype[P_DOMORE]);
@@ -1005,7 +994,7 @@ void free_construction(struct construction *cons, construct_t type)
     while (cons) {
         construction *next = cons->improvement;
         if (type == CONS_BUILDING) {
-            free(cons->extra.name);
+            free(cons->name);
         }
         free(cons->materials);
         free(cons);
@@ -1040,7 +1029,7 @@ construction *read_construction(gamedata *data, construct_t type)
             case CONS_BUILDING:
                 READ_TOK(data->store, zName, sizeof(zName));
                 if (zName[0]) {
-                    cons->extra.name = strdup(zName);
+                    cons->name = strdup(zName);
                 }
                 break;
             case CONS_SHIP:
@@ -1079,11 +1068,8 @@ void write_construction(gamedata *data, construction *cons, construct_t type)
             WRITE_INT(data->store, 0);
         }
         switch (type) {
-            case CONS_ITEM:
-                assert(!cons->extra.btype);
-                break;
             case CONS_BUILDING:
-                WRITE_TOK(data->store, cons->extra.name);
+                WRITE_TOK(data->store, cons->name);
                 break;
             case CONS_SHIP:
             case CONS_OTHER:

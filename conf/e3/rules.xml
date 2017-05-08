@@ -14,4 +14,7 @@
   <xi:include href="config://game/resources.xml" />
   <xi:include href="config://game/ships.xml"/>
   <xi:include href="config://game/spells.xml"/>
+
+  <xi:include href="config://game/familiars.xml"/>
+  <xi:include href="config://game/equipment.xml"/>
 </eressea>

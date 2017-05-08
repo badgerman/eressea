@@ -30,6 +30,7 @@ without prior permission by the authors of Eressea.
 #include "spellbook.h"
 #include "calendar.h"
 #include "prefix.h"
+#include "move.h"
 
 #include "vortex.h"
 
@@ -246,17 +247,10 @@ construction ** consPtr, construct_t type)
         con->minskill = xml_ivalue(node, "minskill", -1);
         con->reqsize = xml_ivalue(node, "reqsize", 1);
 
-        if (type == CONS_ITEM) {
-            propValue = xmlGetProp(node, BAD_CAST "building");
-            if (propValue != NULL) {
-                con->extra.btype = bt_get_or_create((const char *)propValue);
-                xmlFree(propValue);
-            }
-        }
-        else if (type == CONS_BUILDING) {
+        if (type == CONS_BUILDING) {
             propValue = xmlGetProp(node, BAD_CAST "name");
             if (propValue != NULL) {
-                con->extra.name = strdup((const char *)propValue);
+                con->name = strdup((const char *)propValue);
                 xmlFree(propValue);
             }
         }
@@ -401,132 +395,6 @@ static int parse_buildings(xmlDocPtr doc)
     xmlXPathFreeObject(buildings);
 
     xmlXPathFreeContext(xpath);
-    return 0;
-}
-
-static int parse_calendar(xmlDocPtr doc)
-{
-    xmlXPathContextPtr xpath = xmlXPathNewContext(doc);
-    xmlXPathObjectPtr xpathCalendars;
-    xmlNodeSetPtr nsetCalendars;
-
-    xpathCalendars = xmlXPathEvalExpression(BAD_CAST "/eressea/calendar", xpath);
-    nsetCalendars = xpathCalendars->nodesetval;
-    if (nsetCalendars != NULL && nsetCalendars->nodeNr != 0) {
-        int c;
-        for (c = 0; c != nsetCalendars->nodeNr; ++c) {
-            xmlNodePtr calendar = nsetCalendars->nodeTab[c];
-            xmlXPathObjectPtr xpathWeeks, xpathMonths, xpathSeasons;
-            xmlNodeSetPtr nsetWeeks, nsetMonths, nsetSeasons;
-            xmlChar *propValue = xmlGetProp(calendar, BAD_CAST "name");
-            xmlChar *newyear = xmlGetProp(calendar, BAD_CAST "newyear");
-            xmlChar *start;
-
-            start = xmlGetProp(calendar, BAD_CAST "start");
-            if (start && config_get("game.start") == NULL) {
-                config_set("game.start", (const char *)start);
-                xmlFree(start);
-            }
-            if (propValue) {
-                free(agename);
-                agename = strdup(mkname("calendar", (const char *)propValue));
-                xmlFree(propValue);
-            }
-
-            xpath->node = calendar;
-            xpathWeeks = xmlXPathEvalExpression(BAD_CAST "week", xpath);
-            nsetWeeks = xpathWeeks->nodesetval;
-            if (nsetWeeks != NULL && nsetWeeks->nodeNr) {
-                int i;
-
-                weeks_per_month = nsetWeeks->nodeNr;
-                free(weeknames);
-                free(weeknames2);
-                weeknames = malloc(sizeof(char *) * weeks_per_month);
-                weeknames2 = malloc(sizeof(char *) * weeks_per_month);
-                for (i = 0; i != nsetWeeks->nodeNr; ++i) {
-                    xmlNodePtr week = nsetWeeks->nodeTab[i];
-                    xmlChar *propValue = xmlGetProp(week, BAD_CAST "name");
-                    if (propValue) {
-                        weeknames[i] = strdup(mkname("calendar", (const char *)propValue));
-                        weeknames2[i] = malloc(strlen(weeknames[i]) + 3);
-                        sprintf(weeknames2[i], "%s_d", weeknames[i]);
-                        xmlFree(propValue);
-                    }
-                }
-            }
-            xmlXPathFreeObject(xpathWeeks);
-
-            xpathSeasons = xmlXPathEvalExpression(BAD_CAST "season", xpath);
-            nsetSeasons = xpathSeasons->nodesetval;
-            if (nsetSeasons != NULL && nsetSeasons->nodeNr) {
-                int i;
-
-                seasons = nsetSeasons->nodeNr;
-                assert(!seasonnames);
-                seasonnames = malloc(sizeof(char *) * seasons);
-
-                for (i = 0; i != nsetSeasons->nodeNr; ++i) {
-                    xmlNodePtr season = nsetSeasons->nodeTab[i];
-                    xmlChar *propValue = xmlGetProp(season, BAD_CAST "name");
-                    if (propValue) {
-                        seasonnames[i] =
-                            strdup(mkname("calendar", (const char *)propValue));
-                        xmlFree(propValue);
-                    }
-                }
-            }
-
-            xpathMonths = xmlXPathEvalExpression(BAD_CAST "season/month", xpath);
-            nsetMonths = xpathMonths->nodesetval;
-            if (nsetMonths != NULL && nsetMonths->nodeNr) {
-                int i;
-
-                months_per_year = nsetMonths->nodeNr;
-                free(monthnames);
-                monthnames = malloc(sizeof(char *) * months_per_year);
-                free(month_season);
-                month_season = malloc(sizeof(int) * months_per_year);
-                free(storms);
-                storms = malloc(sizeof(int) * months_per_year);
-
-                for (i = 0; i != nsetMonths->nodeNr; ++i) {
-                    xmlNodePtr month = nsetMonths->nodeTab[i];
-                    xmlChar *propValue = xmlGetProp(month, BAD_CAST "name");
-
-                    if (propValue) {
-                        if (newyear
-                            && strcmp((const char *)newyear, (const char *)propValue) == 0) {
-                            first_month = i;
-                            xmlFree(newyear);
-                            newyear = NULL;
-                        }
-                        monthnames[i] = strdup(mkname("calendar", (const char *)propValue));
-                        xmlFree(propValue);
-                    }
-                    if (nsetSeasons) {
-                        int j;
-                        for (j = 0; j != seasons; ++j) {
-                            xmlNodePtr season = month->parent;
-                            if (season == nsetSeasons->nodeTab[j]) {
-                                month_season[i] = j;
-                                break;
-                            }
-                        }
-                        assert(j != seasons);
-                    }
-                    storms[i] = xml_ivalue(nsetMonths->nodeTab[i], "storm", 0);
-                }
-            }
-            xmlXPathFreeObject(xpathMonths);
-            xmlXPathFreeObject(xpathSeasons);
-            xmlFree(newyear);
-            newyear = NULL;
-        }
-    }
-    xmlXPathFreeObject(xpathCalendars);
-    xmlXPathFreeContext(xpath);
-
     return 0;
 }
 
@@ -1883,7 +1751,6 @@ static int parse_strings(xmlDocPtr doc)
 void register_xmlreader(void)
 {
     xml_register_callback(parse_races);
-    xml_register_callback(parse_calendar);
     xml_register_callback(parse_resources);
 
     xml_register_callback(parse_buildings); /* requires resources */

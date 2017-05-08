@@ -11,8 +11,8 @@ function setup()
 end
 
 function test_calendar()
-    assert_equal(get_season(1011), "calendar::winter")
-    assert_equal(get_season(1012), "calendar::spring")
+    assert_equal("winter", get_season(1011))
+    assert_equal("spring", get_season(1012))
 end
 
 function test_herbalism()
@@ -437,4 +437,18 @@ function test_demonstealth()
   process_orders()
   desc = u:show()
   assert_equal(nil, string.find(desc, "Drache"))
+end
+
+function test_autoseed_equipment()
+    local r, f, u
+    r = region.create(0, 0, "plain")
+    f = faction.create("demon")
+    u = unit.create(f, r, 1)
+    equip_unit(u, 'autoseed_unit')
+    assert_equal(50, u:get_item('log'))
+    assert_equal(50, u:get_item('stone'))
+    assert_equal(30, u:get_skill('perception'))
+    assert_equal(0, u:get_item('adamantium'))
+    equip_unit(u, 'autoseed_faction')
+    assert_equal(1, u:get_item('adamantium'))
 end

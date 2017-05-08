@@ -29,8 +29,11 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* util includes */
 #include <selist.h>
+#include <util/gamedata.h>
 #include <util/rand.h>
 #include <util/rng.h>
+
+#include <storage.h>
 
 /* libc includes */
 #include <assert.h>
@@ -234,6 +237,73 @@ void free_ls(void *arg) {
     lazy_spell *ls = (lazy_spell*)arg;
     spellref_free(ls->spref);
     free(ls);
+}
+
+static equipment * read_equipment(gamedata *data) {
+    char zText[32];
+    equipment *eq;
+    int i;
+
+    READ_TOK(data->store, zText, sizeof(zText));
+    if (zText[0] == '\0') {
+        return NULL;
+    }
+    eq = get_or_create_equipment(zText);
+    READ_INT(data->store, &i);
+    while (i >= 0) {
+        READ_TOK(data->store, zText, sizeof(zText));
+        eq->skills[i] = strdup(zText);
+        READ_INT(data->store, &i);
+    }
+
+    READ_TOK(data->store, zText, sizeof(zText));
+    while (zText[0] != '\0') {
+        itemdata *idata = malloc(sizeof(itemdata));
+        idata->itype = it_find(zText);
+        READ_TOK(data->store, zText, sizeof(zText));
+        idata->value = strdup(zText);
+        idata->next = eq->items;
+        eq->items = idata;
+        READ_TOK(data->store, zText, sizeof(zText));
+    }
+    return eq;
+}
+
+void read_equipments(gamedata *data)
+{
+    equipment *eq;
+    do {
+        eq = read_equipment(data);
+    } while (eq);
+}
+
+static void write_equipment(gamedata *data, const equipment *eq) {
+    int i;
+    itemdata *idata;
+    WRITE_TOK(data->store, eq->name);
+
+    for (i = 0; i != MAXSKILLS; ++i) {
+        if (eq->skills[i]) {
+            WRITE_INT(data->store, i);
+            WRITE_TOK(data->store, eq->skills[i]);
+        }
+    }
+    WRITE_INT(data->store, -1);
+
+    for (idata = eq->items; idata; idata = idata->next) {
+        WRITE_TOK(data->store, idata->itype->rtype->_name);
+        WRITE_TOK(data->store, idata->value);
+    }
+    WRITE_TOK(data->store, NULL);
+}
+
+void write_equipments(gamedata *data)
+{
+    equipment *eq;
+    for (eq = equipment_sets; eq; eq = eq->next) {
+        write_equipment(data, eq);
+    }
+    WRITE_TOK(data->store, NULL);
 }
 
 void equipment_done(void) {

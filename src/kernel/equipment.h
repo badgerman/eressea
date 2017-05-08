@@ -27,6 +27,7 @@ extern "C" {
     struct spell;
     struct item;
     struct unit;
+    struct gamedata;
 
     typedef struct itemdata {
         const struct item_type *itype;
@@ -54,6 +55,8 @@ extern "C" {
         void(*callback) (const struct equipment *, struct unit *);
     } equipment;
 
+    void read_equipments(struct gamedata *data);
+    void write_equipments(struct gamedata *data);
     void equipment_done(void);
 
     struct equipment *get_or_create_equipment(const char *eqname);

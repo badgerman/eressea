@@ -26,12 +26,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-    /* Die enums fuer Gebauede werden nie gebraucht, nur bei der Bestimmung
-     * des Schutzes durch eine Burg wird die Reihenfolge und MAXBUILDINGS
-     * wichtig
-     */
-
+    
     struct gamedata;
     typedef struct requirement {
         const struct resource_type *rtype;
@@ -53,13 +48,8 @@ extern "C" {
         int reqsize;                /* size of object using up 1 set of requirement. */
         requirement *materials;     /* material req'd to build one object */
 
-        union {
-            /* CONS_BUILDING: */
-            char * name; /* building level name */
-            /* CONS_ITEM: */
-            const struct building_type *btype; /* building required to build item */
-        } extra;
-
+        /* only used by CONS_BUILDING: */
+        char * name; /* building level name */
         struct construction *improvement;
         /* next level, if upgradable. */
     } construction;
@@ -96,7 +86,6 @@ extern "C" {
 #define ENEEDSKILL -2
 #define ECOMPLETE -3
 #define ENOMATERIALS -4
-#define EBUILDINGREQ -5
 
 #ifdef __cplusplus
 }
