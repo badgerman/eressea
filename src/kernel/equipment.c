@@ -272,6 +272,25 @@ static equipment * read_equipment(gamedata *data) {
         equipment_addspell(eq, zText, i);
         READ_INT(data->store, &i);
     }
+
+    READ_INT(data->store, &i);
+    if (i>0) {
+        subset * sub = eq->subsets = calloc(i+1, sizeof(subset));
+        while (i--) {
+            int j;
+            subsetitem *ssi;
+            READ_FLT(data->store, &sub->chance);
+            READ_INT(data->store, &j);
+            ssi = sub->sets = calloc(j+1, sizeof(subset));
+            while (j--) {
+                READ_FLT(data->store, &ssi->chance);
+                READ_TOK(data->store, zText, sizeof(zText));
+                ssi->set = get_or_create_equipment(zText);
+                ssi++;
+            }
+            sub++;
+        }
+    }
     return eq;
 }
 
@@ -313,6 +332,28 @@ static void write_equipment(gamedata *data, const equipment *eq) {
 
     selist_foreach_ex(eq->spells, eq_write_spell_cb, data);
     WRITE_INT(data->store, -1);
+
+    if (eq->subsets) {
+        struct subset *sub;
+        for (i=0, sub = eq->subsets;sub->sets;++sub) ++i;
+        WRITE_INT(data->store, i);
+        if (eq->subsets) {
+            for (sub = eq->subsets;sub->sets;++sub) {
+                subsetitem *ssi;
+                WRITE_FLT(data->store, sub->chance);
+                for (i=0, ssi=sub->sets; ssi && ssi->set; ++ssi) ++i; 
+                WRITE_INT(data->store, i);
+                for (i=0, ssi=sub->sets; ssi && ssi->set; ++ssi) {
+                    WRITE_FLT(data->store, ssi->chance);
+                    WRITE_TOK(data->store, ssi->set->name);
+                }
+            }
+        } else {
+            WRITE_INT(data->store, 0);        
+        }
+    } else {
+        WRITE_INT(data->store, 0);        
+    }
 }
 
 void write_equipments(gamedata *data)
