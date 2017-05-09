@@ -13,7 +13,6 @@ if config.rules then
         assert(0 == read_xml(confdir .. 'rules.xml', catalog),
             "could not load XML data, did you compile with LIBXML2 ?")
     end
-    read_xml(confdir .. 'config.xml', catalog)
     read_xml(confdir .. 'locales.xml', catalog)
 end
 eressea.game.reset()

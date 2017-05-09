@@ -251,20 +251,26 @@ static equipment * read_equipment(gamedata *data) {
     eq = get_or_create_equipment(zText);
     READ_INT(data->store, &i);
     while (i >= 0) {
+        assert(i < MAXSKILLS);
         READ_TOK(data->store, zText, sizeof(zText));
-        eq->skills[i] = strdup(zText);
+        equipment_setskill(eq, (skill_t)i, zText);
         READ_INT(data->store, &i);
     }
 
     READ_TOK(data->store, zText, sizeof(zText));
     while (zText[0] != '\0') {
-        itemdata *idata = malloc(sizeof(itemdata));
-        idata->itype = it_find(zText);
+        const item_type *itype;
+        itype = it_find(zText);
         READ_TOK(data->store, zText, sizeof(zText));
-        idata->value = strdup(zText);
-        idata->next = eq->items;
-        eq->items = idata;
+        equipment_setitem(eq, itype, zText);
         READ_TOK(data->store, zText, sizeof(zText));
+    }
+
+    READ_INT(data->store, &i);
+    while (i >= 0) {
+        READ_TOK(data->store, zText, sizeof(zText));
+        equipment_addspell(eq, zText, i);
+        READ_INT(data->store, &i);
     }
     return eq;
 }
@@ -275,6 +281,15 @@ void read_equipments(gamedata *data)
     do {
         eq = read_equipment(data);
     } while (eq);
+}
+
+static bool eq_write_spell_cb(void *arg, void *cbdata) {
+    gamedata *data = (gamedata *)cbdata;
+    lazy_spell *ls = (lazy_spell*)arg;
+
+    WRITE_INT(data->store, ls->level);
+    WRITE_TOK(data->store, ls->spref->name);
+    return true;
 }
 
 static void write_equipment(gamedata *data, const equipment *eq) {
@@ -295,6 +310,9 @@ static void write_equipment(gamedata *data, const equipment *eq) {
         WRITE_TOK(data->store, idata->value);
     }
     WRITE_TOK(data->store, NULL);
+
+    selist_foreach_ex(eq->spells, eq_write_spell_cb, data);
+    WRITE_INT(data->store, -1);
 }
 
 void write_equipments(gamedata *data)
