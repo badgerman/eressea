@@ -34,7 +34,7 @@
 #define ATHASH_VERSION 353 /* attribute-type hash, not name */
 #define NOWATCH_VERSION 354 /* plane->watchers is gone */
 #define KEYVAL_VERSION 355 /* at_keys has values */
-#define NULLTOK_VERSION 356 /* terminate WRITE_TOK with NULL, not "end" */
+#define NULLTOK_VERSION 356 /* land_region has no items, terminate WRITE_TOK with NULL, not "end" */
 /* unfinished: */
 #define CRYPT_VERSION 400 /* passwords are encrypted */
 

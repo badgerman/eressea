@@ -1042,7 +1042,9 @@ static region *readregion(struct gamedata *data, int x, int y)
         if (!r->land->demands) {
             fix_demand(r);
         }
-        read_items(data->store, &r->land->items);
+        if (data->version < NULLTOK_VERSION) {
+            read_items(data->store, NULL);
+        }
         if (data->version >= REGIONOWNER_VERSION) {
             READ_INT(data->store, &n);
             region_set_morale(r, MAX(0, (short)n), -1);
@@ -1116,7 +1118,6 @@ void writeregion(struct gamedata *data, const region * r)
             WRITE_INT(data->store, demand->value);
         }
         WRITE_TOK(data->store, NULL);
-        write_items(data->store, r->land->items);
         WRITE_SECTION(data->store);
 #if RELEASE_VERSION>=REGIONOWNER_VERSION
         WRITE_INT(data->store, region_get_morale(r));
