@@ -4184,7 +4184,11 @@ static void reset_game(void)
 
 void turn_begin(void)
 {
+    int ft = first_turn();
     assert(turn >= 0);
+    if (turn<ft) {
+        turn = ft;
+    }
     ++turn;
     reset_game();
 }

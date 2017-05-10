@@ -922,9 +922,6 @@ static int init_data(const char *filename, const char *catalog)
     if (l) {
         return l;
     }
-    if (turn <= 0) {
-        turn = first_turn();
-    }
     return 0;
 }
 
