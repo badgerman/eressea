@@ -287,7 +287,7 @@ void free_races(void) {
         for (i = 0; races->attack[i].type!=AT_NONE; ++i) {
             int type = races->attack[i].type;
             if (type == AT_SPELL) {
-                spellref_free(races->attack[i].data.sp);
+                spellref_free(races->attack[i].data.spell.ref);
             }
             else if (type != AT_DAZZLE) {
                 free(races->attack[i].data.dice);

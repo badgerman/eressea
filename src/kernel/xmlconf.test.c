@@ -32,7 +32,7 @@ static void test_xmlconf(CuTest *tc) {
     CuAssertIntEquals(tc, AT_NONE, rc->attack[1].type);
     CuAssertIntEquals(tc, AT_STANDARD, rc->attack[0].type);
     CuAssertIntEquals(tc, 0, rc->attack[0].flags);
-    CuAssertIntEquals(tc, 0, rc->attack[0].level);
+    CuAssertIntEquals(tc, 0, rc->attack[0].data.spell.level);
     CuAssertStrEquals(tc, "1d5", rc->attack[0].data.dice);
     test_cleanup();
 }

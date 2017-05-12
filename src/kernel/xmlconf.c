@@ -96,10 +96,10 @@ static void parse_attack(ParseInfo *pi, const XML_Char **atts) {
                 break;
             case AT_SPELL:
                 if (strcmp(key, "spell") == 0) {
-                    rc->attack[a].data.sp = spellref_create(value);
+                    rc->attack[a].data.spell.ref = spellref_create(NULL, value);
                 }
                 else if (strcmp(key, "level") == 0) {
-                    rc->attack[a].level = atoi(value);
+                    rc->attack[a].data.spell.level = atoi(value);
                 }
                 else {
                     log_error("invalid attribute %s=%s for attack type %d.", key, value, type);
