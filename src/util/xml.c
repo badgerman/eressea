@@ -16,6 +16,10 @@
 #include "log.h"
 #include "assert.h"
 
+#ifdef USE_EXPAT
+#include <kernel/xmlconf.h>
+#endif
+
 #ifdef USE_LIBXML2
 #include <libxml/catalog.h>
 #include <libxml/xmlstring.h>
@@ -141,8 +145,10 @@ int read_xml(const char *filename, const char *catalog)
     }
     xmlFreeDoc(doc);
     return result;
+#elif USE_EXPAT
+    return xmlconf_read(filename);
 #else
-    log_error("LIBXML2 disabled, cannot read %s.\n", filename);
+    log_error("EXPAT and LIBXML2 disabled, cannot read %s.\n", filename);
     return -1;
 #endif
 }

@@ -48,20 +48,16 @@ without prior permission by the authors of Eressea.
 #include <util/nrmessage.h>
 #include <util/xml.h>
 
-#ifdef USE_LIBXML2
 /* libxml includes */
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/encoding.h>
-#endif
 
 /* libc includes */
 #include <assert.h>
 #include <ctype.h>
 #include <limits.h>
 #include <string.h>
-
-#ifdef USE_LIBXML2
 
 static variant xml_fraction(xmlNodePtr node, const char *name) {
     xmlChar *propValue = xmlGetProp(node, BAD_CAST name);
@@ -1756,4 +1752,3 @@ void register_xmlreader(void)
     xml_register_callback(parse_strings);
     xml_register_callback(parse_messages);
 }
-#endif

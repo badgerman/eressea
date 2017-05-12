@@ -72,6 +72,9 @@ int RunAllTests(int argc, char *argv[])
     ADD_SUITE(message);
     ADD_SUITE(order);
     ADD_SUITE(race);
+#ifdef USE_EXPAT
+    ADD_SUITE(xmlconf);
+#endif
     /* util */
     ADD_SUITE(config);
     ADD_SUITE(attrib);

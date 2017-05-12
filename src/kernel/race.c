@@ -285,12 +285,12 @@ void free_races(void) {
             free(opt);
         }
         for (i = 0; races->attack[i].type!=AT_NONE; ++i) {
-            att *at = races->attack + i;
-            if (at->type == AT_SPELL) {
-                spellref_free(at->data.spell.ref);
+            int type = races->attack[i].type;
+            if (type == AT_SPELL) {
+                spellref_free(races->attack[i].data.sp);
             }
-            else {
-                free(at->data.dice);
+            else if (type != AT_DAZZLE) {
+                free(races->attack[i].data.dice);
             }
         }
         free(xrefs);

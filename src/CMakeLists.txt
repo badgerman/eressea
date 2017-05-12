@@ -274,6 +274,12 @@ target_link_libraries(eressea ${CURSES_LIBRARIES})
 add_definitions(-DUSE_CURSES)
 endif(CURSES_FOUND)
 
+if (EXPAT_FOUND)
+target_link_libraries(eressea ${EXPAT_LIBRARIES})
+target_link_libraries(test_eressea ${EXPAT_LIBRARIES})
+add_definitions(-DUSE_EXPAT)
+endif(EXPAT_FOUND)
+
 if (LIBXML2_FOUND)
 include_directories (${LIBXML2_INCLUDE_DIR})
 target_link_libraries(eressea ${LIBXML2_LIBRARIES})
