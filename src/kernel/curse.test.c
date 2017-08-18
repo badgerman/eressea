@@ -141,7 +141,7 @@ static void test_write_flag(CuTest *tc) {
     c = fix.c;
     r = fix.r;
     uid = r->uid;
-    c->flags = CURSE_ISNEW;
+    c->mask = CURSE_ISNEW;
     write_game(&data);
     free_gamedata();
     data.strm.api->rewind(data.strm.handle);
@@ -150,7 +150,7 @@ static void test_write_flag(CuTest *tc) {
     CuAssertPtrNotNull(tc, r);
     CuAssertPtrNotNull(tc, r->attribs);
     c = (curse *)r->attribs->data.v;
-    CuAssertIntEquals(tc, CURSE_ISNEW, c->flags);
+    CuAssertIntEquals(tc, CURSE_ISNEW, c_flags(c));
 
     mstream_done(&data.strm);
     gamedata_done(&data);
