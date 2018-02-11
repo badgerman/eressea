@@ -2041,7 +2041,7 @@ double u_heal_factor(const unit * u)
     return 1.0;
 }
 
-void unit_command(struct unit *u, keyword_t kwd, action_fun call)
+void unit_command(struct unit *u, int kwd, action_fun call)
 {
     order *ord;
     for (ord = u->orders; ord; ord = ord->next) {
