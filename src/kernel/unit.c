@@ -2046,7 +2046,7 @@ void unit_command(struct unit *u, int kwd, action_fun call)
     order *ord;
     for (ord = u->orders; ord; ord = ord->next) {
         keyword_t okwd = getkeyword(ord);
-        if (okwd == kwd) {
+        if (okwd == (keyword_t)kwd) {
             call(u, ord);
         }
     }
@@ -2058,7 +2058,7 @@ void unit_commands(struct unit *u, unit_action actions[]) {
         keyword_t okwd = getkeyword(ord);
         int i;
         for (i = 0; actions[i].call; ++i) {
-            if (okwd == actions[i].kwd) {
+            if (okwd == (keyword_t)actions[i].kwd) {
                 actions[i].call(u, ord);
             }
         }
