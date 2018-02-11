@@ -2055,7 +2055,7 @@ bool unit_command(struct unit *u, int kwd, action_fun call)
     return result;
 }
 
-bool unit_commands(struct unit *u, unit_action actions[]) {
+bool unit_commands(struct unit *u, const unit_action actions[]) {
     order *ord;
     bool result = false;
     for (ord = u->orders; ord; ord = ord->next) {

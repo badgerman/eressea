@@ -753,6 +753,12 @@ static void recruit_cmd(unit *u, order *ord) {
 
 void economics(region * r)
 {
+    const unit_action actions[] = {
+        { K_GIVE, give_cmd },
+        { K_FORGET, forget_cmd },
+        { NOKEYWORD, NULL }
+    };
+
     unit *u;
 
     /* Geben vor Selbstmord (doquit)! Hier alle unmittelbaren Befehle.
@@ -760,9 +766,8 @@ void economics(region * r)
      * eintreiben. */
 
     for (u = r->units; u; u = u->next) {
-        if (u->number > 0) {
-            unit_command(u, K_GIVE, give_cmd);
-            unit_command(u, K_FORGET, forget_cmd);
+        if (u->number > 0) { /* K_GIVE and K_FORGET */
+            unit_commands(u, actions);
         }
     }
     /* RECRUIT orders */
@@ -2780,6 +2785,11 @@ static void sell_cmd(unit *u, order *ord) {
 
 void produce(struct region *r)
 {
+    const unit_action actions[] = {
+        { K_BUY, buy_cmd },
+        { K_SELL, sell_cmd },
+        { NOKEYWORD, NULL }
+    };
     econ_request workers[MAX_WORKERS];
     econ_request *taxorders, *lootorders, *stealorders;
     unit *u;
@@ -2788,12 +2798,6 @@ void produce(struct region *r)
     static const struct building_type *caravan_bt;
     static int rc_cache;
     static const race *rc_insect, *rc_aquarian;
-
-    unit_action actions[] = { 
-        { K_BUY, buy_cmd },
-        { K_SELL, sell_cmd },
-        { NOKEYWORD, NULL }
-    };
 
     if (bt_changed(&bt_cache)) {
         caravan_bt = bt_find("caravan");
