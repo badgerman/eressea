@@ -281,8 +281,8 @@ extern "C" {
         action_fun call;
     } unit_action;
 
-    void unit_command(struct unit *u, int kwd, action_fun call);
-    void unit_commands(struct unit *u, unit_action actions[]);
+    bool unit_command(struct unit *u, int kwd, action_fun call);
+    bool unit_commands(struct unit *u, unit_action actions[]);
 
 #ifdef __cplusplus
 }

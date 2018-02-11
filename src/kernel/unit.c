@@ -2041,26 +2041,33 @@ double u_heal_factor(const unit * u)
     return 1.0;
 }
 
-void unit_command(struct unit *u, int kwd, action_fun call)
+bool unit_command(struct unit *u, int kwd, action_fun call)
 {
     order *ord;
+    bool result = false;
     for (ord = u->orders; ord; ord = ord->next) {
         keyword_t okwd = getkeyword(ord);
         if (okwd == (keyword_t)kwd) {
             call(u, ord);
+            result = true;
         }
     }
+    return result;
 }
 
-void unit_commands(struct unit *u, unit_action actions[]) {
+bool unit_commands(struct unit *u, unit_action actions[]) {
     order *ord;
+    bool result = false;
     for (ord = u->orders; ord; ord = ord->next) {
-        keyword_t okwd = getkeyword(ord);
+        keyword_t kwd = getkeyword(ord);
         int i;
         for (i = 0; actions[i].call; ++i) {
-            if (okwd == (keyword_t)actions[i].kwd) {
+            if (kwd == (keyword_t)actions[i].kwd) {
                 actions[i].call(u, ord);
+                result = true;
+                break;
             }
         }
     }
+    return result;
 }

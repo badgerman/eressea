@@ -745,10 +745,15 @@ void maintain_buildings(region * r)
     }
 }
 
+static econ_request *recruitorders;
+
+static void recruit_cmd(unit *u, order *ord) {
+    recruit(u, ord, &recruitorders);
+}
+
 void economics(region * r)
 {
     unit *u;
-    econ_request *recruitorders = NULL;
 
     /* Geben vor Selbstmord (doquit)! Hier alle unmittelbaren Befehle.
      * Rekrutieren vor allen Einnahmequellen. Bewachen JA vor Steuern
@@ -762,18 +767,13 @@ void economics(region * r)
     }
     /* RECRUIT orders */
 
-    if (rules_recruit < 0)
+    if (rules_recruit < 0) {
         recruit_init();
+    }
+    recruitorders = NULL;
     for (u = r->units; u; u = u->next) {
-        order *ord;
-
         if ((rules_recruit & RECRUIT_MERGE) || u->number == 0) {
-            for (ord = u->orders; ord; ord = ord->next) {
-                if (getkeyword(ord) == K_RECRUIT) {
-                    recruit(u, ord, &recruitorders);
-                    break;
-                }
-            }
+            unit_command(u, K_RECRUIT, recruit_cmd);
         }
     }
 
@@ -2767,17 +2767,33 @@ static bool rule_autowork(void) {
     return config_get_int("work.auto", 0) != 0;
 }
 
+static econ_request *sellorders, *buyorders;
+static bool selling_limited;
+
+static void buy_cmd(unit *u, order *ord) {
+    buy(u, &buyorders, ord);
+}
+
+static void sell_cmd(unit *u, order *ord) {
+    selling_limited &= sell(u, &sellorders, ord);
+}
+
 void produce(struct region *r)
 {
     econ_request workers[MAX_WORKERS];
-    econ_request *taxorders, *lootorders, *sellorders, *stealorders, *buyorders;
+    econ_request *taxorders, *lootorders, *stealorders;
     unit *u;
-    bool limited = true;
     econ_request *nextworker = workers;
     static int bt_cache;
     static const struct building_type *caravan_bt;
     static int rc_cache;
     static const race *rc_insect, *rc_aquarian;
+
+    unit_action actions[] = { 
+        { K_BUY, buy_cmd },
+        { K_SELL, sell_cmd },
+        { NOKEYWORD, NULL }
+    };
 
     if (bt_changed(&bt_cache)) {
         caravan_bt = bt_find("caravan");
@@ -2806,6 +2822,7 @@ void produce(struct region *r)
         peasant_taxes(r);
     }
 
+    selling_limited = true;
     buyorders = 0;
     sellorders = 0;
     working = 0;
@@ -2816,7 +2833,6 @@ void produce(struct region *r)
     stealorders = 0;
 
     for (u = r->units; u; u = u->next) {
-        order *ord;
         bool trader = false;
         keyword_t todo;
 
@@ -2834,19 +2850,8 @@ void produce(struct region *r)
             continue;
         }
 
-        for (ord = u->orders; ord; ord = ord->next) {
-            keyword_t kwd = getkeyword(ord);
-            if (kwd == K_BUY) {
-                buy(u, &buyorders, ord);
-                trader = true;
-            }
-            else if (kwd == K_SELL) {
-                /* sell returns true if the sale is not limited
-                 * by the region limit */
-                limited &= !sell(u, &sellorders, ord);
-                trader = true;
-            }
-        }
+        trader = unit_commands(u, actions);
+
         if (trader) {
             attrib *a = a_find(u->attribs, &at_trades);
             if (a && a->data.i) {
@@ -2943,7 +2948,7 @@ void produce(struct region *r)
         if (r->terrain == newterrain(T_DESERT)
             && buildingtype_exists(r, caravan_bt, true))
             limit *= 2;
-        expandselling(r, sellorders, limited ? limit : INT_MAX);
+        expandselling(r, sellorders, selling_limited ? limit : INT_MAX);
         free_requests(sellorders);
     }
 
