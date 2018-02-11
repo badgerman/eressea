@@ -725,7 +725,7 @@ bool ucontact(const unit * u, const unit * u2)
 
     /* Explizites KONTAKTIERE */
     for (ru = a_find(u->attribs, &at_contact); ru && ru->type == &at_contact;
-    ru = ru->next) {
+        ru = ru->next) {
         if (((unit *)ru->data.v) == u2) {
             return true;
         }
@@ -1216,8 +1216,8 @@ skill *add_skill(unit * u, skill_t sk)
     skill *sv;
     int i;
 
-    for (i=0; i != u->skill_size; ++i) {
-        sv = u->skills+i;
+    for (i = 0; i != u->skill_size; ++i) {
+        sv = u->skills + i;
         if (sv->id >= sk) break;
     }
     u->skills = realloc(u->skills, (1 + u->skill_size) * sizeof(skill));
@@ -1458,7 +1458,7 @@ void default_name(const unit *u, char name[], int len) {
         const char * prefix;
         prefix = LOC(lang, "unitdefault");
         if (!prefix) {
-            prefix= parameters[P_UNIT];
+            prefix = parameters[P_UNIT];
         }
         result = prefix;
     }
@@ -1715,7 +1715,7 @@ int unit_max_hp(const unit * u)
     h = u_race(u)->hitpoints;
 
     if (config_changed(&config)) {
-        rule_stamina = config_get_int("rules.stamina", 1)!=0;
+        rule_stamina = config_get_int("rules.stamina", 1) != 0;
     }
     if (rule_stamina) {
         double p = pow(effskill(u, SK_STAMINA, u->region) / 2.0, 1.5) * 0.2;
@@ -1738,7 +1738,7 @@ void scale_number(unit * u, int n)
         return;
     }
     if (u->number > 0) {
-        if (n>0) {
+        if (n > 0) {
             const attrib *a = a_find(u->attribs, &at_effect);
 
             u->hp = (long long)u->hp * n / u->number;
@@ -2020,7 +2020,7 @@ bool has_limited_skills(const struct unit * u)
 double u_heal_factor(const unit * u)
 {
     const race * rc = u_race(u);
-    if (rc->healing>0) {
+    if (rc->healing > 0) {
         return rc->healing / 100.0;
     }
     if (r_isforest(u->region)) {
@@ -2039,4 +2039,28 @@ double u_heal_factor(const unit * u)
         }
     }
     return 1.0;
+}
+
+void unit_command(struct unit *u, keyword_t kwd, action_fun call)
+{
+    order *ord;
+    for (ord = u->orders; ord; ord = ord->next) {
+        keyword_t okwd = getkeyword(ord);
+        if (okwd == kwd) {
+            call(u, ord);
+        }
+    }
+}
+
+void unit_commands(struct unit *u, unit_action actions[]) {
+    order *ord;
+    for (ord = u->orders; ord; ord = ord->next) {
+        keyword_t okwd = getkeyword(ord);
+        int i;
+        for (i = 0; actions[i].call; ++i) {
+            if (okwd == actions[i].kwd) {
+                actions[i].call(u, ord);
+            }
+        }
+    }
 }

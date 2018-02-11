@@ -274,6 +274,16 @@ extern "C" {
     int maintenance_cost(const struct unit *u);
     bool has_limited_skills(const struct unit *u);
 
+    typedef void(*action_fun)(struct unit*, struct order *ord);
+
+    typedef struct unit_action {
+        int kwd;
+        action_fun call;
+    } unit_action;
+
+    void unit_command(struct unit *u, int kwd, action_fun call);
+    void unit_commands(struct unit *u, unit_action actions[]);
+
 #ifdef __cplusplus
 }
 #endif

@@ -756,20 +756,9 @@ void economics(region * r)
      * eintreiben. */
 
     for (u = r->units; u; u = u->next) {
-        order *ord;
         if (u->number > 0) {
-            for (ord = u->orders; ord; ord = ord->next) {
-                keyword_t kwd = getkeyword(ord);
-                if (kwd == K_GIVE) {
-                    give_cmd(u, ord);
-                }
-                else if (kwd == K_FORGET) {
-                    forget_cmd(u, ord);
-                }
-                if (u->orders == NULL) {
-                    break;
-                }
-            }
+            unit_command(u, K_GIVE, give_cmd);
+            unit_command(u, K_FORGET, forget_cmd);
         }
     }
     /* RECRUIT orders */
