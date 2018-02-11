@@ -644,7 +644,7 @@ int give_control_cmd(unit * u, order * ord)
     return 0;
 }
 
-static int forget_cmd(unit * u, order * ord)
+static void forget_cmd(unit * u, order * ord)
 {
     char token[128];
     skill_t sk;
@@ -652,7 +652,7 @@ static int forget_cmd(unit * u, order * ord)
 
     if (is_cursed(u->attribs, &ct_slavery)) {
         /* charmed units shouldn't be losing their skills */
-        return 0;
+        return;
     }
 
     init_order_depr(ord);
@@ -662,12 +662,11 @@ static int forget_cmd(unit * u, order * ord)
     if (sk != NOSKILL) {
         if (sk == SK_MAGIC && is_familiar(u)) {
             /* some units cannot forget their innate magical abilities */
-            return 0;
+            return;
         }
         ADDMSG(&u->faction->msgs, msg_message("forget", "unit skill", u, sk));
         set_level(u, sk, 0);
     }
-    return 0;
 }
 
 static int maintain(building * b)
