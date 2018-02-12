@@ -491,41 +491,40 @@ static attrib *set_new_dragon_target(unit * u, region * r, int range)
     return NULL;
 }
 
-static order *make_movement_order(unit * u, const region * target, int moves,
+#define RANGE_MAX (DRAGON_RANGE * 5)
+
+order * create_movement(keyword_t kwd, const struct locale *lang, direction_t steps[])
+{
+    char zOrder[128];
+    int i;
+    sbstring sbs;
+
+    sbs_init(&sbs, zOrder, sizeof(zOrder));
+    for (i = 0; steps[i] != NODIRECTION; ++i) {
+        direction_t dir = steps[i];
+        sbs_strcat(&sbs, " ");
+        sbs_strcat(&sbs, LOC(lang, directions[dir]));
+    }
+    return create_order(kwd, lang, zOrder+1);
+}
+
+static order *dragon_movement(unit * u, const region * target, int moves,
     bool(*allowed) (const region *, const region *))
 {
     region *r = u->region;
-    region **plan;
-    int position = 0;
-    char zOrder[128], *bufp = zOrder;
-    size_t size = sizeof(zOrder) - 1;
+    direction_t steps[RANGE_MAX + 1];
 
     if (monster_is_waiting(u))
         return NULL;
 
-    plan = path_find(r, target, DRAGON_RANGE * 5, allowed);
-    if (plan == NULL)
-        return NULL;
-
-    while (position != moves && plan[position + 1]) {
-        int bytes;
-        region *prev = plan[position];
-        region *next = plan[++position];
-        direction_t dir = reldirection(prev, next);
-        assert(dir != NODIRECTION && dir != D_SPECIAL);
-        if (size > 1 && bufp != zOrder) {
-            *bufp++ = ' ';
-            --size;
-        }
-        bytes =
-            (int)str_strlcpy(bufp,
-            (const char *)LOC(u->faction->locale, directions[dir]), size);
-        if (wrptr(&bufp, &size, bytes) != 0)
-            WARN_STATIC_BUFFER();
+    if (moves > RANGE_MAX) {
+        moves = RANGE_MAX;
     }
-
-    *bufp = 0;
-    return create_order(K_MOVE, u->faction->locale, zOrder);
+    path_find(r, target, moves, steps, allowed);
+    if (steps[0] == NODIRECTION) {
+        return NULL;
+    }
+    return create_movement(K_MOVE, u->faction->locale, steps);
 }
 
 void random_growl(const unit *u, region *target, int rand)
@@ -678,15 +677,15 @@ static order *plan_dragon(unit * u)
         assert(long_order == NULL);
         /* TODO: per-race planning functions? */
         if (rc == rc_wyrm) {
-            long_order = make_movement_order(u, tr, 1, allowed_dragon);
+            long_order = dragon_movement(u, tr, 1, allowed_dragon);
         }
         else {
             switch (old_race(rc)) {
             case RC_FIREDRAGON:
-                long_order = make_movement_order(u, tr, 4, allowed_dragon);
+                long_order = dragon_movement(u, tr, 4, allowed_dragon);
                 break;
             case RC_DRAGON:
-                long_order = make_movement_order(u, tr, 3, allowed_dragon);
+                long_order = dragon_movement(u, tr, 3, allowed_dragon);
                 break;
             default:
                 break;
@@ -774,7 +773,7 @@ void plan_monsters(faction * f)
                 else if (tu) {
                     tu = findunitg(ta->data.i, NULL);
                     if (tu != NULL) {
-                        long_order = make_movement_order(u, tu->region, 2, allowed_walk);
+                        long_order = dragon_movement(u, tu->region, 2, allowed_walk);
                     }
                 }
                 else

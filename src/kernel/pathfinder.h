@@ -18,12 +18,16 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #ifndef H_KRNL_PATHFINDER
 #define H_KRNL_PATHFINDER
+
+#include "types.h"
+
+struct region;
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    extern struct region **path_find(struct region *start,
-        const struct region *target, int maxlen,
+    extern void path_find(struct region *start,
+        const struct region *target, int maxlen, direction_t steps[],
         bool(*allowed) (const struct region *, const struct region *));
     extern bool path_exists(struct region *start, const struct region *target,
         int maxlen, bool(*allowed) (const struct region *,

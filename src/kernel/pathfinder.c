@@ -24,6 +24,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "region.h"
 #include "terrain.h"
 
+/* TODO: move reldirection to region.h?*/
+#include "../move.h"
+
 #include <limits.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -207,10 +210,27 @@ bool(*allowed) (const region *, const region *))
     return false;
 }
 
-region **path_find(region * start, const region * target, int maxlen,
-    bool(*allowed) (const region *, const region *))
+void path_find(region * start, const region * target, int maxlen,
+    direction_t steps[], bool(*allowed) (const region *, const region *))
 {
+    region **plan;
+
     assert((!fval(start, RF_MARK) && !fval(target, RF_MARK))
         || !"Did you call path_init()?");
-    return internal_path_find(start, target, maxlen, allowed);
+    plan = internal_path_find(start, target, maxlen, allowed);
+
+    if (plan[0]) {
+        int i;
+        for (i = 0; i != maxlen && plan[i + 1]; ++i) {
+            region *prev = plan[i];
+            region *next = plan[i + 1];
+            direction_t dir = reldirection(prev, next);
+            assert(dir != NODIRECTION && dir != D_SPECIAL);
+            steps[i] = dir;
+        }
+        steps[i] = NODIRECTION;
+    }
+    else {
+        steps[0] = NODIRECTION;
+    }
 }

@@ -19,16 +19,18 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef H_GC_MONSTER
 #define H_GC_MONSTER
 
+#include "kernel/types.h"
 #include <stdbool.h>
+
+struct unit;
+struct region;
+struct order;
+struct faction;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    struct unit;
-    struct region;
-    struct faction;
-    
     struct unit *spawn_seaserpent(struct region *r, struct faction *f);
     void spawn_dragons(void);
     void monsters_desert(struct faction *monsters);
@@ -36,7 +38,7 @@ extern "C" {
     void monster_kills_peasants(struct unit *u);
     bool monster_is_waiting(const struct unit *u);
     void make_zombie(struct unit * u);
-
+    struct order * create_movement(keyword_t kwd, const struct locale *lang, direction_t steps[]);
 #ifdef __cplusplus
 }
 #endif

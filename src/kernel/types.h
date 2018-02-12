@@ -77,15 +77,14 @@ typedef enum {
 
 /* ------------------ Status von Einheiten --------------------- */
 
-typedef unsigned char status_t;
-enum {
+typedef enum {
   ST_AGGRO,
   ST_FIGHT,
   ST_BEHIND,
   ST_CHICKEN,
   ST_AVOID,
   ST_FLEE
-};
+} status_t;
 
 /* ----------------- Parameter --------------------------------- */
 
@@ -192,6 +191,84 @@ typedef enum {
   /* this enum is stored in the datafile, so do not change the numbers around */
   M_NONE = -1
 } magic_t;
+
+typedef enum {
+    D_NORTHWEST,
+    D_NORTHEAST,
+    D_EAST,
+    D_SOUTHEAST,
+    D_SOUTHWEST,
+    D_WEST,
+    MAXDIRECTIONS,
+    D_PAUSE,
+    D_SPECIAL,
+    NODIRECTION = -1
+} direction_t;
+
+typedef enum {
+    K_KOMMENTAR,
+    K_BANNER,
+    K_WORK,
+    K_ATTACK,
+    K_STEAL,
+    K_BESIEGE,
+    K_NAME,
+    K_USE,
+    K_DISPLAY,
+    K_ENTER,
+    K_GUARD,
+    K_MAIL,
+    K_END,
+    K_DRIVE,
+    K_NUMBER,
+    K_FOLLOW,
+    K_RESEARCH,
+    K_GIVE,
+    K_ALLY,
+    K_STATUS,
+    K_COMBATSPELL,
+    K_BUY,
+    K_CONTACT,
+    K_TEACH,
+    K_STUDY,
+    K_MAKE,
+    K_MAKETEMP,
+    K_MOVE,
+    K_PASSWORD,
+    K_RECRUIT,
+    K_RESERVE,
+    K_ROUTE,
+    K_SABOTAGE,
+    K_SEND,
+    K_SPY,
+    K_QUIT,
+    K_SETSTEALTH,
+    K_TRANSPORT,
+    K_TAX,
+    K_ENTERTAIN,
+    K_SELL,
+    K_LEAVE,
+    K_FORGET,
+    K_CAST,
+    K_RESHOW,
+    K_DESTROY,
+    K_PLANT,
+    K_GROW,
+    K_DEFAULT,
+    K_URSPRUNG,
+    K_EMAIL,
+    K_PIRACY,
+    K_GROUP,
+    K_SORT,
+    K_PREFIX,
+    K_ALLIANCE,
+    K_CLAIM,
+    K_PROMOTION,
+    K_PAY,
+    K_LOOT,
+    MAXKEYWORDS,
+    NOKEYWORD
+} keyword_t;
 
 #define DONT_HELP      0
 #define HELP_MONEY     1        /* Mitversorgen von Einheiten */

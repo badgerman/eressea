@@ -230,8 +230,25 @@ static void test_dragon_moves(CuTest * tc)
     test_teardown();
 }
 
-static void test_monsters_learn_exp(CuTest * tc)
-{
+static void test_create_movement(CuTest *tc) {
+    direction_t steps[4];
+    order *ord;
+    const struct locale * lang;
+    char zText[64];
+
+    test_setup();
+    lang = test_create_locale();
+    steps[0] = D_WEST;
+    steps[1] = D_EAST;
+    steps[2] = D_EAST;
+    steps[3] = NODIRECTION;
+    ord = create_movement(K_MOVE, lang, steps);
+    CuAssertStrEquals(tc, "move west east east", get_command(ord, lang, zText, sizeof(zText)));
+    free_order(ord);
+    test_teardown();
+}
+
+static void test_monsters_learn_exp(CuTest * tc) {
     unit *u, *m;
     skill* sk;
 
@@ -278,6 +295,7 @@ CuSuite *get_monsters_suite(void)
     SUITE_ADD_TEST(suite, test_monsters_attack_not);
     SUITE_ADD_TEST(suite, test_dragon_attacks_the_rich);
     SUITE_ADD_TEST(suite, test_dragon_moves);
+    SUITE_ADD_TEST(suite, test_create_movement);
     SUITE_ADD_TEST(suite, test_monsters_learn_exp);
     return suite;
 }

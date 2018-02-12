@@ -1,25 +1,14 @@
 #ifndef H_DIRECTION_H
 #define H_DIRECTION_H
 
+#include "kernel/types.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
     struct locale;
-
-    typedef enum {
-        D_NORTHWEST,
-        D_NORTHEAST,
-        D_EAST,
-        D_SOUTHEAST,
-        D_SOUTHWEST,
-        D_WEST,
-        MAXDIRECTIONS,
-        D_PAUSE,
-        D_SPECIAL,
-        NODIRECTION = -1
-    } direction_t;
 
     extern const char *shortdirections[MAXDIRECTIONS];
 
