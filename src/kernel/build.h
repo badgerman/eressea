@@ -60,7 +60,6 @@ extern "C" {
 
     void free_construction(struct construction *cons);
     int destroy_cmd(struct unit *u, struct order *ord);
-    int leave_cmd(struct unit *u, struct order *ord);
 
     void build_road(struct unit *u, int size, direction_t d);
     void create_ship(struct unit *u, const struct ship_type *newtype,
