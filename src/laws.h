@@ -87,7 +87,7 @@ extern "C" {
     int pay_cmd(struct unit *u, struct order *ord);
     int promotion_cmd(struct unit *u, struct order *ord);
     int combatspell_cmd(struct unit *u, struct order *ord);
-    int contact_cmd(struct unit *u, struct order *ord);
+    void contact_cmd(struct unit *u, struct order *ord);
     int guard_on_cmd(struct unit *u, struct order *ord);
     int guard_off_cmd(struct unit *u, struct order *ord);
     int reshow_cmd(struct unit *u, struct order *ord);

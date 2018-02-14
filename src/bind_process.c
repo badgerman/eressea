@@ -197,8 +197,13 @@ void process_sethelp(void) {
     process_cmd(K_ALLY, ally_cmd, 0);
 }
 
+static int wrap_contact_cmd(unit *u, order *ord) {
+    contact_cmd(u, ord);
+    return 0;
+}
+
 void process_contact(void) {
-    process_cmd(K_CONTACT, contact_cmd, 0);
+    process_cmd(K_CONTACT, wrap_contact_cmd, 0);
 }
 
 void process_magic(void) {

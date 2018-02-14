@@ -942,7 +942,7 @@ int can_contact(const region * r, const unit * u, const unit * u2) {
     return (alliedunit(u, u2->faction, HELP_GIVE));
 }
 
-int contact_cmd(unit * u, order * ord)
+void contact_cmd(unit * u, order * ord)
 {
     unit *u2;
     int n;
@@ -954,11 +954,9 @@ int contact_cmd(unit * u, order * ord)
     if (u2 != NULL) {
         if (!can_contact(u->region, u, u2)) {
             cmistake(u, u->thisorder, 23, MSG_EVENT);
-            return -1;
         }
         usetcontact(u, u2);
     }
-    return 0;
 }
 
 int leave_cmd(unit * u, struct order *ord)
@@ -1157,13 +1155,7 @@ static void do_contact(region * r)
 {
     unit * u;
     for (u = r->units; u; u = u->next) {
-        order *ord;
-        for (ord = u->orders; ord; ord = ord->next) {
-            keyword_t kwd = getkeyword(ord);
-            if (kwd == K_CONTACT) {
-                contact_cmd(u, ord);
-            }
-        }
+        unit_command(u, K_CONTACT, contact_cmd);
     }
 }
 
