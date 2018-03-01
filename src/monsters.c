@@ -17,7 +17,9 @@
  * permission from the authors.
  */
 
+#ifdef _MSC_VER
 #include <platform.h>
+#endif
 
 #include "monsters.h"
 
@@ -132,7 +134,10 @@ static void reduce_weight(unit * u)
             if (itype->weight >= 10 && itype->rtype->wtype == 0
                 && itype->rtype->atype == 0) {
                 if (itype->capacity < itype->weight) {
-                    int reduce = MIN(itm->number, -((capacity - weight) / itype->weight));
+                    int reduce = (weight - capacity) / itype->weight;
+                    if (reduce > itm->number) {
+                        reduce = itm->number;
+                    }
                     give_peasants(u, itm->type, reduce);
                     weight -= reduce * itype->weight;
                 }
@@ -147,7 +152,10 @@ static void reduce_weight(unit * u)
         const item_type *itype = itm->type;
         weight += itm->number * itype->weight;
         if (itype->capacity < itype->weight) {
-            int reduce = MIN(itm->number, -((capacity - weight) / itype->weight));
+            int reduce = (weight - capacity) / itype->weight;
+            if (reduce > itm->number) {
+                reduce = itm->number;
+            }
             give_peasants(u, itm->type, reduce);
             weight -= reduce * itype->weight;
         }
@@ -771,7 +779,7 @@ void plan_monsters(faction * f)
                     }
                 }
                 else if (tu) {
-                    tu = findunitg(ta->data.i, NULL);
+                    tu = findunit(ta->data.i);
                     if (tu != NULL) {
                         long_order = dragon_movement(u, tu->region, 2, allowed_walk);
                     }
@@ -1026,10 +1034,12 @@ static void eaten_by_monster(unit * u)
 
     n = (int)(n * multi);
     if (n > 0) {
+
         n = lovar(n);
-        n = MIN(rpeasants(u->region), n);
 
         if (n > 0) {
+            int p = rpeasants(u->region);
+            if (p < n) n = p;
             deathcounts(u->region, n);
             rsetpeasants(u->region, rpeasants(u->region) - n);
             ADDMSG(&u->region->msgs, msg_message("eatpeasants", "unit amount", u, n));
@@ -1047,8 +1057,9 @@ static void absorbed_by_monster(unit * u)
 
     if (n > 0) {
         n = lovar(n);
-        n = MIN(rpeasants(u->region), n);
         if (n > 0) {
+            int p = rpeasants(u->region);
+            if (p < n) n = p;
             rsetpeasants(u->region, rpeasants(u->region) - n);
             scale_number(u, u->number + n);
             ADDMSG(&u->region->msgs, msg_message("absorbpeasants",
@@ -1062,7 +1073,10 @@ static int scareaway(region * r, int anzahl)
     int n, p, diff = 0, emigrants[MAXDIRECTIONS];
     direction_t d;
 
-    anzahl = MIN(MAX(1, anzahl), rpeasants(r));
+    p = rpeasants(r);
+    if (anzahl < 1) anzahl = 1;
+    if (anzahl > p) anzahl = p;
+    assert(p >= 0 && anzahl >= 0);
 
     /* Wandern am Ende der Woche (normal) oder wegen Monster. Die
      * Wanderung wird erst am Ende von demographics () ausgefuehrt.
@@ -1072,9 +1086,7 @@ static int scareaway(region * r, int anzahl)
     for (d = 0; d != MAXDIRECTIONS; d++)
         emigrants[d] = 0;
 
-    p = rpeasants(r);
-    assert(p >= 0 && anzahl >= 0);
-    for (n = MIN(p, anzahl); n; n--) {
+    for (n = anzahl; n; n--) {
         direction_t dir = (direction_t)(rng_int() % MAXDIRECTIONS);
         region *rc = rconnect(r, dir);
 
@@ -1103,8 +1115,9 @@ static void scared_by_monster(unit * u)
     }
     if (n > 0) {
         n = lovar(n);
-        n = MIN(rpeasants(u->region), n);
         if (n > 0) {
+            int p = rpeasants(u->region);
+            if (p < n) n = p;
             n = scareaway(u->region, n);
             if (n > 0) {
                 ADDMSG(&u->region->msgs, msg_message("fleescared",

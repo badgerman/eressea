@@ -20,6 +20,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define H_KRNL_MAGIC
 
 #include <kernel/types.h>
+#include <util/variant.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -325,7 +326,6 @@ extern "C" {
     struct unit *get_familiar(const struct unit *u);
     struct unit *get_familiar_mage(const struct unit *u);
     struct unit *get_clone(const struct unit *u);
-    struct unit *get_clone_mage(const struct unit *u);
     void remove_familiar(struct unit *mage);
     void create_newfamiliar(struct unit *mage, struct unit *familiar);
     void create_newclone(struct unit *mage, struct unit *familiar);

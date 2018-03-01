@@ -695,7 +695,7 @@ nr_unit(struct stream *out, const faction * f, const unit * u, int indent, seen_
         return;
 
     newline(out);
-    dh = bufunit(f, u, indent, mode, buf, sizeof(buf));
+    dh = bufunit(f, u, mode, buf, sizeof(buf));
 
     if (u->faction == f) {
         marker = '*';
@@ -2279,9 +2279,11 @@ report_plaintext(const char *filename, report_context * ctx,
                     m = msg_message("nr_market_info_p", "p1 p2",
                         lux->rtype, herb->rtype);
                 }
-                else if (lux || herb) {
-                    m = msg_message("nr_market_info_s", "p1",
-                        lux ? lux->rtype : herb->rtype);
+                else if (lux) {
+                    m = msg_message("nr_market_info_s", "p1",lux->rtype);
+                }
+                else if (herb) {
+                    m = msg_message("nr_market_info_s", "p1", herb->rtype);
                 }
                 if (m) {
                     newline(out);
@@ -2395,29 +2397,6 @@ struct fsee {
 #define REPORT_ZV (1 << O_ZUGVORLAGE)
 #define REPORT_ZIP (1 << O_COMPRESS)
 #define REPORT_BZIP2 (1 << O_BZIP2)
-
-unit *can_find(faction * f, faction * f2)
-{
-    int key = f->no % FMAXHASH;
-    struct fsee *fs = fsee[key];
-    struct see *ss;
-    if (f == f2)
-        return f->units;
-    while (fs && fs->f != f)
-        fs = fs->nexthash;
-    if (!fs)
-        return NULL;
-    ss = fs->see;
-    while (ss && ss->seen != f2)
-        ss = ss->next;
-    if (ss) {
-        /* bei TARNE PARTEI yxz muss die Partei von unit proof nicht
-         * wirklich Partei f2 sein! */
-         /* assert(ss->proof->faction==f2); */
-        return ss->proof;
-    }
-    return NULL;
-}
 
 void register_nr(void)
 {

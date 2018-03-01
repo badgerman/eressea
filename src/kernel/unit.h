@@ -150,9 +150,6 @@ extern "C" {
     const char *uprivate(const struct unit *u);
     void usetprivate(struct unit *u, const char *c);
 
-    const struct item_type *ugetpotionuse(const struct unit *u);        /* benutzt u einein trank? */
-    void usetpotionuse(struct unit *u, const struct item_type *p);      /* u benutzt trank p (es darf halt nur einer pro runde) */
-
     bool ucontact(const struct unit *u, const struct unit *u2);
     void usetcontact(struct unit *u, const struct unit *c);
 
@@ -248,9 +245,7 @@ extern "C" {
     void remove_empty_units_in_region(struct region * r);
     void remove_empty_units(void);
 
-    struct unit *findunitg(int n, const struct region *hint);
     struct unit *findunit(int n);
-
     struct unit *findunitr(const struct region *r, int n);
 
     void default_name(const unit *u, char name[], int len);

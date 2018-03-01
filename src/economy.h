@@ -18,6 +18,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #ifndef H_GC_ECONOMY
 #define H_GC_ECONOMY
+
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -72,7 +75,7 @@ extern "C" {
     void produce(struct region *r);
     void auto_work(struct region *r);
 
-    unsigned int expand_production(struct region * r, struct econ_request * requests, struct econ_request ***results);
+    int expand_production(struct region * r, struct econ_request * requests, struct econ_request ***results);
 
     typedef enum income_t { IC_WORK, IC_ENTERTAIN, IC_TAX, IC_TRADE, IC_TRADETAX, IC_STEAL, IC_MAGIC, IC_LOOT } income_t;
     void add_income(struct unit * u, income_t type, int want, int qty);

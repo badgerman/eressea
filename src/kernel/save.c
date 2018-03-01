@@ -496,7 +496,7 @@ unit *read_unit(gamedata *data)
     }
 
     READ_INT(data->store, &n);
-    unit_setstatus(u, n);
+    unit_setstatus(u, (status_t)n);
     READ_INT(data->store, &u->flags);
     u->flags &= UFL_SAVEMASK;
     if ((u->flags & UFL_ANON_FACTION) && !rule_stealth_anon()) {
@@ -935,6 +935,7 @@ static void read_password(gamedata *data, faction *f) {
     else {
         faction_setpassword(f, (data->version >= CRYPT_VERSION) ? name : password_encode(name, PASSWORD_DEFAULT));
     }
+    (void)_test_read_password;
 }
 
 void _test_read_password(gamedata *data, faction *f) {
@@ -943,6 +944,7 @@ void _test_read_password(gamedata *data, faction *f) {
 
 static void write_password(gamedata *data, const faction *f) {
     WRITE_TOK(data->store, (const char *)f->_password);
+    (void)_test_write_password;
 }
 
 void _test_write_password(gamedata *data, const faction *f) {
@@ -1015,7 +1017,7 @@ faction *read_faction(gamedata * data)
     READ_STR(data->store, name, sizeof(name));
     if (check_email(name) == 0) {
       faction_setemail(f, name);
-    } else {
+    } else if (name[0]) {
       log_warning("Invalid email address for faction %s: %s", itoa36(f->no), name);
       faction_setemail(f, NULL);
     }

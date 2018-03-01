@@ -39,7 +39,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "skill.h"
 #include "terrain.h"
 
-#include <attributes/moved.h>
 #include <attributes/otherfaction.h>
 #include <attributes/racename.h>
 #include <attributes/stealth.h>
@@ -75,8 +74,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
-#define FIND_FOREIGN_TEMP
 
 int weight(const unit * u)
 {
@@ -123,19 +120,6 @@ unit *findunitr(const region * r, int n)
     assert(n > 0);
     u = ufindhash(n);
     return (u && u->region == r) ? u : 0;
-}
-
-/* TODO: deprecated, replace with findunit(n) */
-unit *findunitg(int n, const region * hint)
-{
-    UNUSED_ARG(hint);
-    /* Abfangen von Syntaxfehlern. */
-    if (n <= 0)
-        return NULL;
-
-    /* findunit global! */
-    hint = 0;
-    return ufindhash(n);
 }
 
 #define UMAXHASH MAXUNITS
@@ -359,42 +343,6 @@ int gift_items(unit * u, int flags)
 
 static unit *deleted_units = NULL;
 
-#define DMAXHASH 7919
-#undef DMAXHASH /* TODO: makes dfindhash slow! */
-#ifdef DMAXHASH
-typedef struct dead {
-    struct dead *nexthash;
-    faction *f;
-    int no;
-} dead;
-
-static dead *deadhash[DMAXHASH];
-
-static void dhash(int no, faction * f)
-{
-    dead *hash = (dead *)calloc(1, sizeof(dead));
-    dead *old = deadhash[no % DMAXHASH];
-    hash->no = no;
-    hash->f = f;
-    deadhash[no % DMAXHASH] = hash;
-    hash->nexthash = old;
-}
-
-faction *dfindhash(int no)
-{
-    dead *old;
-
-    if (no < 0)
-        return 0;
-
-    for (old = deadhash[no % DMAXHASH]; old; old = old->nexthash) {
-        if (old->no == no) {
-            return old->f;
-        }
-    }
-    return 0;
-}
-#else
 struct faction *dfindhash(int no) {
     unit *u;
 
@@ -405,7 +353,6 @@ struct faction *dfindhash(int no) {
     }
     return NULL;
 }
-#endif
 
 int remove_unit(unit ** ulist, unit * u)
 {
@@ -454,9 +401,6 @@ int remove_unit(unit ** ulist, unit * u)
 
     u->next = deleted_units;
     deleted_units = u;
-#ifdef DMAXHASH
-    dhash(u->no, u->faction);
-#endif
 
     u->region = NULL;
 
@@ -473,11 +417,11 @@ unit *findnewunit(const region * r, const faction * f, int n)
     for (u2 = r->units; u2; u2 = u2->next)
         if (u2->faction == f && ualias(u2) == n)
             return u2;
-#ifdef FIND_FOREIGN_TEMP
+
     for (u2 = r->units; u2; u2 = u2->next)
         if (ualias(u2) == n)
             return u2;
-#endif
+
     return 0;
 }
 
@@ -571,35 +515,6 @@ void usetprivate(unit * u, const char *str)
         free(a->data.v);
     }
     a->data.v = str_strdup(str);
-}
-
-/*********************/
-/*   at_potionuser   */
-/*********************/
-/* Einheit BENUTZT einen Trank */
-attrib_type at_potionuser = {
-    "potionuser",
-    DEFAULT_INIT,
-    DEFAULT_FINALIZE,
-    DEFAULT_AGE,
-    NO_WRITE,
-    NO_READ
-};
-
-void usetpotionuse(unit * u, const item_type * ptype)
-{
-    attrib *a = a_find(u->attribs, &at_potionuser);
-    if (!a)
-        a = a_add(&u->attribs, a_new(&at_potionuser));
-    a->data.v = (void *)ptype;
-}
-
-const item_type *ugetpotionuse(const unit * u)
-{
-    attrib *a = a_find(u->attribs, &at_potionuser);
-    if (!a)
-        return NULL;
-    return (const item_type *)a->data.v;
 }
 
 /*********************/

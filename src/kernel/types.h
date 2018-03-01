@@ -20,9 +20,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define ERESSEA_TYPES_H
 
 #include <settings.h>
-#include <util/variant.h>
-
-typedef short item_t;
 
 struct attrib;
 struct attrib_type;
