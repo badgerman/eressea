@@ -118,17 +118,17 @@ extern "C" {
         C_BADLEARN,
         C_SHIP_SPEEDUP,             /*  9 - Sturmwind-Zauber */
         C_SHIP_FLYING,              /* 10 - Luftschiff-Zauber */
-        C_SHIP_NODRIFT,             /* 11 - GünstigeWinde-Zauber */
+        C_SHIP_NODRIFT,             /* 11 - GuenstigeWinde-Zauber */
         C_DEPRESSION,
         C_MAGICWALLS,               /* 13 - Heimstein */
         C_STRONGWALL,               /* 14 - Feste Mauer - Precombat */
         C_ASTRALBLOCK,              /* 15 - Astralblock */
         C_GENEROUS,                 /* 16 - Unterhaltung vermehren */
         C_PEACE,                    /* 17 - Regionsweit Attacken verhindern */
-        C_MAGICSTREET,              /* 19 - magisches Straßennetz */
-        C_RESIST_MAGIC,             /* 20 - verändert Magieresistenz von Objekten */
-        C_SONG_BADMR,               /* 21 - verändert Magieresistenz */
-        C_SONG_GOODMR,              /* 22 - verändert Magieresistenz */
+        C_MAGICSTREET,              /* 19 - magisches Strassennetz */
+        C_RESIST_MAGIC,             /* 20 - veraendert Magieresistenz von Objekten */
+        C_SONG_BADMR,               /* 21 - veraendert Magieresistenz */
+        C_SONG_GOODMR,              /* 22 - veraendert Magieresistenz */
         C_SLAVE,                    /* 23 - dient fremder Partei */
         C_CALM,                     /* 25 - Beinflussung */
         C_OLDRACE,
@@ -153,10 +153,10 @@ extern "C" {
         CURSE_ONLYONE = 0x08,       /* Verhindert, das ein weiterer Zauber dieser Art auf das Objekt gezaubert wird */
 
         /* the following are mutually exclusive */
-        CURSE_SPREADNEVER = 0x00,   /* wird nie mit übertragen */
-        CURSE_SPREADALWAYS = 0x10,  /* wird immer mit übertragen */
+        CURSE_SPREADNEVER = 0x00,   /* wird nie transferiert */
+        CURSE_SPREADALWAYS = 0x10,  /* wird immer transferiert */
         CURSE_SPREADMODULO = 0x20,  /* personenweise weitergabe */
-        CURSE_SPREADCHANCE = 0x30   /* Ansteckungschance je nach Mengenverhältnis */
+        CURSE_SPREADCHANCE = 0x30   /* Ansteckungschance realtiv zu Groesse */
     } curseflags;
 
 #define CURSE_FLAGSMASK 0x0F

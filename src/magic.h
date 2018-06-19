@@ -131,12 +131,12 @@ extern "C" {
         struct unit *_familiar;     /* Vertrauter, gesetzt, wenn der Spruch durch
                                        den Vertrauten gezaubert wird */
         const struct spell *sp;     /* Spruch */
-        int level;                  /* gewünschte Stufe oder Stufe des Magiers */
-        double force;               /* Stärke des Zaubers */
+        int level;                  /* gewuenschte Stufe oder Stufe des Magiers */
+        double force;               /* Staerke des Zaubers */
         struct region *_rtarget;     /* Zielregion des Spruchs */
         int distance;               /* Entfernung zur Zielregion */
         struct order *order;        /* Befehl */
-        struct spellparameter *par; /* für weitere Parameter */
+        struct spellparameter *par; /* fuer weitere Parameter */
     } castorder;
 
     struct unit * co_get_caster(const struct castorder * co);
@@ -182,7 +182,7 @@ extern "C" {
     enum {
         SPC_FIX,                    /* Fixkosten */
         SPC_LEVEL,                  /* Komponenten pro Level */
-        SPC_LINEAR                  /* Komponenten pro Level und müssen vorhanden sein */
+        SPC_LINEAR                  /* Komponenten pro Level und muessen vorhanden sein */
     };
 
     /* ------------------------------------------------------------- */
