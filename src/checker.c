@@ -5,6 +5,7 @@
 #include "util/order_parser.h"
 #include "util/keyword.h"
 #include "util/language.h"
+#include "util/parser.h"
 #include "util/path.h"
 #include "util/pofile.h"
 
@@ -17,21 +18,29 @@
 
 typedef struct parser_state {
     FILE * F;
+    struct locale *lang;
 } parser_state;
 
-static void handle_order(void *userData, const char *str) {
+static void handle_order(void *userData, const char *line) {
     parser_state * state = (parser_state*)userData;
-    fputs(str, state->F);
-    fputc('\n', state->F);
+    const char *str;
+    keyword_t kwd;
+    init_tokens_str(line);
+    str = getstrtoken();
+    kwd = get_keyword(str, state->lang);
+    if (kwd == NOKEYWORD) {
+        fprintf(state->F, "unknown command: %s\n", str);
+    }
 }
 
-int parsefile(FILE *F) {
+int parsefile(FILE *F, const char *loc) {
     OP_Parser parser;
     char buf[1024];
     int done = 0, err = 0;
     parser_state state = { NULL };
 
     state.F = stdout;
+    state.lang = get_locale(loc);
 
     parser = OP_ParserCreate();
     OP_SetOrderHandler(parser, handle_order);
@@ -122,6 +131,7 @@ static void read_config(const char *cfgfile) {
 }
 
 int main(int argc, char **argv) {
+    const char *loc = "de";
     const char *cfgfile = "checker.ini";
     FILE * F = stdin;
     if (argc > 1) {
@@ -133,7 +143,7 @@ int main(int argc, char **argv) {
         }
     }
     read_config(cfgfile);
-    parsefile(F);
+    parsefile(F, loc);
     if (F != stdin) {
         fclose(F);
     }
