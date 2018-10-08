@@ -129,6 +129,14 @@ static const char * parameter_key(int i)
     return parameters[i];
 }
 
-void init_parameters(struct locale *lang) {
+void init_parameter(const struct locale *lang, param_t par, const char *str)
+{
+    void **tokens = get_translations(lang, UT_PARAMS);
+    struct critbit_tree **cb = (critbit_tree **)tokens;
+    add_translation(cb, str, (int)par);
+}
+
+void init_parameters(struct locale *lang)
+{
     init_translations(lang, UT_PARAMS, parameter_key, MAXPARAMS);
 }

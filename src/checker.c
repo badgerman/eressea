@@ -5,6 +5,7 @@
 #include "util/order_parser.h"
 #include "util/keyword.h"
 #include "util/language.h"
+#include "util/param.h"
 #include "util/parser.h"
 #include "util/path.h"
 #include "util/pofile.h"
@@ -71,6 +72,16 @@ static int handle_po(const char *msgid, const char *msgstr, const char *msgctxt,
             keyword_t kwd = findkeyword(msgid);
             init_keyword(lang, kwd, msgstr);
             locale_setstring(lang, mkname("keyword", keywords[kwd]), msgstr);
+        }
+    }
+    else if (msgid[0]>='A' && msgid[0] <= 'Z') {
+        int i;
+        /* parameters have no msgctxt, this is lame */
+        for (i = 0; i != MAXPARAMS; ++i) {
+            if (strcmp(msgid, parameters[i]) == 0) {
+                init_parameter(lang, (param_t)i, msgstr);
+                break;
+            }
         }
     }
     return 0;
