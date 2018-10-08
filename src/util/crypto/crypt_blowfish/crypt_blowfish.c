@@ -64,6 +64,10 @@
 #define BF_SCALE			0
 #endif
 
+/* never use BF_ASM, our cmake project does not support it */
+#undef BF_ASM
+#define BF_ASM 0
+
 typedef unsigned int BF_word;
 typedef signed int BF_word_signed;
 
