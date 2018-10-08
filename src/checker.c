@@ -19,18 +19,30 @@
 
 typedef struct parser_state {
     FILE * F;
-    struct locale *lang;
+    const struct locale *lang;
 } parser_state;
 
 static void handle_order(void *userData, const char *line) {
     parser_state * state = (parser_state*)userData;
-    const char *str;
+    const char *tok;
     keyword_t kwd;
     init_tokens_str(line);
-    str = getstrtoken();
-    kwd = get_keyword(str, state->lang);
+    tok = getstrtoken();
+    kwd = get_keyword(tok, state->lang);
     if (kwd == NOKEYWORD) {
-        fprintf(state->F, "unknown command: %s\n", str);
+        param_t par;
+        par = findparam(tok, state->lang);
+        switch (par) {
+        case P_UNIT:
+        case P_FACTION:
+        case P_GAMENAME:
+        case P_REGION:
+        case P_LOCALE:
+        case P_NEXT:
+            break;
+        default:
+            fprintf(state->F, "unknown command: %s\n", tok);
+        }
     }
 }
 
