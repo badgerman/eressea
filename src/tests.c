@@ -468,11 +468,8 @@ spell * test_create_spell(void)
 }
 
 void test_translate_param(const struct locale *lang, param_t param, const char *text) {
-    struct critbit_tree **cb;
-
     assert(lang && text);
-    cb = (struct critbit_tree **)get_translations(lang, UT_PARAMS);
-    add_translation(cb, text, param);
+    init_parameter(lang, param, text);
 }
 
 item_type *test_create_silver(void) {

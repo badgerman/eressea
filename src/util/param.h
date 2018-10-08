@@ -70,6 +70,7 @@ extern "C"
     param_t getparam(const struct locale *lang);
 
     void init_parameters(struct locale *lang);
+    void init_parameter(const struct locale *lang, param_t par, const char *str);
 
 #ifdef __cplusplus
 }
