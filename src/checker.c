@@ -8,6 +8,8 @@
 #include "util/path.h"
 #include "util/pofile.h"
 
+#include <iniparser.h>
+
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -65,15 +67,62 @@ static int handle_po(const char *msgid, const char *msgstr, const char *msgctxt,
     return 0;
 }
 
-static void read_config(const char *respath) {
-    char path[PATH_MAX];
-    struct locale *lang;
-    lang = get_or_create_locale("de");
-    path_join(respath, "translations/strings.de.po", path, sizeof(path));
-    pofile_read(path, handle_po, lang);
+static void read_language(dictionary *d, const char *respath, const char *loc) {
+    char buffer[PATH_MAX];
+    size_t len = strlen(loc);
+    struct locale *lang = get_or_create_locale(loc);
+
+    if (len + 7 < sizeof(buffer)) {
+        const char *files;
+        
+        memcpy(buffer, loc, len);
+        memcpy(buffer + len, ":files", 7);
+        files = iniparser_getstring(d, buffer, NULL);
+        if (files) {
+            char path[PATH_MAX];
+            const char *del = strchr(files, ':');
+            while (del) {
+                len = del - files;
+                memcpy(buffer, files, len);
+                buffer[len] = '\0';
+                path_join(respath, buffer, path, sizeof(path));
+                pofile_read(path, handle_po, lang);
+                files = del + 1;
+                del = strchr(files, ':');
+            }
+            path_join(respath, files, path, sizeof(path));
+            pofile_read(path, handle_po, lang);
+        }
+    }
+}
+
+static void read_config(const char *cfgfile) {
+    dictionary *d;
+
+    d = iniparser_load(cfgfile);
+    if (d) {
+        char buffer[8];
+        const char *respath = iniparser_getstring(d, ":res", "res");
+        const char *languages = iniparser_getstring(d, ":languages", "de");
+        const char *del = strchr(languages, ',');
+        while (del) {
+            size_t len = del - languages;
+            if (len < sizeof(buffer)) {
+                memcpy(buffer, languages, len);
+                buffer[len] = '\0';
+                read_language(d, respath, buffer);
+            }
+            languages = del + 1;
+            del = strchr(languages, ':');
+        }
+        read_language(d, respath, languages);
+        iniparser_freedict(d);
+    }
+    
 }
 
 int main(int argc, char **argv) {
+    const char *cfgfile = "checker.ini";
     FILE * F = stdin;
     if (argc > 1) {
         const char *filename = argv[1];
@@ -83,7 +132,7 @@ int main(int argc, char **argv) {
             return -1;
         }
     }
-    read_config("../git");
+    read_config(cfgfile);
     parsefile(F);
     if (F != stdin) {
         fclose(F);
