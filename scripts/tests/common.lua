@@ -45,6 +45,15 @@ function test_locales()
     assert_equal(-1, eressea.locale.direction("foo", "sw"))
 end
 
+function test_parser()
+    local r = region.create(0, 0, "plain")
+    local f = create_faction('halfling')
+    local u = unit.create(f, r, 1)
+    assert_equal(0, u:add_order("ATTACKIERE " .. itoa36(u.id)))
+    assert_equal(0, u:add_order("ATTACKIEREN " .. itoa36(u.id)))
+    assert_nil(u:add_order("FLIEGEN"))
+end
+
 function test_flags()
     local r = region.create(0, 0, "plain")
     local f = create_faction('halfling')

@@ -718,7 +718,11 @@ static int tolua_unit_add_order(lua_State * L)
     unit *self = (unit *)tolua_tousertype(L, 1, 0);
     const char *str = tolua_tostring(L, 2, 0);
     order *ord = parse_order(str, self->faction->locale);
-    unit_addorder(self, ord);
+    if (ord) {
+        unit_addorder(self, ord);
+        lua_pushinteger(L, 0);
+        return 1;
+    }
     return 0;
 }
 

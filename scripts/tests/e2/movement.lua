@@ -96,7 +96,6 @@ function test_follow_ship()
     local f = faction.create("human", "test@example.com", "de")
     local u1 = unit.create(f, r1, 1)
     local u2 = unit.create(f, r1, 1)
-    u2.name = 'Xolgrim'
     u1:add_item("money", 100)
     u2:add_item("money", 100)
     u1.ship = ship.create(r1, "boat")
@@ -166,7 +165,6 @@ function test_troll_example()
     u1:clear_orders()
 
     -- 3 trolls - 1 cart = 320, but not allowed?
-    u1.name='XXX'
     assert_nomove("3 trolls", u1)
 
     u1.number = 4
