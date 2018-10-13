@@ -45,7 +45,12 @@ extern "C" {
     void reset_locales(void);
 
     /** operations on locales: **/
-    void locale_setstring(struct locale *lang, const char *key,
+    enum setstring_t {
+        SETSTRING_OK,
+        SETSTRING_DUPLICATE,
+        SETSTRING_CONFLICT,
+    };
+    enum setstring_t locale_setstring(struct locale *lang, const char *key,
         const char *value);
     const char *locale_getstring(const struct locale *lang,
         const char *key);

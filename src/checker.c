@@ -5,21 +5,25 @@
 #include "util/order_parser.h"
 #include "util/keyword.h"
 #include "util/language.h"
+#include "util/log.h"
 #include "util/param.h"
 #include "util/parser.h"
 #include "util/path.h"
 #include "util/pofile.h"
+#include "util/strings.h"
 
-#include <iniparser.h>
+#include <cJSON.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct parser_state {
     FILE * F;
-    const struct locale *lang;
+    struct locale *lang;
 } parser_state;
 
 static void handle_order(void *userData, const char *line) {
@@ -46,14 +50,14 @@ static void handle_order(void *userData, const char *line) {
     }
 }
 
-int parsefile(FILE *F, const char *loc) {
+int parsefile(FILE *F, struct locale *lang) {
     OP_Parser parser;
     char buf[1024];
     int done = 0, err = 0;
     parser_state state = { NULL };
 
     state.F = stdout;
-    state.lang = get_locale(loc);
+    state.lang = lang;
 
     parser = OP_ParserCreate();
     OP_SetOrderHandler(parser, handle_order);
@@ -99,64 +103,153 @@ static int handle_po(const char *msgid, const char *msgstr, const char *msgctxt,
     return 0;
 }
 
-static void read_language(dictionary *d, const char *respath, const char *loc) {
-    char buffer[PATH_MAX];
-    size_t len = strlen(loc);
-    struct locale *lang = get_or_create_locale(loc);
+static char path[PATH_MAX];
 
-    if (len + 7 < sizeof(buffer)) {
-        const char *files;
-        
-        memcpy(buffer, loc, len);
-        memcpy(buffer + len, ":files", 7);
-        files = iniparser_getstring(d, buffer, NULL);
-        if (files) {
-            char path[PATH_MAX];
-            const char *del = strchr(files, ':');
-            while (del) {
-                len = del - files;
-                memcpy(buffer, files, len);
-                buffer[len] = '\0';
-                path_join(respath, buffer, path, sizeof(path));
-                pofile_read(path, handle_po, lang);
-                files = del + 1;
-                del = strchr(files, ':');
-            }
-            path_join(respath, files, path, sizeof(path));
+static void parse_translations(cJSON *config, const char *cfgdir, struct locale *lang) {
+    cJSON *json;
+    assert(config->type == cJSON_Array);
+    for (json = config->child; json; json = json->next) {
+        if (json->type == cJSON_String) {
+            path_join(cfgdir, json->valuestring, path, sizeof(path));
             pofile_read(path, handle_po, lang);
         }
     }
 }
 
-static void read_config(const char *cfgfile) {
-    dictionary *d;
-
-    d = iniparser_load(cfgfile);
-    if (d) {
-        char buffer[8];
-        const char *respath = iniparser_getstring(d, ":res", "res");
-        const char *languages = iniparser_getstring(d, ":languages", "de");
-        const char *del = strchr(languages, ',');
-        while (del) {
-            size_t len = del - languages;
-            if (len < sizeof(buffer)) {
-                memcpy(buffer, languages, len);
-                buffer[len] = '\0';
-                read_language(d, respath, buffer);
+static void parse_keywords(cJSON *config) {
+    struct locale *lang;
+    assert(config->type == cJSON_Object);
+    lang = get_locale(config->string);
+    if (lang) {
+        cJSON *json;
+        for (json = config->child; json; json = json->next) {
+            keyword_t kwd = findkeyword(json->string);
+            if (kwd != NOKEYWORD && keywords[kwd]) {
+                if (json->type == cJSON_String) {
+                    init_keyword(lang, kwd, json->valuestring);
+                    locale_setstring(lang, mkname("keyword", keywords[kwd]), json->valuestring);
+                }
+                else if (json->type == cJSON_Array) {
+                    cJSON *child;
+                    for (child = json->child; child; child = child->next) {
+                        init_keyword(lang, kwd, child->valuestring);
+                        if (child == json->child) {
+                            locale_setstring(lang, mkname("keyword", keywords[kwd]), child->valuestring);
+                        }
+                    }
+                }
             }
-            languages = del + 1;
-            del = strchr(languages, ':');
         }
-        read_language(d, respath, languages);
-        iniparser_freedict(d);
     }
-    
+}
+
+static cJSON *json_parse(const char *filename) {
+    cJSON *config = NULL;
+    FILE *F = fopen(filename, "r");
+    if (F) {
+        long pos;
+        fseek(F, 0, SEEK_END);
+        pos = ftell(F);
+        rewind(F);
+        if (pos > 0) {
+            char *data;
+            size_t sz;
+
+            data = malloc(pos + 1);
+            sz = fread(data, 1, (size_t)pos, F);
+            data[sz] = 0;
+            config = cJSON_Parse(data);
+            if (!config) {
+                int line;
+                char buffer[10];
+                const char *xp = data, *lp, *ep = cJSON_GetErrorPtr();
+                for (line = 1, lp = xp; xp && xp<ep; ++line, lp = xp + 1) {
+                    xp = strchr(lp, '\n');
+                    if (xp >= ep) break;
+                }
+                xp = (ep > data + 10) ? ep - 10 : data;
+                str_strlcpy(buffer, xp, sizeof(buffer));
+                buffer[9] = 0;
+                log_error("json parse error in line %d, position %d, near `%s`\n", line, ep - lp, buffer);
+            }
+            free(data);
+        }
+        fclose(F);
+    }
+    return config;
+}
+
+static int read_keywords(const char *filename) {
+    cJSON *json, *config = json_parse(filename);
+
+    if (config) {
+        for (json = config->child; json; json = json->next) {
+            if (json->type == cJSON_Object) {
+                if (0 == strcmp("keywords", json->string)) {
+                    break;
+                }
+            }
+        }
+        if (json) {
+            for (json = json->child; json; json = json->next) {
+                if (json->type == cJSON_Object) {
+                    parse_keywords(json);
+                }
+            }
+        }
+        cJSON_Delete(config);
+    }
+    else {
+        log_error("could not parse %s.", filename);
+        return - 1;
+    }
+    return 0;
+}
+
+static int read_config(const char *cfgfile) {
+    cJSON *config = json_parse(cfgfile);
+    if (config) {
+        const char *cfgdir = "res";
+        const char *kwdfile = "keywords.json";
+        cJSON *json, *files = NULL;
+        for (json = config->child; json; json = json->next) {
+            if (json->type == cJSON_String) {
+                if (0 == strcmp(json->string, "config-dir")) {
+                    cfgdir = json->valuestring;
+                }
+                else if (0 == strcmp(json->string, "keywords")) {
+                    kwdfile = json->valuestring;
+                }
+            }
+            else if (json->type == cJSON_Object) {
+                if (0 == strcmp(json->string, "translations")) {
+                    files = json;
+                }
+            }
+        }
+        if (files) {
+            for (json = files->child; json; json = json->next) {
+                struct locale * lang = get_locale(json->string);
+                if (lang) {
+                    parse_translations(json, cfgdir, lang);
+                }
+            }
+        }
+        path_join(cfgdir, kwdfile, path, sizeof(path));
+        cJSON_Delete(config);
+        return read_keywords(path);
+    }
+    log_error("could not parse %s.", cfgfile);
+    return -1;
 }
 
 int main(int argc, char **argv) {
     const char *loc = "de";
-    const char *cfgfile = "checker.ini";
+    const char *cfgfile = "checker.json";
     FILE * F = stdin;
+    int err = 0;
+    struct locale *lang;
+
     if (argc > 1) {
         const char *filename = argv[1];
         F = fopen(filename, "r");
@@ -165,10 +258,13 @@ int main(int argc, char **argv) {
             return -1;
         }
     }
-    read_config(cfgfile);
-    parsefile(F, loc);
-    if (F != stdin) {
-        fclose(F);
+    lang = get_or_create_locale(loc);
+    err = read_config(cfgfile);
+    if (0 == err) {
+        err = parsefile(F, lang);
+        if (F != stdin) {
+            fclose(F);
+        }
     }
-    return 0;
+    return err;
 }

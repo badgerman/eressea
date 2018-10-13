@@ -189,7 +189,7 @@ const char *locale_string(const locale * lang, const char *key, bool warn)
     return NULL;
 }
 
-void locale_setstring(locale * lang, const char *key, const char *value)
+enum setstring_t locale_setstring(locale * lang, const char *key, const char *value)
 {
     unsigned int hkey = str_hash(key);
     unsigned int id = hkey & (SMAXHASH - 1);
@@ -215,10 +215,13 @@ void locale_setstring(locale * lang, const char *key, const char *value)
     else {
         if (strcmp(find->str, value) != 0) {
             log_warning("multiple translations for key %s\n", key);
+            return SETSTRING_CONFLICT;
         }
         free(find->str);
         find->str = str_strdup(value);
+        return SETSTRING_DUPLICATE;
     }
+    return SETSTRING_OK;
 }
 
 static const char *escape_str(const char *in, FILE *F) {

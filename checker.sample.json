@@ -1,0 +1,14 @@
+{
+    "config-dir": ".",
+    "keywords": "conf/keywords.json",
+    "translations": {
+        "de" : [
+            "res/translations/strings.de.po",
+            "res/translations/strings-e2.de.po"
+        ],
+        "en" : [
+            "res/translations/strings.en.po",
+            "res/translations/strings-e2.en.po"
+        ]
+    }
+}

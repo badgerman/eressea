@@ -2,7 +2,7 @@
     "keywords": {
         "en" : {
             "plant": "PLANT",
-	    "grow": [ "GROW", "BREED" ],
+            "grow": [ "GROW", "BREED" ],
             "promote": ["PROMOTE", "PROMOTION" ],
             "combat": [ "COMBAT", "FIGHT" ]
         },

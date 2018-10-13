@@ -121,10 +121,10 @@ function test_build_castle_stages()
     u:add_order("MACHE BURG " .. itoa36(b.id))
     process_orders()
     assert_equal(10, b.size)
-    
+
     u:set_skill("building", 3)
     u:clear_orders()
-    
+
     u:add_order("MACHE BURG " .. itoa36(b.id))
     process_orders()
     assert_equal(250, b.size)
