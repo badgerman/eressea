@@ -171,7 +171,7 @@ size_t report_status(const unit * u, const struct locale *lang, char *fsbuf, siz
         const char *lname = locale_name(lang);
         struct locale *wloc = get_locale(lname);
         log_warning("no translation for combat status %s in %s", combatstatus[u->status], lname);
-        locale_setstring(wloc, combatstatus[u->status], combatstatus[u->status] + 7);
+        locale_setstring_depr(wloc, combatstatus[u->status], combatstatus[u->status] + 7);
         len = str_strlcpy(fsbuf, combatstatus[u->status] + 7, buflen);
     }
     else {

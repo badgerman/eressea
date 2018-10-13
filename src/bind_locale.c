@@ -13,7 +13,7 @@ void locale_create(const char *lang) {
 void locale_set(const char *lang, const char *key, const char *str) {
     struct locale *loc = get_locale(lang);
     if (loc) {
-        locale_setstring(loc, key, str);
+        locale_setstring_depr(loc, key, str);
     }
 }
 

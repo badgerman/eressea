@@ -16,6 +16,21 @@ static void test_language(CuTest *tc)
     test_teardown();
 }
 
+static void test_set_string(CuTest *tc)
+{
+    struct locale *lang;
+
+    test_setup();
+    lang = get_or_create_locale("strings");
+    CuAssertIntEquals(tc, SETSTRING_OK, locale_setstring(lang, "foo", "bar"));
+    CuAssertStrEquals(tc, "bar", locale_getstring(default_locale, "foo"));
+    CuAssertIntEquals(tc, SETSTRING_DUPLICATE, locale_setstring(lang, "foo", "bar"));
+    CuAssertStrEquals(tc, "bar", locale_getstring(default_locale, "foo"));
+    CuAssertIntEquals(tc, SETSTRING_CONFLICT, locale_setstring(lang, "foo", "BAR"));
+    CuAssertStrEquals(tc, "BAR", locale_getstring(default_locale, "foo"));
+    test_teardown();
+}
+
 static void test_make_locales(CuTest *tc)
 {
     test_setup();
@@ -30,6 +45,7 @@ CuSuite *get_language_suite(void)
 {
     CuSuite *suite = CuSuiteNew();
     SUITE_ADD_TEST(suite, test_language);
+    SUITE_ADD_TEST(suite, test_set_string);
     SUITE_ADD_TEST(suite, test_make_locales);
     return suite;
 }

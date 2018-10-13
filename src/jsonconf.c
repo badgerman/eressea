@@ -679,7 +679,7 @@ static void json_locale(cJSON *json, struct locale *lang) {
     }
     for (child = json->child; child; child = child->next) {
         if (child->type == cJSON_String) {
-            locale_setstring(lang, child->string, child->valuestring);
+            locale_setstring_depr(lang, child->string, child->valuestring);
         }
     }
 }
@@ -817,14 +817,14 @@ static void json_skill(cJSON *json, struct locale *lang) {
         if (sk != NOSKILL) {
             if (child->type == cJSON_String) {
                 init_skill(lang, sk, child->valuestring);
-                locale_setstring(lang, mkname("skill", skillnames[sk]), child->valuestring);
+                locale_setstring_depr(lang, mkname("skill", skillnames[sk]), child->valuestring);
             }
             else if (child->type == cJSON_Array) {
                 cJSON *entry;
                 for (entry = child->child; entry; entry = entry->next) {
                     init_skill(lang, sk, entry->valuestring);
                     if (entry == child->child) {
-                        locale_setstring(lang, mkname("skill", skillnames[sk]), entry->valuestring);
+                        locale_setstring_depr(lang, mkname("skill", skillnames[sk]), entry->valuestring);
                     }
                 }
             }
@@ -849,14 +849,14 @@ static void json_keyword(cJSON *json, struct locale *lang) {
         if (kwd != NOKEYWORD && keywords[kwd]) {
             if (child->type == cJSON_String) {
                 init_keyword(lang, kwd, child->valuestring);
-                locale_setstring(lang, mkname("keyword", keywords[kwd]), child->valuestring);
+                locale_setstring_depr(lang, mkname("keyword", keywords[kwd]), child->valuestring);
             }
             else if (child->type == cJSON_Array) {
                 cJSON *entry;
                 for (entry = child->child; entry; entry = entry->next) {
                     init_keyword(lang, kwd, entry->valuestring);
                     if (entry == child->child) {
-                        locale_setstring(lang, mkname("keyword", keywords[kwd]), entry->valuestring);
+                        locale_setstring_depr(lang, mkname("keyword", keywords[kwd]), entry->valuestring);
                     }
                 }
             }
@@ -1027,7 +1027,7 @@ static int add_po_string(const char *msgid, const char *msgstr, const char *msgc
     if (msgctxt) {
         key = mkname(msgctxt, msgid);
     }
-    locale_setstring(lang, key, msgstr);
+    locale_setstring_depr(lang, key, msgstr);
     return 0;
 }
 

@@ -181,7 +181,7 @@ const char *locale_string(const locale * lang, const char *key, bool warn)
             const char * value = locale_string(default_locale, key, warn);
             if (value) {
                 /* TODO: evil side-effects for a const function */
-                locale_setstring(get_or_create_locale(lang->name), key, value);
+                locale_setstring_depr(get_or_create_locale(lang->name), key, value);
             }
             return value;
         }
@@ -200,28 +200,50 @@ enum setstring_t locale_setstring(locale * lang, const char *key, const char *va
     assert(lang);
     find = lang->strings[id];
     while (find) {
-        if (find->hashkey == hkey && strcmp(key, find->key) == 0)
+        if (find->hashkey == hkey && strcmp(key, find->key) == 0) {
             break;
+        }
         find = find->nexthash;
     }
     if (!find) {
         find = calloc(1, sizeof(struct locale_str));
-        find->nexthash = lang->strings[id];
-        lang->strings[id] = find;
+        if (!find) {
+            return SETSTRING_NO_MEMORY;
+        }
         find->hashkey = hkey;
         find->key = str_strdup(key);
+        if (!find->key) {
+            free(find);
+            return SETSTRING_NO_MEMORY;
+        }
         find->str = str_strdup(value);
+        if (!find->str) {
+            free(find->key);
+            free(find);
+            return SETSTRING_NO_MEMORY;
+        }
+        find->nexthash = lang->strings[id];
+        lang->strings[id] = find;
     }
     else {
         if (strcmp(find->str, value) != 0) {
-            log_warning("multiple translations for key %s\n", key);
+            size_t len = strlen(value);
+            find->str = realloc(find->str, len + 1);
+            if (!find->str) {
+                return SETSTRING_NO_MEMORY;
+            }
+            memcpy(find->str, value, len + 1);
             return SETSTRING_CONFLICT;
         }
-        free(find->str);
-        find->str = str_strdup(value);
         return SETSTRING_DUPLICATE;
     }
     return SETSTRING_OK;
+}
+
+void locale_setstring_depr(locale * lang, const char *key, const char *value) {
+    if (locale_setstring(lang, key, value) == SETSTRING_CONFLICT) {
+        log_warning("conflicting translations for %s: %s", key, value);
+    }
 }
 
 static const char *escape_str(const char *in, FILE *F) {

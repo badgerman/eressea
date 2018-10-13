@@ -47,10 +47,13 @@ extern "C" {
     /** operations on locales: **/
     enum setstring_t {
         SETSTRING_OK,
+        SETSTRING_NO_MEMORY,
         SETSTRING_DUPLICATE,
         SETSTRING_CONFLICT,
     };
     enum setstring_t locale_setstring(struct locale *lang, const char *key,
+        const char *value);
+    void locale_setstring_depr(struct locale *lang, const char *key,
         const char *value);
     const char *locale_getstring(const struct locale *lang,
         const char *key);

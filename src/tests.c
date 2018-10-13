@@ -105,60 +105,60 @@ struct locale * test_create_locale(void) {
     if (!loc) {
         int i;
         loc = get_or_create_locale("test");
-        locale_setstring(loc, "factiondefault", parameters[P_FACTION]);
-        locale_setstring(loc, "unitdefault", parameters[P_UNIT]);
-        locale_setstring(loc, "money", "Silber");
-        locale_setstring(loc, "money_p", "Silber");
-        locale_setstring(loc, "cart", "Wagen");
-        locale_setstring(loc, "cart_p", "Wagen");
-        locale_setstring(loc, "horse", "Pferd");
-        locale_setstring(loc, "horse_p", "Pferde");
-        locale_setstring(loc, "iron", "Eisen");
-        locale_setstring(loc, "iron_p", "Eisen");
-        locale_setstring(loc, "stone", "Stein");
-        locale_setstring(loc, "stone_p", "Steine");
-        locale_setstring(loc, "plain", "Ebene");
-        locale_setstring(loc, "ocean", "Ozean");
+        locale_setstring_depr(loc, "factiondefault", parameters[P_FACTION]);
+        locale_setstring_depr(loc, "unitdefault", parameters[P_UNIT]);
+        locale_setstring_depr(loc, "money", "Silber");
+        locale_setstring_depr(loc, "money_p", "Silber");
+        locale_setstring_depr(loc, "cart", "Wagen");
+        locale_setstring_depr(loc, "cart_p", "Wagen");
+        locale_setstring_depr(loc, "horse", "Pferd");
+        locale_setstring_depr(loc, "horse_p", "Pferde");
+        locale_setstring_depr(loc, "iron", "Eisen");
+        locale_setstring_depr(loc, "iron_p", "Eisen");
+        locale_setstring_depr(loc, "stone", "Stein");
+        locale_setstring_depr(loc, "stone_p", "Steine");
+        locale_setstring_depr(loc, "plain", "Ebene");
+        locale_setstring_depr(loc, "ocean", "Ozean");
         for (i = 0; i < MAXRACES; ++i) {
             if (racenames[i]) {
                 char name[64];
                 rc_key(racenames[i], NAME_PLURAL, name, sizeof(name));
                 if (!locale_getstring(loc, name)) {
-                    locale_setstring(loc, name, name + 6);
+                    locale_setstring_depr(loc, name, name + 6);
                 }
                 rc_key(racenames[i], NAME_SINGULAR, name, sizeof(name));
                 if (!locale_getstring(loc, name)) {
-                    locale_setstring(loc, name, name + 6);
+                    locale_setstring_depr(loc, name, name + 6);
                 }
             }
         }
         for (i = 0; i < MAXSKILLS; ++i) {
             if (!locale_getstring(loc, mkname("skill", skillnames[i])))
-                locale_setstring(loc, mkname("skill", skillnames[i]), skillnames[i]);
+                locale_setstring_depr(loc, mkname("skill", skillnames[i]), skillnames[i]);
         }
         for (i = 0; i != ALLIANCE_MAX; ++i) {
-            locale_setstring(loc, alliance_kwd[i], alliance_kwd[i]);
+            locale_setstring_depr(loc, alliance_kwd[i], alliance_kwd[i]);
         }
         for (i = 0; i != MAXDIRECTIONS; ++i) {
-            locale_setstring(loc, shortdirections[i], shortdirections[i] + 4);
-            locale_setstring(loc, directions[i], directions[i]);
+            locale_setstring_depr(loc, shortdirections[i], shortdirections[i] + 4);
+            locale_setstring_depr(loc, directions[i], directions[i]);
             init_direction(loc, i, directions[i]);
             init_direction(loc, i, coasts[i] + 7);
         }
         for (i = 0; i <= ST_FLEE; ++i) {
-            locale_setstring(loc, combatstatus[i], combatstatus[i] + 7);
+            locale_setstring_depr(loc, combatstatus[i], combatstatus[i] + 7);
         }
         for (i = 0; i != MAXKEYWORDS; ++i) {
             if (keywords[i]) {
-                locale_setstring(loc, mkname("keyword", keywords[i]), keywords[i]);
+                locale_setstring_depr(loc, mkname("keyword", keywords[i]), keywords[i]);
             }
         }
         for (i = 0; i != MAXPARAMS; ++i) {
-            locale_setstring(loc, parameters[i], parameters[i]);
+            locale_setstring_depr(loc, parameters[i], parameters[i]);
             test_translate_param(loc, i, parameters[i]);
         }
         for (i = 0; i != MAXMAGIETYP; ++i) {
-            locale_setstring(loc, mkname("school", magic_school[i]), magic_school[i]);
+            locale_setstring_depr(loc, mkname("school", magic_school[i]), magic_school[i]);
         }
         init_locale(loc);
     }
@@ -391,7 +391,7 @@ ship_type * test_create_shiptype(const char * name)
     stype->coasts[1] = test_create_terrain("ocean", SEA_REGION | SWIM_INTO | FLY_INTO);
     stype->coasts[2] = NULL;
     if (default_locale) {
-        locale_setstring(default_locale, name, name);
+        locale_setstring_depr(default_locale, name, name);
     }
     return stype;
 }
@@ -421,7 +421,7 @@ building_type * test_create_buildingtype(const char * name)
     }
     if (default_locale) {
         if (locale_getstring(default_locale, name) == NULL) {
-            locale_setstring(default_locale, name, name);
+            locale_setstring_depr(default_locale, name, name);
         }
     }
     return btype;
@@ -505,24 +505,24 @@ void test_create_world(void)
 
     loc = test_create_locale();
 
-    locale_setstring(loc, parameters[P_SHIP], "SCHIFF");
-    locale_setstring(loc, parameters[P_ANY], "ALLE");
+    locale_setstring_depr(loc, parameters[P_SHIP], "SCHIFF");
+    locale_setstring_depr(loc, parameters[P_ANY], "ALLE");
     init_parameters(loc);
 
-    locale_setstring(loc, "status_aggressive", "aggressiv");
-    locale_setstring(loc, keyword(K_RESERVE), "RESERVIEREN");
-    locale_setstring(loc, "money", "Silber");
-    locale_setstring(loc, "money_p", "Silber");
-    locale_setstring(loc, "cart", "Wagen");
-    locale_setstring(loc, "cart_p", "Wagen");
-    locale_setstring(loc, "horse", "Pferd");
-    locale_setstring(loc, "horse_p", "Pferde");
-    locale_setstring(loc, "iron", "Eisen");
-    locale_setstring(loc, "iron_p", "Eisen");
-    locale_setstring(loc, "stone", "Stein");
-    locale_setstring(loc, "stone_p", "Steine");
-    locale_setstring(loc, "plain", "Ebene");
-    locale_setstring(loc, "ocean", "Ozean");
+    locale_setstring_depr(loc, "status_aggressive", "aggressiv");
+    locale_setstring_depr(loc, keyword(K_RESERVE), "RESERVIEREN");
+    locale_setstring_depr(loc, "money", "Silber");
+    locale_setstring_depr(loc, "money_p", "Silber");
+    locale_setstring_depr(loc, "cart", "Wagen");
+    locale_setstring_depr(loc, "cart_p", "Wagen");
+    locale_setstring_depr(loc, "horse", "Pferd");
+    locale_setstring_depr(loc, "horse_p", "Pferde");
+    locale_setstring_depr(loc, "iron", "Eisen");
+    locale_setstring_depr(loc, "iron_p", "Eisen");
+    locale_setstring_depr(loc, "stone", "Stein");
+    locale_setstring_depr(loc, "stone_p", "Steine");
+    locale_setstring_depr(loc, "plain", "Ebene");
+    locale_setstring_depr(loc, "ocean", "Ozean");
     init_resources();
     get_resourcetype(R_SILVER)->itype->weight = 1;
 
