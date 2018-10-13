@@ -23,11 +23,11 @@ static void test_set_string(CuTest *tc)
     test_setup();
     lang = get_or_create_locale("strings");
     CuAssertIntEquals(tc, SETSTRING_OK, locale_setstring(lang, "foo", "bar"));
-    CuAssertStrEquals(tc, "bar", locale_getstring(default_locale, "foo"));
+    CuAssertStrEquals(tc, "bar", locale_getstring(lang, "foo"));
     CuAssertIntEquals(tc, SETSTRING_DUPLICATE, locale_setstring(lang, "foo", "bar"));
-    CuAssertStrEquals(tc, "bar", locale_getstring(default_locale, "foo"));
+    CuAssertStrEquals(tc, "bar", locale_getstring(lang, "foo"));
     CuAssertIntEquals(tc, SETSTRING_CONFLICT, locale_setstring(lang, "foo", "BAR"));
-    CuAssertStrEquals(tc, "BAR", locale_getstring(default_locale, "foo"));
+    CuAssertStrEquals(tc, "BAR", locale_getstring(lang, "foo"));
     test_teardown();
 }
 
