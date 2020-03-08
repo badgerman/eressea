@@ -32,7 +32,8 @@
 #include <util/parser.h>
 #include <util/rand.h>
 #include <util/rng.h>
-#include <util/strings.h>
+
+#include <strings.h>
 
 /* libc includes */
 #include <assert.h>

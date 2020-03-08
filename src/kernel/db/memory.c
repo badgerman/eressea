@@ -4,9 +4,9 @@
 #include "driver.h"
 
 #include <util/log.h>
-#include <util/strings.h>
 
 #include <selist.h>
+#include <strings.h>
 
 #include <assert.h>
 #include <stdlib.h>

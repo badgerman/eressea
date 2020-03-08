@@ -19,10 +19,10 @@
 
 #include <kernel/attrib.h>
 #include <util/language.h>
-#include <util/strings.h>
 
 #include <CuTest.h>
 #include <selist.h>
+#include <strings.h>
 #include <tests.h>
 
 #include <stdlib.h>

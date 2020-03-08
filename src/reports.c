@@ -54,8 +54,9 @@
 #include "util/macros.h"
 #include "util/path.h"
 #include "util/password.h"
-#include "util/strings.h"
 #include "util/translation.h"
+
+#include <strings.h>
 #include <stream.h>
 #include <selist.h>
 

@@ -20,8 +20,8 @@
 #include <util/language.h>
 #include <util/lists.h>
 #include <util/message.h>
-#include <util/strings.h>
 
+#include <strings.h>
 #include <stream.h>
 #include <memstream.h>
 

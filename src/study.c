@@ -36,9 +36,9 @@
 #include <util/parser.h>
 #include <util/rand.h>
 #include <util/rng.h>
-#include <util/strings.h>
 #include <util/umlaut.h>
 
+#include <strings.h>
 #include <selist.h>
 
 /* libc includes */

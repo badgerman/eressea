@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <util/log.h>
 #include <util/password.h>
-#include <util/strings.h>
 #include <util/variant.h>
 
 #pragma warning(disable: 4210)
@@ -86,7 +85,6 @@ int RunAllTests(int argc, char *argv[])
     ADD_SUITE(password);
     ADD_SUITE(umlaut);
     ADD_SUITE(unicode);
-    ADD_SUITE(strings);
     ADD_SUITE(log);
     ADD_SUITE(variant);
     ADD_SUITE(rng);

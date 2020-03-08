@@ -24,10 +24,10 @@
 #include <util/base36.h>
 #include <util/functions.h>
 #include <kernel/gamedata.h>
-#include <util/strings.h>
 #include <util/language.h>
 #include <util/macros.h>
 
+#include <strings.h>
 #include <storage.h>
 
 /* libc includes */

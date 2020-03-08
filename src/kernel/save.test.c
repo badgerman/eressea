@@ -23,9 +23,9 @@
 #include <kernel/gamedata.h>
 #include <util/password.h>
 #include <util/path.h>
-#include <util/strings.h>
 
 #include <storage.h>
+#include <strings.h>
 
 #include <limits.h>
 #include <memstream.h>

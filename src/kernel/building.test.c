@@ -8,7 +8,8 @@
 #include <kernel/unit.h>
 
 #include <util/language.h>
-#include <util/strings.h>
+
+#include <strings.h>
 
 #include <CuTest.h>
 #include <tests.h>

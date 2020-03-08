@@ -55,12 +55,12 @@
 #include <util/rand.h>
 #include <util/resolve.h>
 #include <util/rng.h>
-#include <util/strings.h>
 #include <util/umlaut.h>
 #include <util/unicode.h>
 
 #include <selist.h>
 #include <stream.h>
+#include <strings.h>
 #include <filestream.h>
 #include <limits.h>
 #include <storage.h>

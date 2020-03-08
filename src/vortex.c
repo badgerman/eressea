@@ -8,10 +8,10 @@
 #include <kernel/gamedata.h>
 #include <util/language.h>
 #include <util/log.h>
-#include <util/strings.h>
 #include <util/umlaut.h>
 #include <util/variant.h>
 
+#include <strings.h>
 #include <storage.h>
 
 #include <assert.h>

@@ -3,7 +3,8 @@
 #include "raceprefix.h"
 
 #include <kernel/attrib.h>
-#include <util/strings.h>
+
+#include <strings.h>
 
 #include <assert.h>
 #include <string.h>

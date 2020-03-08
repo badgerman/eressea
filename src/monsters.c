@@ -40,7 +40,6 @@
 #include <util/log.h>
 #include <util/rand.h>
 #include <util/rng.h>
-#include <util/strings.h>
 
 /* attributes includes */
 #include <attributes/targetregion.h>
@@ -49,6 +48,7 @@
 
 #include <spells/regioncurse.h>
 
+#include <strings.h>
 #include <selist.h>
 
 /* libc includes */

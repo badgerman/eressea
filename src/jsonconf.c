@@ -27,7 +27,7 @@
 #include "util/nrmessage.h"
 #include "util/path.h"
 #include "util/pofile.h"
-#include "util/strings.h"
+
 
 /* game modules */
 #include "direction.h"
@@ -37,6 +37,8 @@
 #include "exparse.h"
 
 /* external libraries */
+#include <strings.h>
+
 #include <cJSON.h>
 
 /* libc includes */

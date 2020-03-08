@@ -5,8 +5,8 @@
 #include <util/language.h>
 #include <util/umlaut.h>
 #include <util/log.h>
-#include <util/strings.h>
 
+#include <strings.h>
 #include <critbit.h>
 
 #include <assert.h>

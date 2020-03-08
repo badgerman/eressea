@@ -47,7 +47,6 @@
 #include <util/path.h>
 #include <util/rand.h>
 #include <util/rng.h>
-#include <util/strings.h>
 #include <util/translation.h>
 #include <util/umlaut.h>
 
@@ -56,8 +55,9 @@
 #include "prefix.h"
 
 /* external libraries */
-#include <iniparser.h>
+#include <strings.h>
 #include <critbit.h>
+#include <iniparser.h>
 
 /* libc includes */
 #include <stdio.h>

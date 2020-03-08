@@ -1,25 +1,29 @@
-#include <kernel/ally.h>
-#include <kernel/config.h>
-#include <kernel/curse.h>
-#include <kernel/item.h>
-#include <kernel/building.h>
-#include <kernel/faction.h>
-#include <kernel/order.h>
-#include <kernel/race.h>
-#include <kernel/region.h>
-#include <kernel/spell.h>
-#include <kernel/terrain.h>
-#include <kernel/attrib.h>
+#include "ally.h"
+#include "config.h"
+#include "curse.h"
+#include "item.h"
+#include "building.h"
+#include "faction.h"
+#include "order.h"
+#include "race.h"
+#include "region.h"
+#include "unit.h"
+#include "spell.h"
+#include "terrain.h"
+#include "attrib.h"
+
 #include <util/base36.h>
 #include <util/language.h>
 #include <util/macros.h>
-#include <util/strings.h>
 #include <util/rng.h>
+
 #include <spells/regioncurse.h>
+
 #include <alchemy.h>
 #include <laws.h>
 #include <spells.h>
-#include "unit.h"
+
+#include <strings.h>
 
 #include <CuTest.h>
 #include <tests.h>

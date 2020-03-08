@@ -18,7 +18,8 @@
 #include <util/language.h>
 #include <util/log.h>
 #include <util/macros.h>
-#include <util/strings.h>
+
+#include <strings.h>
 
 #include <tolua.h>
 #include <lauxlib.h>

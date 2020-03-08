@@ -26,7 +26,8 @@
 #include <util/message.h>
 #include <util/rand.h>
 #include <util/rng.h>
-#include <util/strings.h>
+
+#include <strings.h>
 
 #include <CuTest.h>
 

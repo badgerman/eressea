@@ -2,18 +2,18 @@
 #include <kernel/config.h>
 #include "terrain.h"
 
-#include <attributes/racename.h>
-#include <spells/regioncurse.h>
-
 /* kernel includes */
+#include "attrib.h"
 #include "curse.h"
 #include "region.h"
 #include "resources.h"
 #include "terrainid.h"
 
 #include <util/log.h>
-#include <kernel/attrib.h>
-#include <util/strings.h>
+#include <attributes/racename.h>
+#include <spells/regioncurse.h>
+
+#include <strings.h>
 
 /* libc includes */
 #include <assert.h>

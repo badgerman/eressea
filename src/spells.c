@@ -72,12 +72,12 @@
 #include <util/rand.h>
 #include <util/log.h>
 #include <util/nrmessage.h>
-#include <util/strings.h>
 #include <util/variant.h>
 #include <util/goodies.h>
 #include <util/resolve.h>
 #include <util/rng.h>
 
+#include <strings.h>
 #include <storage.h>
 
 /* libc includes */

@@ -70,7 +70,6 @@
 #include <util/path.h>
 #include <util/rand.h>
 #include <util/rng.h>
-#include <util/strings.h>
 #include <util/umlaut.h>
 #include <util/unicode.h>
 
@@ -85,6 +84,7 @@
 #include <spells/regioncurse.h>
 #include <spells/unitcurse.h>
 
+#include <strings.h>
 #include <selist.h>
 #include <iniparser.h>
 
@@ -684,8 +684,8 @@ growing_trees(region * r, const season_t current_season, const season_t last_wee
             a->data.sa[0] = (short)cap_int(rtrees(r, 0), 0, SHRT_MAX);
             a->data.sa[1] = (short)cap_int(rtrees(r, 1), 0, SHRT_MAX);
         }
-        else if (a->data.sa[0] < 0 || a->data.sa[1] << 0) {
-            a->data.sa[0] = (short)cap_int(a->data.sa[0], 0, SHRT_MAX);
+        else if (a->data.sa[0] < 0 || a->data.sa[1] < 0) {
+            a->data.sa[0] = (short)cap_int(a->data.sa[1], 0, SHRT_MAX);
             a->data.sa[1] = (short)cap_int(a->data.sa[1], 0, SHRT_MAX);
         }
 

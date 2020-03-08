@@ -57,12 +57,12 @@
 #include <util/rand.h>
 #include <util/resolve.h>
 #include <util/rng.h>
-#include <util/strings.h>
 #include <util/umlaut.h>
 
 #include <selist.h>
 #include <critbit.h>
 #include <storage.h>
+#include <strings.h>
 
 /* libc includes */
 #include <assert.h>

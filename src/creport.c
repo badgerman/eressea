@@ -61,13 +61,14 @@ static char g_bigbuf[BUFFERSIZE];
 #include <kernel/attrib.h>
 #include <util/base36.h>
 #include <util/crmessage.h>
-#include <util/strings.h>
 #include <util/language.h>
 #include <util/log.h>
 #include <util/macros.h>
 #include <util/message.h>
 #include <util/nrmessage.h>
+
 #include <selist.h>
+#include <strings.h>
 #include <filestream.h>
 #include <stream.h>
 

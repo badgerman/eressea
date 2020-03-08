@@ -2,9 +2,9 @@
 #include "attrib.h"
 
 #include <kernel/gamedata.h>
-#include <util/strings.h>
 
 #include <storage.h>
+#include <strings.h>
 #include <memstream.h>
 #include <CuTest.h>
 #include <tests.h>

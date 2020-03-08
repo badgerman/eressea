@@ -27,10 +27,11 @@
 #include <util/log.h>
 #include <util/macros.h>
 #include <util/message.h>
-#include <util/strings.h>
 
 #include <attributes/key.h>
 #include <attributes/racename.h>
+
+#include <strings.h>
 
 #include <lua.h>
 #include <lauxlib.h>

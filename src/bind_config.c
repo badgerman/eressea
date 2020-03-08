@@ -16,7 +16,8 @@
 #include <util/log.h>
 #include <util/nrmessage.h>
 #include <util/path.h>
-#include <util/strings.h>
+
+#include <strings.h>
 
 #include <cJSON.h>
 

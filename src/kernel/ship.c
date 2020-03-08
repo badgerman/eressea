@@ -25,12 +25,12 @@
 #include <util/lists.h>
 #include <util/log.h>
 #include <util/param.h>
-#include <util/strings.h>
 #include <util/umlaut.h>
 
-#include <storage.h>
-#include <selist.h>
 #include <critbit.h>
+#include <selist.h>
+#include <storage.h>
+#include <strings.h>
 
 /* libc includes */
 #include <assert.h>
