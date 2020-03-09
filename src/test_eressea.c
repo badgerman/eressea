@@ -1,13 +1,19 @@
 #include <platform.h>
 #include <eressea.h>
+
 #include <kernel/config.h>
-#include <CuTest.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+
 #include <util/log.h>
 #include <util/password.h>
 #include <util/variant.h>
+
+#include <strings.h>
+
+#include <CuTest.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #pragma warning(disable: 4210)
 
